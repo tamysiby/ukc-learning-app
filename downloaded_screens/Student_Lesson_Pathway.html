@@ -1,0 +1,317 @@
+<!DOCTYPE html><html lang="en" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#ffdf9e",
+                        "secondary-container": "#fdc003",
+                        "surface-bright": "#f8f9fa",
+                        "tertiary-fixed-dim": "#ffb59f",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c1c6d7",
+                        "primary": "#0058bc",
+                        "on-error-container": "#93000a",
+                        "secondary": "#785900",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f4f5",
+                        "on-primary-fixed": "#001a41",
+                        "on-surface-variant": "#414755",
+                        "surface-variant": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#852300",
+                        "on-tertiary-fixed": "#3a0a00",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-fixed": "#261a00",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#191c1d",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "surface-dim": "#d9dadb",
+                        "on-primary-container": "#fefcff",
+                        "surface-container-highest": "#e1e3e4",
+                        "inverse-on-surface": "#f0f1f2",
+                        "inverse-surface": "#2e3132",
+                        "primary-fixed": "#d8e2ff",
+                        "on-background": "#191c1d",
+                        "primary-container": "#0070eb",
+                        "surface-container": "#edeeef",
+                        "surface": "#f8f9fa",
+                        "inverse-primary": "#adc6ff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdbd0",
+                        "tertiary": "#a83206",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-tint": "#005bc1",
+                        "on-primary-fixed-variant": "#004493",
+                        "outline": "#717786",
+                        "secondary-fixed-dim": "#fabd00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#6c5000",
+                        "tertiary-container": "#ca4a20"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "section-margin": "40px",
+                        "card-gap": "12px",
+                        "unit": "8px",
+                        "container-padding": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "hangul-display": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "hangul-display": ["48px", {"lineHeight": "60px", "fontWeight": "500"}],
+                        "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    }catch(_e){}</script></head><body class="text-on-surface pb-32">
+<!-- Top AppBar (From JSON) -->
+<header class="fixed top-0 w-full z-50 flex items-center px-4 h-16 bg-surface dark:bg-surface-dim border-b border-surface-variant dark:border-outline-variant">
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Coreanica</h1>
+</div>
+<div class="ml-auto flex items-center gap-2">
+<div class="flex items-center bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[18px] mr-1" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                4 Day Streak
+            </div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[720px] mx-auto pt-24 px-6">
+<!-- Global Progress Header -->
+<section class="mb-10 animate-fade-in">
+<div class="flex justify-between items-end mb-3">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Daily Pathway</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your Korean journey is picking up pace!</p>
+</div>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-primary">15%</span>
+<p class="font-label-sm text-label-sm text-outline">COMPLETED</p>
+</div>
+</div>
+<div class="h-4 w-full bg-surface-variant rounded-full overflow-hidden p-[2px]">
+<div class="h-full bg-primary rounded-full relative overflow-hidden" style="width: 15%">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+</section>
+<!-- Lesson Chunks Container -->
+<div class="space-y-12">
+<!-- Chunk 1: Unlocked -->
+<section class="relative">
+<!-- Vertical Connector Line -->
+<div class="absolute left-6 top-16 bottom-0 w-1 bg-surface-variant -z-10 rounded-full">
+<div class="w-full h-[60%] bg-primary rounded-full"></div>
+</div>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-lg progress-glow">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md">Chunk 1: The Basics</h3>
+<span class="font-label-sm text-label-sm text-primary bg-primary-fixed px-2 py-0.5 rounded">60% COMPLETE</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Mastering Hangul vowels and greetings.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+<!-- Lesson 1 -->
+<div class="lesson-card bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant flex items-center gap-4 cursor-pointer shadow-sm">
+<div class="w-14 h-14 rounded-xl bg-tertiary-fixed text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">style</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px]">Vocab Flashcards</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">12 words to learn</p>
+</div>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Lesson 2 -->
+<div class="lesson-card bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant flex items-center gap-4 cursor-pointer shadow-sm">
+<div class="w-14 h-14 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">menu_book</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px]">Basic Grammar</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Subject particles 은/는</p>
+</div>
+<div class="ml-auto">
+<div class="w-6 h-6 border-2 border-primary rounded-full flex items-center justify-center">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Lesson 3 -->
+<div class="lesson-card bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant flex items-center gap-4 cursor-pointer shadow-sm md:col-span-2">
+<div class="w-14 h-14 rounded-xl bg-error-container text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">quiz</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px]">Unit 1 Quiz</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Test your knowledge of Chunk 1</p>
+</div>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-outline">play_circle</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Chunk 2: Locked -->
+<section class="relative locked">
+<div class="absolute left-6 top-16 bottom-0 w-1 bg-surface-variant -z-10 rounded-full"></div>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest text-on-surface-variant flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md">Chunk 2: Daily Life</h3>
+<span class="font-label-sm text-label-sm text-outline bg-surface-variant px-2 py-0.5 rounded">LOCKED</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Ordering coffee and counting items.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+<div class="lesson-card bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant flex items-center gap-4 shadow-sm">
+<div class="w-14 h-14 rounded-xl bg-surface-variant text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">translate</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px]">Essential Verbs</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Common action words</p>
+</div>
+</div>
+<div class="lesson-card bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant flex items-center gap-4 shadow-sm">
+<div class="w-14 h-14 rounded-xl bg-surface-variant text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">record_voice_over</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px]">Pronunciation Lab</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Practice batchim sounds</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Chunk 3: Locked -->
+<section class="relative locked">
+<div class="absolute left-6 top-16 bottom-0 w-1 bg-surface-variant -z-10 rounded-full"></div>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest text-on-surface-variant flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-md text-headline-md">Chunk 3: Places &amp; Directions</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Navigating Seoul's streets.</p>
+</div>
+</div>
+</section>
+<!-- Chunk 4: Locked -->
+<section class="relative locked">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest text-on-surface-variant flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-md text-headline-md">Chunk 4: Social Skills</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Honorifics and formal speaking.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Encouragement Card -->
+<div class="mt-12 bg-primary-container p-6 rounded-3xl text-on-primary-container relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-headline-md text-headline-md mb-2">Keep going, Alex!</h4>
+<p class="font-body-md text-body-md opacity-90">Finish 2 more lessons today to reach your 15-minute goal.</p>
+</div>
+<span class="material-symbols-outlined absolute right-[-10px] bottom-[-10px] text-[120px] opacity-10 rotate-12">celebration</span>
+</div>
+</main>
+<!-- Bottom Navigation Bar (From JSON) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-6 pb-4 pt-2 bg-surface-container-lowest dark:bg-surface-container-low shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<!-- Destination 1: Pathway (Active) -->
+<a href="#" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 min-w-[72px] transition-all transform active:translate-y-0.5">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-sm text-label-sm mt-1">Pathway</span>
+</a>
+<!-- Destination 2: Profile (Inactive) -->
+<a href="#" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 min-w-[72px] hover:text-primary transition-all transform active:translate-y-0.5">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</a>
+</nav>
+<!-- Micro-interactions Script -->
+<script>
+        document.querySelectorAll('.lesson-card:not(.locked)').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transform = 'scale(1.1) rotate(-5deg)';
+                    icon.style.transition = 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }
+            });
+            card.addEventListener('mouseleave', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transform = 'scale(1) rotate(0deg)';
+                }
+            });
+        });
+
+        // Simple parallax effect for the scroll header
+        window.addEventListener('scroll', () => {
+            const scroll = window.scrollY;
+            const header = document.querySelector('header');
+            if (scroll > 10) {
+                header.classList.add('shadow-md');
+                header.style.backgroundColor = 'rgba(248, 249, 250, 0.95)';
+            } else {
+                header.classList.remove('shadow-md');
+                header.style.backgroundColor = 'rgb(248, 249, 250)';
+            }
+        });
+    </script>
+<style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+        }
+    </style>
+</body></html>
