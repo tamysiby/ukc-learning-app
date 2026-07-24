@@ -5,8 +5,7 @@ import {
   getStoredSession,
   getStoredUsers,
   saveStoredUsers,
-  saveStoredSession,
-  setUserOnlineState
+  saveStoredSession
 } from '../services/supabaseClient';
 
 const AuthContext = createContext(null);
@@ -23,6 +22,7 @@ export function AuthProvider({ children }) {
 
   const lastActivityTimeRef = useRef(Date.now());
   const inactivityTimerRef = useRef(null);
+  const sessionCheckTimerRef = useRef(null);
   const throttleTimerRef = useRef(0);
 
   // Load session & sync users list
@@ -36,48 +36,73 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // Sync users list whenever storage updates (e.g., from admin CRUD or online status shifts)
+  // Sync users list
   const refreshUsersList = () => {
     setUsers(getStoredUsers());
+  };
+
+  // Single-session enforcement: Validate if current session was superseded
+  const validateSessionIntegrity = (currentUsr) => {
+    if (!currentUsr || !currentUsr.activeSessionId) return true;
+
+    const allUsers = getStoredUsers();
+    const selfRecord = allUsers.find(u => u.id === currentUsr.id);
+
+    // If another session logged in with a different sessionId
+    if (selfRecord && selfRecord.activeSessionId && selfRecord.activeSessionId !== currentUsr.activeSessionId) {
+      setCurrentUser(null);
+      setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
+      saveStoredSession(null);
+      refreshUsersList();
+      return false;
+    }
+    return true;
   };
 
   // Cross-tab single-session enforcement & storage synchronization
   useEffect(() => {
     const handleStorageChange = (e) => {
-      // Sync list of users
       refreshUsersList();
 
       if (!currentUser) return;
 
-      // Check if session storage updated
+      // Check if session storage updated in another tab/window
       if (e.key === 'ukc_app_session_v1') {
         const newSession = e.newValue ? JSON.parse(e.newValue) : null;
         if (!newSession) {
-          // Logged out in another tab
+          // Explicit logout in another tab
           setCurrentUser(null);
+        } else if (newSession.id === currentUser.id && newSession.activeSessionId !== currentUser.activeSessionId) {
+          // Logged in with a new session in another tab
+          setCurrentUser(null);
+          setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
         }
       }
 
-      // Check if user database updated (Single Session Superseded check)
-      if (e.key === 'ukc_app_users_db_v1' && e.newValue) {
-        try {
-          const updatedUsers = JSON.parse(e.newValue);
-          const selfRecord = updatedUsers.find(u => u.id === currentUser.id);
-
-          // If a new session ID was assigned to this user from another login event
-          if (selfRecord && selfRecord.activeSessionId && selfRecord.activeSessionId !== currentUser.activeSessionId) {
-            authSignOut(currentUser.id);
-            setCurrentUser(null);
-            setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
-          }
-        } catch (err) {
-          console.error('Error parsing cross-tab session update:', err);
-        }
+      // Check if users database updated
+      if (e.key === 'ukc_app_users_db_v1') {
+        validateSessionIntegrity(currentUser);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, [currentUser]);
+
+  // Fast Periodic Session Heartbeat (Validates single-session integrity every 2 seconds)
+  useEffect(() => {
+    if (!currentUser) {
+      if (sessionCheckTimerRef.current) clearInterval(sessionCheckTimerRef.current);
+      return;
+    }
+
+    sessionCheckTimerRef.current = setInterval(() => {
+      validateSessionIntegrity(currentUser);
+    }, 2000);
+
+    return () => {
+      if (sessionCheckTimerRef.current) clearInterval(sessionCheckTimerRef.current);
+    };
   }, [currentUser]);
 
   // 15-Minute Throttled Inactivity Auto-Logout Tracker
@@ -89,7 +114,7 @@ export function AuthProvider({ children }) {
 
     const resetActivityTimer = () => {
       const now = Date.now();
-      // Throttle: only update lastActivityTime at most once every 10 seconds to avoid CPU churn
+      // Throttle: update lastActivityTime at most once every 10 seconds to avoid CPU churn
       if (now - throttleTimerRef.current > THROTTLE_INTERVAL_MS) {
         throttleTimerRef.current = now;
         lastActivityTimeRef.current = now;
@@ -100,17 +125,17 @@ export function AuthProvider({ children }) {
     const events = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
     events.forEach(evt => window.addEventListener(evt, resetActivityTimer, { passive: true }));
 
-    // Periodic check every 15 seconds to see if 15 mins of inactivity passed
+    // Periodic check every 10 seconds to see if 15 mins of inactivity passed
     inactivityTimerRef.current = setInterval(() => {
       const idleDuration = Date.now() - lastActivityTimeRef.current;
       if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
         // Auto Logout
         authSignOut(currentUser.id);
         setCurrentUser(null);
-        setUsers(getStoredUsers());
+        refreshUsersList();
         setSessionNotice('You were automatically logged out due to 15 minutes of inactivity.');
       }
-    }, 15000);
+    }, 10000);
 
     return () => {
       events.forEach(evt => window.removeEventListener(evt, resetActivityTimer));
