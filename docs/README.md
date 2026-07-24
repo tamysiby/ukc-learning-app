@@ -54,6 +54,7 @@ docs/
 - 📐 **Lesson Spec Template**: [`docs/templates/lesson-template.md`](file:///home/tamy/p/ukc-learning-app/docs/templates/lesson-template.md)
 - 📝 **Quiz Spec Template**: [`docs/templates/quiz-template.md`](file:///home/tamy/p/ukc-learning-app/docs/templates/quiz-template.md)
 - 🗺️ **Curriculum Roadmap**: [`docs/curriculum/roadmap.md`](file:///home/tamy/p/ukc-learning-app/docs/curriculum/roadmap.md)
+- 🔒 **Auth & Security Rules**: [`docs/guidelines/auth-rules.md`](file:///home/tamy/p/ukc-learning-app/docs/guidelines/auth-rules.md)
 - ✍️ **Content Style Guide**: [`docs/guidelines/content-style-guide.md`](file:///home/tamy/p/ukc-learning-app/docs/guidelines/content-style-guide.md)
 
 ---
