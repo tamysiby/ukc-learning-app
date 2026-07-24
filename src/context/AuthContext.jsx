@@ -1,22 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   authSignIn,
   authSignOut,
   getStoredSession,
   getStoredUsers,
   saveStoredUsers,
-  saveStoredSession
+  saveStoredSession,
+  setUserOnlineState
 } from '../services/supabaseClient';
 
 const AuthContext = createContext(null);
+
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const THROTTLE_INTERVAL_MS = 10 * 1000; // Throttle activity updates every 10 seconds
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
+  const [sessionNotice, setSessionNotice] = useState('');
 
-  // Initial load: restore active session & user list
+  const lastActivityTimeRef = useRef(Date.now());
+  const inactivityTimerRef = useRef(null);
+  const throttleTimerRef = useRef(0);
+
+  // Load session & sync users list
   useEffect(() => {
     const savedUser = getStoredSession();
     if (savedUser) {
@@ -27,9 +36,93 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  // Sync users list whenever storage updates (e.g., from admin CRUD or online status shifts)
+  const refreshUsersList = () => {
+    setUsers(getStoredUsers());
+  };
+
+  // Cross-tab single-session enforcement & storage synchronization
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      // Sync list of users
+      refreshUsersList();
+
+      if (!currentUser) return;
+
+      // Check if session storage updated
+      if (e.key === 'ukc_app_session_v1') {
+        const newSession = e.newValue ? JSON.parse(e.newValue) : null;
+        if (!newSession) {
+          // Logged out in another tab
+          setCurrentUser(null);
+        }
+      }
+
+      // Check if user database updated (Single Session Superseded check)
+      if (e.key === 'ukc_app_users_db_v1' && e.newValue) {
+        try {
+          const updatedUsers = JSON.parse(e.newValue);
+          const selfRecord = updatedUsers.find(u => u.id === currentUser.id);
+
+          // If a new session ID was assigned to this user from another login event
+          if (selfRecord && selfRecord.activeSessionId && selfRecord.activeSessionId !== currentUser.activeSessionId) {
+            authSignOut(currentUser.id);
+            setCurrentUser(null);
+            setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
+          }
+        } catch (err) {
+          console.error('Error parsing cross-tab session update:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [currentUser]);
+
+  // 15-Minute Throttled Inactivity Auto-Logout Tracker
+  useEffect(() => {
+    if (!currentUser) {
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current);
+      return;
+    }
+
+    const resetActivityTimer = () => {
+      const now = Date.now();
+      // Throttle: only update lastActivityTime at most once every 10 seconds to avoid CPU churn
+      if (now - throttleTimerRef.current > THROTTLE_INTERVAL_MS) {
+        throttleTimerRef.current = now;
+        lastActivityTimeRef.current = now;
+      }
+    };
+
+    // User interaction events
+    const events = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
+    events.forEach(evt => window.addEventListener(evt, resetActivityTimer, { passive: true }));
+
+    // Periodic check every 15 seconds to see if 15 mins of inactivity passed
+    inactivityTimerRef.current = setInterval(() => {
+      const idleDuration = Date.now() - lastActivityTimeRef.current;
+      if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
+        // Auto Logout
+        authSignOut(currentUser.id);
+        setCurrentUser(null);
+        setUsers(getStoredUsers());
+        setSessionNotice('You were automatically logged out due to 15 minutes of inactivity.');
+      }
+    }, 15000);
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, resetActivityTimer));
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current);
+    };
+  }, [currentUser]);
+
   const login = async (email, password) => {
     setAuthError('');
+    setSessionNotice('');
     setLoading(true);
+    
     const res = await authSignIn(email, password);
     setLoading(false);
     
@@ -39,15 +132,20 @@ export function AuthProvider({ children }) {
     }
 
     setCurrentUser(res.user);
-    // Refresh local list state
-    setUsers(getStoredUsers());
+    lastActivityTimeRef.current = Date.now();
+    refreshUsersList();
     return { success: true, user: res.user };
   };
 
   const logout = async () => {
-    await authSignOut();
+    if (currentUser) {
+      await authSignOut(currentUser.id);
+    } else {
+      await authSignOut();
+    }
     setCurrentUser(null);
     setAuthError('');
+    refreshUsersList();
   };
 
   const createStudentUser = (newStudentData) => {
@@ -73,7 +171,9 @@ export function AuthProvider({ children }) {
       progress: 0,
       streak: 0,
       lastActive: 'Never',
-      joinedDate: new Date().toISOString().split('T')[0]
+      joinedDate: new Date().toISOString().split('T')[0],
+      isOnline: false,
+      activeSessionId: null
     };
 
     const updatedList = [createdUser, ...currentUsers];
@@ -98,7 +198,6 @@ export function AuthProvider({ children }) {
     saveStoredUsers(updatedList);
     setUsers(updatedList);
 
-    // If current logged-in user modified their own profile, update session
     if (currentUser.id === userId) {
       const updatedSelf = { ...currentUser, ...updates };
       setCurrentUser(updatedSelf);
@@ -140,10 +239,13 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!currentUser,
         loading,
         authError,
+        sessionNotice,
         clearError: () => setAuthError(''),
+        clearSessionNotice: () => setSessionNotice(''),
         login,
         logout,
         users,
+        refreshUsersList,
         createStudentUser,
         updateStudentUser,
         deleteStudentUser,

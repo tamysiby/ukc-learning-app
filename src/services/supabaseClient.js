@@ -8,7 +8,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const STORAGE_USERS_KEY = 'ukc_app_users_db_v1';
 const STORAGE_SESSION_KEY = 'ukc_app_session_v1';
 
-// Default Seed Users (Admin & Students) without external image dependencies
+// Default Seed Users (Admin & Students)
 export const initialMockUsers = [
   {
     id: 'usr-admin-1',
@@ -21,7 +21,9 @@ export const initialMockUsers = [
     progress: 100,
     streak: 45,
     lastActive: 'Just now',
-    joinedDate: '2025-08-01'
+    joinedDate: '2025-08-01',
+    isOnline: false,
+    activeSessionId: null
   },
   {
     id: 'usr-1',
@@ -34,7 +36,9 @@ export const initialMockUsers = [
     progress: 78,
     streak: 14,
     lastActive: '10 mins ago',
-    joinedDate: '2026-01-15'
+    joinedDate: '2026-01-15',
+    isOnline: false,
+    activeSessionId: null
   },
   {
     id: 'usr-2',
@@ -47,7 +51,9 @@ export const initialMockUsers = [
     progress: 42,
     streak: 5,
     lastActive: '2 hours ago',
-    joinedDate: '2026-03-01'
+    joinedDate: '2026-03-01',
+    isOnline: false,
+    activeSessionId: null
   },
   {
     id: 'usr-3',
@@ -60,7 +66,9 @@ export const initialMockUsers = [
     progress: 95,
     streak: 0,
     lastActive: '4 days ago',
-    joinedDate: '2025-11-10'
+    joinedDate: '2025-11-10',
+    isOnline: false,
+    activeSessionId: null
   },
   {
     id: 'usr-5',
@@ -73,7 +81,9 @@ export const initialMockUsers = [
     progress: 60,
     streak: 9,
     lastActive: '1 hour ago',
-    joinedDate: '2026-02-14'
+    joinedDate: '2026-02-14',
+    isOnline: false,
+    activeSessionId: null
   }
 ];
 
@@ -130,6 +140,11 @@ export const mockFlashcards = [
   }
 ];
 
+// Helper to generate unique session token
+export const generateSessionId = () => {
+  return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+};
+
 // User Storage Management
 export const getStoredUsers = () => {
   try {
@@ -173,10 +188,29 @@ export const saveStoredSession = (user) => {
   }
 };
 
+// Update user online status
+export const setUserOnlineState = (userId, isOnline, sessionId = null) => {
+  const users = getStoredUsers();
+  const updatedList = users.map(u => {
+    if (u.id === userId) {
+      return {
+        ...u,
+        isOnline: isOnline,
+        lastActive: isOnline ? 'Just now' : u.lastActive,
+        activeSessionId: isOnline ? (sessionId || u.activeSessionId) : null
+      };
+    }
+    return u;
+  });
+  saveStoredUsers(updatedList);
+  return updatedList;
+};
+
 // Authentic Authentication Functions
 export const authSignIn = async (email, password) => {
   const cleanEmail = email?.trim().toLowerCase();
-  
+  const newSessionId = generateSessionId();
+
   // Attempt Supabase auth if real URL configured
   const isSupabaseConfigured = import.meta.env?.VITE_SUPABASE_URL && !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder');
   
@@ -186,14 +220,24 @@ export const authSignIn = async (email, password) => {
       if (!error && data.user) {
         // Fetch user profile
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
-        const userObj = profile || {
-          id: data.user.id,
-          name: data.user.email.split('@')[0],
-          email: data.user.email,
-          role: data.user.user_metadata?.role || 'Student',
-          status: 'Active',
-          level: 'Beginner (Level 1)'
+        const userObj = {
+          ...(profile || {
+            id: data.user.id,
+            name: data.user.email.split('@')[0],
+            email: data.user.email,
+            role: data.user.user_metadata?.role || 'Student',
+            status: 'Active',
+            level: 'Beginner (Level 1)'
+          }),
+          isOnline: true,
+          activeSessionId: newSessionId,
+          lastActive: 'Just now'
         };
+        
+        // Update profile online state in Supabase
+        await supabase.from('profiles').update({ last_active: new Date().toISOString() }).eq('id', data.user.id);
+        
+        setUserOnlineState(userObj.id, true, newSessionId);
         saveStoredSession(userObj);
         return { user: userObj, error: null };
       }
@@ -218,12 +262,13 @@ export const authSignIn = async (email, password) => {
     return { user: null, error: 'Invalid password. Please check your credentials and try again.' };
   }
 
-  // Update last active time
   const updatedUser = {
     ...matchedUser,
+    isOnline: true,
+    activeSessionId: newSessionId,
     lastActive: 'Just now'
   };
-  
+
   const updatedUsersList = users.map(u => u.id === matchedUser.id ? updatedUser : u);
   saveStoredUsers(updatedUsersList);
   saveStoredSession(updatedUser);
@@ -231,7 +276,14 @@ export const authSignIn = async (email, password) => {
   return { user: updatedUser, error: null };
 };
 
-export const authSignOut = async () => {
+export const authSignOut = async (userId = null) => {
+  const currentSession = getStoredSession();
+  const targetId = userId || currentSession?.id;
+
+  if (targetId) {
+    setUserOnlineState(targetId, false, null);
+  }
+
   try {
     await supabase.auth.signOut();
   } catch (e) {

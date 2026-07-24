@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
-  const { login, authError, clearError, loading } = useAuth();
+  const { login, authError, clearError, sessionNotice, clearSessionNotice, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +45,23 @@ export default function LoginPage() {
 
         {/* Card Box */}
         <div className="mt-8 bg-surface-container-lowest py-8 px-6 sm:px-10 shadow-xl rounded-3xl border border-outline-variant/80 backdrop-blur-sm space-y-6">
+          {/* Session Expiry or Superseded Notice */}
+          {sessionNotice && (
+            <div className="p-3.5 bg-amber-500/10 text-amber-800 dark:text-amber-300 rounded-2xl border border-amber-500/20 text-xs flex items-center justify-between gap-2 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg shrink-0 text-amber-600">info</span>
+                <span>{sessionNotice}</span>
+              </div>
+              <button
+                type="button"
+                onClick={clearSessionNotice}
+                className="text-amber-800 dark:text-amber-300 hover:opacity-80 p-0.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          )}
+
           {/* Error Message Alert */}
           {authError && (
             <div className="p-3.5 bg-red-500/10 text-red-700 dark:text-red-300 rounded-2xl border border-red-500/20 text-xs flex items-center justify-between gap-2 animate-in fade-in">
@@ -55,7 +72,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={clearError}
-                className="text-red-700 dark:text-red-300 hover:opacity-80 p-0.5"
+                className="text-red-700 dark:text-red-300 hover:opacity-80 p-0.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">close</span>
               </button>

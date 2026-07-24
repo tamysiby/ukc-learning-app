@@ -29,9 +29,17 @@ export default function AdminUserDetails({ user, onBack }) {
               }`}>
                 {user.role}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                user.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
                 {user.status}
               </span>
+              {user.isOnline && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Online Now
+                </span>
+              )}
             </div>
             <p className="text-sm text-on-surface-variant font-label">{user.email}</p>
             <p className="text-xs text-outline">Enrolled Level: <span className="font-semibold text-on-surface">{user.level}</span> • Joined {user.joinedDate}</p>

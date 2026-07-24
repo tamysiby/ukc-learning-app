@@ -31,7 +31,11 @@ export default function AdminUserManagement({ onSelectUser }) {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'All' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
+    const matchesStatus = statusFilter === 'All'
+      ? true
+      : statusFilter === 'Online'
+        ? !!user.isOnline
+        : user.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -158,6 +162,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                 className="bg-surface-container-low border border-outline-variant rounded-lg px-2.5 py-1.5 text-xs font-medium text-on-surface focus:outline-none"
               >
                 <option value="All">All Statuses</option>
+                <option value="Online">🟢 Online Now</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
@@ -183,14 +188,22 @@ export default function AdminUserManagement({ onSelectUser }) {
                     <p className="text-xs text-on-surface-variant">{user.email}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => toggleUserStatus(user.id)}
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${
-                    user.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                  }`}
-                >
-                  {user.status}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  {user.isOnline && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Online
+                    </span>
+                  )}
+                  <button
+                    onClick={() => toggleUserStatus(user.id)}
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${
+                      user.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {user.status}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between text-xs pt-1 border-t border-outline-variant/60">
@@ -282,17 +295,25 @@ export default function AdminUserManagement({ onSelectUser }) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleUserStatus(user.id)}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors ${
-                          user.status === 'Active'
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                            : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                        {user.status}
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {user.isOnline && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Online
+                          </span>
+                        )}
+                        <button
+                          onClick={() => toggleUserStatus(user.id)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors ${
+                            user.status === 'Active'
+                              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                              : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                          {user.status}
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
                       <button
