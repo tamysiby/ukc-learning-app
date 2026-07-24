@@ -45,7 +45,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText(/KOREAN FOUNDATIONS/i)[0]).toBeInTheDocument();
-      expect(screen.getByText(/Unit 3: Essential Vocabulary/i)).toBeInTheDocument();
+      expect(screen.getByText(/Unit 1: Hangul & Korean Basics/i)).toBeInTheDocument();
     });
   });
 
@@ -57,7 +57,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
     fireEvent.click(studentDemoBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Unit 3: Essential Vocabulary/i)).toBeInTheDocument();
+      expect(screen.getByText(/Unit 1: Hangul & Korean Basics/i)).toBeInTheDocument();
     });
 
     // Simulate a new login from another session updating the database/storage

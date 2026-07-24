@@ -4,14 +4,14 @@ import LoginPage from './components/LoginPage';
 import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
 import StudentLessonPathway from './components/StudentLessonPathway';
-import StudentVocabLesson from './components/StudentVocabLesson';
+import { HangulLesson, VocabLesson } from './lessons';
 import StudentAccount from './components/StudentAccount';
 import UserAvatar from './components/UserAvatar';
 
 function AppContent() {
   const { currentUser, isAuthenticated, userRole, logout, loading } = useAuth();
   
-  // Tabs: 'pathway' | 'vocab' | 'account' (for Student) | 'admin-list' | 'admin-details' (for Admin)
+  // Tabs: 'pathway' | 'hangul' | 'vocab' | 'account' (for Student) | 'admin-list' | 'admin-details' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -66,7 +66,7 @@ function AppContent() {
                 <button
                   onClick={() => setCurrentTab('pathway')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                    currentTab === 'pathway' || currentTab === 'vocab'
+                    currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab'
                       ? 'bg-primary/10 text-primary'
                       : 'text-on-surface-variant hover:bg-surface-container-low'
                   }`}
@@ -122,10 +122,16 @@ function AppContent() {
         {userRole === 'Student' ? (
           <>
             {(currentTab === 'pathway' || currentTab === 'admin-list' || currentTab === 'admin-details') && (
-              <StudentLessonPathway onStartLesson={() => setCurrentTab('vocab')} />
+              <StudentLessonPathway
+                onStartHangulLesson={() => setCurrentTab('hangul')}
+                onStartVocabLesson={() => setCurrentTab('vocab')}
+              />
+            )}
+            {currentTab === 'hangul' && (
+              <HangulLesson onFinishLesson={() => setCurrentTab('pathway')} />
             )}
             {currentTab === 'vocab' && (
-              <StudentVocabLesson onFinishLesson={() => setCurrentTab('pathway')} />
+              <VocabLesson onFinishLesson={() => setCurrentTab('pathway')} />
             )}
             {currentTab === 'account' && (
               <StudentAccount />
@@ -148,7 +154,7 @@ function AppContent() {
           <button
             onClick={() => setCurrentTab('pathway')}
             className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-              currentTab === 'pathway' || currentTab === 'vocab' ? 'text-primary' : 'text-outline'
+              currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab' ? 'text-primary' : 'text-outline'
             }`}
           >
             <span className="material-symbols-outlined text-xl">map</span>
@@ -156,13 +162,13 @@ function AppContent() {
           </button>
 
           <button
-            onClick={() => setCurrentTab('vocab')}
+            onClick={() => setCurrentTab('hangul')}
             className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-              currentTab === 'vocab' ? 'text-primary' : 'text-outline'
+              currentTab === 'hangul' ? 'text-primary' : 'text-outline'
             }`}
           >
-            <span className="material-symbols-outlined text-xl">style</span>
-            <span className="text-[10px] font-bold">Flashcards</span>
+            <span className="material-symbols-outlined text-xl">menu_book</span>
+            <span className="text-[10px] font-bold">Lesson 1</span>
           </button>
 
           <button

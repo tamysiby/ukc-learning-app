@@ -4,3 +4,4 @@
 -- i (admin) has feature to send message to a specific student/chatting, so students can ask/answer questions. the notification will redirect student to the messaging room with me
 - messaging system
 -- students can access two rooms, one room with me, and another with the other students so they can freely ask questions about lessons 
+-- check duplicate login again since it's still not working
