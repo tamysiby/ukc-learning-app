@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { checkActiveSessionExists } from '../services/supabaseClient';
 
 export default function LoginPage() {
   const { login, authError, clearError, sessionNotice, clearSessionNotice, loading } = useAuth();
@@ -7,21 +8,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Pending active session confirm modal state
+  const [pendingLogin, setPendingLogin] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email || !password) return;
+  const attemptLogin = async (loginEmail, loginPassword, isConfirmed = false) => {
+    if (!loginEmail || !loginPassword) return;
+
+    // Check if another session is currently active for this user account
+    if (!isConfirmed && checkActiveSessionExists(loginEmail)) {
+      setPendingLogin({ email: loginEmail, password: loginPassword });
+      return;
+    }
+
     setIsSubmitting(true);
-    await login(email, password);
+    await login(loginEmail, loginPassword);
     setIsSubmitting(false);
+    setPendingLogin(null);
   };
 
-  const handleQuickDemo = async (demoEmail, demoPass) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    attemptLogin(email, password);
+  };
+
+  const handleQuickDemo = (demoEmail, demoPass) => {
     setEmail(demoEmail);
     setPassword(demoPass);
-    setIsSubmitting(true);
-    await login(demoEmail, demoPass);
-    setIsSubmitting(false);
+    attemptLogin(demoEmail, demoPass);
   };
 
   return (
@@ -33,9 +47,6 @@ export default function LoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         {/* Brand Header */}
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-surface-container-lowest border border-outline-variant/80 flex items-center justify-center text-3xl shadow-lg font-headline">
-            🇰🇷
-          </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">
               UKC Learning Portal
@@ -125,7 +136,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-lg">
                     {showPassword ? 'visibility_off' : 'visibility'}
@@ -162,7 +173,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => handleQuickDemo('admin@ukc.edu', 'AdminPass123!')}
-                className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">admin_panel_settings</span>
                 Admin Login
@@ -170,7 +181,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => handleQuickDemo('minji.kim@ukc.edu', 'StudentPass123!')}
-                className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">school</span>
                 Student Login
@@ -184,6 +195,47 @@ export default function LoginPage() {
           © 2026 UKC Learning Portal
         </p>
       </div>
+
+      {/* ACTIVE SESSION DETECTED WARNING CONFIRMATION DIALOG */}
+      {pendingLogin && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 shrink-0">
+                <span className="material-symbols-outlined text-2xl">warning</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-on-surface font-headline">Active Session Detected</h3>
+                <p className="text-xs text-on-surface-variant font-label">This account is currently logged in on another device or tab.</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 leading-relaxed space-y-1.5">
+              <p className="font-bold text-amber-800 dark:text-amber-300">⚠️ Continuing will log out the older session</p>
+              <p>
+                Logging in now will terminate the active session on your other device/tab, and any unsaved progress in ongoing lessons or interactive decks will be reset.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setPendingLogin(null)}
+                className="px-4 py-2.5 border border-outline-variant rounded-xl text-xs font-bold text-on-surface hover:bg-surface-container-low transition-colors min-h-[40px] cursor-pointer"
+              >
+                Cancel Login
+              </button>
+              <button
+                type="button"
+                onClick={() => attemptLogin(pendingLogin.email, pendingLogin.password, true)}
+                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors min-h-[40px] cursor-pointer"
+              >
+                Log In & Disconnect Older Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

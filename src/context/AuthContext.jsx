@@ -147,10 +147,10 @@ export function AuthProvider({ children }) {
     setAuthError('');
     setSessionNotice('');
     setLoading(true);
-    
+
     const res = await authSignIn(email, password);
     setLoading(false);
-    
+
     if (res.error) {
       setAuthError(res.error);
       return { success: false, error: res.error };
@@ -180,7 +180,7 @@ export function AuthProvider({ children }) {
 
     const currentUsers = getStoredUsers();
     const existing = currentUsers.find(u => u.email.toLowerCase() === newStudentData.email.trim().toLowerCase());
-    
+
     if (existing) {
       return { success: false, error: `An account with email '${newStudentData.email}' already exists.` };
     }

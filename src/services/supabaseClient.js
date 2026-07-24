@@ -145,6 +145,15 @@ export const generateSessionId = () => {
   return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
+// Check if an active session currently exists for an email address
+export const checkActiveSessionExists = (email) => {
+  if (!email) return false;
+  const cleanEmail = email.trim().toLowerCase();
+  const users = getStoredUsers();
+  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+  return !!(user && (user.isOnline || user.activeSessionId));
+};
+
 // User Storage Management
 export const getStoredUsers = () => {
   try {
@@ -165,11 +174,13 @@ export const saveStoredUsers = (users) => {
   }
 };
 
-// Session Storage Management
+// Session Storage Management (Populates both sessionStorage AND localStorage)
 export const getStoredSession = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_SESSION_KEY);
-    if (raw) return JSON.parse(raw);
+    const rawSession = sessionStorage.getItem(STORAGE_SESSION_KEY);
+    if (rawSession) return JSON.parse(rawSession);
+    const rawLocal = localStorage.getItem(STORAGE_SESSION_KEY);
+    if (rawLocal) return JSON.parse(rawLocal);
   } catch (e) {
     console.error('Error reading session:', e);
   }
@@ -179,8 +190,10 @@ export const getStoredSession = () => {
 export const saveStoredSession = (user) => {
   try {
     if (user) {
+      sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
       localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
     } else {
+      sessionStorage.removeItem(STORAGE_SESSION_KEY);
       localStorage.removeItem(STORAGE_SESSION_KEY);
     }
   } catch (e) {

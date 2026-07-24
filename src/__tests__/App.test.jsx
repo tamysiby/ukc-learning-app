@@ -1,11 +1,13 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import App from '../App';
-import { saveStoredUsers, getStoredUsers } from '../services/supabaseClient';
+import { saveStoredUsers, getStoredUsers, initialMockUsers } from '../services/supabaseClient';
 
 describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
+    saveStoredUsers(initialMockUsers.map(u => ({ ...u, isOnline: false, activeSessionId: null })));
   });
 
   it('renders landing login page when unauthenticated', () => {
