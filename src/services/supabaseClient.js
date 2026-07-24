@@ -5,12 +5,30 @@ const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'placeholder-
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Initial Stateful Mock Data for standalone execution
+const STORAGE_USERS_KEY = 'ukc_app_users_db_v1';
+const STORAGE_SESSION_KEY = 'ukc_app_session_v1';
+
+// Default Seed Users (Admin & Students)
 export const initialMockUsers = [
+  {
+    id: 'usr-admin-1',
+    name: 'Tae-hyun Choi (Admin)',
+    email: 'admin@ukc.edu',
+    password: 'AdminPass123!',
+    role: 'Admin',
+    status: 'Active',
+    level: 'Staff Administrator',
+    progress: 100,
+    streak: 45,
+    lastActive: 'Just now',
+    joinedDate: '2025-08-01',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
+  },
   {
     id: 'usr-1',
     name: 'Min-ji Kim',
     email: 'minji.kim@ukc.edu',
+    password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
     level: 'Intermediate (Level 3)',
@@ -24,6 +42,7 @@ export const initialMockUsers = [
     id: 'usr-2',
     name: 'Ji-hoon Park',
     email: 'jihoon.park@ukc.edu',
+    password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
     level: 'Beginner (Level 1)',
@@ -37,6 +56,7 @@ export const initialMockUsers = [
     id: 'usr-3',
     name: 'Soo-jin Lee',
     email: 'soojin.lee@ukc.edu',
+    password: 'StudentPass123!',
     role: 'Student',
     status: 'Inactive',
     level: 'Advanced (Level 5)',
@@ -47,22 +67,10 @@ export const initialMockUsers = [
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
   },
   {
-    id: 'usr-4',
-    name: 'Tae-hyun Choi',
-    email: 'taehyun.admin@ukc.edu',
-    role: 'Admin',
-    status: 'Active',
-    level: 'Staff Administrator',
-    progress: 100,
-    streak: 45,
-    lastActive: 'Just now',
-    joinedDate: '2025-08-01',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
-  },
-  {
     id: 'usr-5',
     name: 'Eun-ji Choi',
     email: 'eunji.choi@ukc.edu',
+    password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
     level: 'Elementary (Level 2)',
@@ -126,3 +134,113 @@ export const mockFlashcards = [
     exampleTranslation: 'I asked the teacher a question.'
   }
 ];
+
+// User Storage Management
+export const getStoredUsers = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_USERS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error('Error reading stored users:', e);
+  }
+  saveStoredUsers(initialMockUsers);
+  return initialMockUsers;
+};
+
+export const saveStoredUsers = (users) => {
+  try {
+    localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+  } catch (e) {
+    console.error('Error saving users:', e);
+  }
+};
+
+// Session Storage Management
+export const getStoredSession = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_SESSION_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error('Error reading session:', e);
+  }
+  return null;
+};
+
+export const saveStoredSession = (user) => {
+  try {
+    if (user) {
+      localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(STORAGE_SESSION_KEY);
+    }
+  } catch (e) {
+    console.error('Error saving session:', e);
+  }
+};
+
+// Authentic Authentication Functions
+export const authSignIn = async (email, password) => {
+  const cleanEmail = email?.trim().toLowerCase();
+  
+  // Attempt Supabase auth if real URL configured
+  const isSupabaseConfigured = import.meta.env?.VITE_SUPABASE_URL && !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder');
+  
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+      if (!error && data.user) {
+        // Fetch user profile
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+        const userObj = profile || {
+          id: data.user.id,
+          name: data.user.email.split('@')[0],
+          email: data.user.email,
+          role: data.user.user_metadata?.role || 'Student',
+          status: 'Active',
+          level: 'Beginner (Level 1)'
+        };
+        saveStoredSession(userObj);
+        return { user: userObj, error: null };
+      }
+    } catch (err) {
+      console.warn('Supabase auth failed, trying local store:', err);
+    }
+  }
+
+  // Local fallback authentication
+  const users = getStoredUsers();
+  const matchedUser = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+  if (!matchedUser) {
+    return { user: null, error: 'Account not found. Student accounts must be added by an Administrator.' };
+  }
+
+  if (matchedUser.status === 'Inactive') {
+    return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
+  }
+
+  if (matchedUser.password && matchedUser.password !== password) {
+    return { user: null, error: 'Invalid password. Please check your credentials and try again.' };
+  }
+
+  // Update last active time
+  const updatedUser = {
+    ...matchedUser,
+    lastActive: 'Just now'
+  };
+  
+  const updatedUsersList = users.map(u => u.id === matchedUser.id ? updatedUser : u);
+  saveStoredUsers(updatedUsersList);
+  saveStoredSession(updatedUser);
+
+  return { user: updatedUser, error: null };
+};
+
+export const authSignOut = async () => {
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    // Ignore offline errors
+  }
+  saveStoredSession(null);
+};

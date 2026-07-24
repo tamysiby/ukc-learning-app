@@ -1,12 +1,21 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import AdminUserManagement from '../components/AdminUserManagement';
+import { AuthProvider } from '../context/AuthContext';
+
+function renderWithAuth(ui) {
+  return render(
+    <AuthProvider>
+      {ui}
+    </AuthProvider>
+  );
+}
 
 describe('Admin User Management Screen', () => {
   const mockOnSelectUser = vi.fn();
 
   it('renders user search bar, filters, and initial user list', () => {
-    render(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
+    renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
     expect(screen.getByText('User Management')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Search users by name, email/i)).toBeInTheDocument();
     expect(screen.getAllByText('Min-ji Kim')[0]).toBeInTheDocument();
@@ -14,7 +23,7 @@ describe('Admin User Management Screen', () => {
   });
 
   it('filters users correctly when searching text', () => {
-    render(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
+    renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
     const searchInput = screen.getByPlaceholderText(/Search users by name, email/i);
     
     fireEvent.change(searchInput, { target: { value: 'Min-ji' } });
@@ -22,12 +31,12 @@ describe('Admin User Management Screen', () => {
     expect(screen.queryByText('Ji-hoon Park')).not.toBeInTheDocument();
   });
 
-  it('triggers onSelectUser callback when View Details or Student Progress button is clicked', () => {
-    render(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
-    const viewButtons = screen.getAllByText(/View Details|View Student Progress/i);
+  it('triggers onSelectUser callback when View Details button is clicked', () => {
+    renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
+    const viewButtons = screen.getAllByTitle(/View details & progress/i);
     expect(viewButtons.length).toBeGreaterThan(0);
     
     fireEvent.click(viewButtons[0]);
-    expect(mockOnSelectUser).toHaveBeenCalledWith(expect.objectContaining({ name: 'Min-ji Kim' }));
+    expect(mockOnSelectUser).toHaveBeenCalledWith(expect.objectContaining({ name: 'Tae-hyun Choi (Admin)' }));
   });
 });

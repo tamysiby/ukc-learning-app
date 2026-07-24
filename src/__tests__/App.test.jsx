@@ -1,32 +1,48 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
 import App from '../App';
 
-describe('UKC Learning App Root & Navigation', () => {
-  it('renders top brand title and navigation role switcher', () => {
-    render(<App />);
-    expect(screen.getAllByText(/UKC Learning/i)[0]).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Student$/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Admin$/i })).toBeInTheDocument();
+describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
+  beforeEach(() => {
+    localStorage.clear();
   });
 
-  it('switches between Student view and Admin view when clicking mode buttons', () => {
+  it('renders landing login page when unauthenticated', () => {
+    render(<App />);
+    expect(screen.getByText('UKC Learning Portal')).toBeInTheDocument();
+    expect(screen.getByText(/Sign in to your learning dashboard/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
+  });
+
+  it('logs in as Admin via quick demo shortcut and renders Admin User Management', async () => {
     render(<App />);
     
-    // Default should be Student Pathway or Student view
-    expect(screen.getAllByText(/Pathway/i)[0]).toBeInTheDocument();
+    const adminDemoBtn = screen.getByRole('button', { name: /Admin Login/i });
+    fireEvent.click(adminDemoBtn);
 
-    // Click Admin Mode button
-    const adminBtn = screen.getByRole('button', { name: /^Admin$/i });
-    fireEvent.click(adminBtn);
+    await waitFor(() => {
+      expect(screen.getByText(/User Management/i)).toBeInTheDocument();
+      expect(screen.getByText(/Admin Portal/i)).toBeInTheDocument();
+    });
 
-    // Should render Admin User Management view
-    expect(screen.getByText(/User Management/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Search users by name, email/i)).toBeInTheDocument();
+    // Test logout button returns to login page
+    const logoutBtn = screen.getByRole('button', { name: /Logout/i });
+    fireEvent.click(logoutBtn);
 
-    // Click Student Mode button back
-    const studentBtn = screen.getByRole('button', { name: /^Student$/i });
-    fireEvent.click(studentBtn);
-    expect(screen.getAllByText(/Pathway/i)[0]).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
+    });
+  });
+
+  it('logs in as Student via quick demo shortcut and renders Student Lesson Pathway', async () => {
+    render(<App />);
+    
+    const studentDemoBtn = screen.getByRole('button', { name: /Student Login/i });
+    fireEvent.click(studentDemoBtn);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/KOREAN FOUNDATIONS/i)[0]).toBeInTheDocument();
+      expect(screen.getByText(/Unit 3: Essential Vocabulary/i)).toBeInTheDocument();
+    });
   });
 });

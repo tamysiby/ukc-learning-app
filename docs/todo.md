@@ -1,0 +1,6 @@
+- i (admin) should be able to add lessons for specific students. so i have control over the lessons that the students see. i guess this means that i should have lesson management so that i can add a lesson and then link students with the lesson? open to discussion on this feature.
+- notification system
+-- notify student when there is a new lesson available for them
+-- i (admin) has feature to send message to a specific student/chatting, so students can ask/answer questions. the notification will redirect student to the messaging room with me
+- messaging system
+-- students can access two rooms, one room with me, and another with the other students so they can freely ask questions about lessons 

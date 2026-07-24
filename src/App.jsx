@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoginPage from './components/LoginPage';
 import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
 import StudentLessonPathway from './components/StudentLessonPathway';
 import StudentVocabLesson from './components/StudentVocabLesson';
 import StudentAccount from './components/StudentAccount';
 
-export default function App() {
-  const [roleMode, setRoleMode] = useState('student'); // 'student' | 'admin'
-  const [currentTab, setCurrentTab] = useState('pathway'); // 'pathway' | 'vocab' | 'account' | 'admin-list' | 'admin-details'
+function AppContent() {
+  const { currentUser, isAuthenticated, userRole, logout, loading } = useAuth();
+  
+  // Tabs: 'pathway' | 'vocab' | 'account' (for Student) | 'admin-list' | 'admin-details' (for Admin)
+  const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleRoleChange = (mode) => {
-    setRoleMode(mode);
-    if (mode === 'admin') {
-      setCurrentTab('admin-list');
-    } else {
-      setCurrentTab('pathway');
-    }
-  };
+  // If loading session check
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3 text-primary font-bold text-sm">
+          <span className="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
+          <span>Loading UKC Learning Portal...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Gated Route: Unauthenticated users MUST log in first
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   const handleSelectAdminUser = (user) => {
     setSelectedUser(user);
@@ -40,19 +52,19 @@ export default function App() {
               </span>
               <span className="hidden sm:inline-block ml-1 text-on-surface font-extrabold">Portal</span>
               <span className="hidden md:inline-block ml-2 px-1.5 py-0.5 bg-surface-container-low text-[9px] font-bold text-outline uppercase tracking-wider rounded">
-                Mobile Optimized
+                Authenticated
               </span>
             </div>
           </div>
 
-          {/* Right Header Navigation & Role Switcher */}
-          <div className="flex items-center gap-2">
-            {/* Desktop Navigation Links */}
-            {roleMode === 'student' && (
+          {/* Header Navigation & User Profile / Logout */}
+          <div className="flex items-center gap-3">
+            {/* Student Navigation Links */}
+            {userRole === 'Student' && (
               <nav className="hidden md:flex items-center gap-1">
                 <button
                   onClick={() => setCurrentTab('pathway')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                     currentTab === 'pathway' || currentTab === 'vocab'
                       ? 'bg-primary/10 text-primary'
                       : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -64,7 +76,7 @@ export default function App() {
 
                 <button
                   onClick={() => setCurrentTab('account')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                     currentTab === 'account'
                       ? 'bg-primary/10 text-primary'
                       : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -76,38 +88,43 @@ export default function App() {
               </nav>
             )}
 
-            {/* Role Switcher Pill */}
-            <div className="bg-surface-container-low p-1 rounded-xl border border-outline-variant flex items-center gap-0.5 sm:gap-1">
+            {/* User Profile Pill & Logout Action */}
+            <div className="flex items-center gap-2 pl-2 border-l border-outline-variant/60">
+              <div className="hidden sm:flex items-center gap-2">
+                <img
+                  src={currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
+                  alt={currentUser?.name}
+                  className="w-8 h-8 rounded-full object-cover border border-outline-variant"
+                />
+                <div className="text-left text-xs leading-tight">
+                  <p className="font-bold text-on-surface">{currentUser?.name}</p>
+                  <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                    userRole === 'Admin' ? 'bg-tertiary-container/40 text-tertiary' : 'bg-primary-fixed/60 text-primary'
+                  }`}>
+                    {userRole}
+                  </span>
+                </div>
+              </div>
+
+              {/* Logout Button */}
               <button
-                onClick={() => handleRoleChange('student')}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all min-h-[32px] ${
-                  roleMode === 'student'
-                    ? 'bg-primary text-on-primary shadow-xs'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
+                onClick={logout}
+                title="Sign out of your account"
+                className="px-2.5 py-1.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface-variant hover:bg-rose-500/10 hover:text-rose-700 hover:border-rose-300 transition-all flex items-center gap-1 min-h-[36px] cursor-pointer"
               >
-                Student
-              </button>
-              <button
-                onClick={() => handleRoleChange('admin')}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all min-h-[32px] ${
-                  roleMode === 'admin'
-                    ? 'bg-tertiary text-on-tertiary shadow-xs'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
-              >
-                Admin
+                <span className="material-symbols-outlined text-base">logout</span>
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main View Area */}
+      {/* Main Authenticated Views */}
       <main className="flex-1">
-        {roleMode === 'student' && (
+        {userRole === 'Student' ? (
           <>
-            {currentTab === 'pathway' && (
+            {(currentTab === 'pathway' || currentTab === 'admin-list' || currentTab === 'admin-details') && (
               <StudentLessonPathway onStartLesson={() => setCurrentTab('vocab')} />
             )}
             {currentTab === 'vocab' && (
@@ -117,26 +134,23 @@ export default function App() {
               <StudentAccount />
             )}
           </>
-        )}
-
-        {roleMode === 'admin' && (
+        ) : (
           <>
-            {currentTab === 'admin-list' && (
-              <AdminUserManagement onSelectUser={handleSelectAdminUser} />
-            )}
-            {currentTab === 'admin-details' && (
+            {currentTab === 'admin-details' ? (
               <AdminUserDetails user={selectedUser} onBack={() => setCurrentTab('admin-list')} />
+            ) : (
+              <AdminUserManagement onSelectUser={handleSelectAdminUser} />
             )}
           </>
         )}
       </main>
 
-      {/* Mobile Bottom Navigation Bar (Visible on mobile viewports for Student Mode) */}
-      {roleMode === 'student' && (
+      {/* Mobile Navigation for Students */}
+      {userRole === 'Student' && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant z-40 px-6 py-2 flex justify-around items-center shadow-lg">
           <button
             onClick={() => setCurrentTab('pathway')}
-            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors ${
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
               currentTab === 'pathway' || currentTab === 'vocab' ? 'text-primary' : 'text-outline'
             }`}
           >
@@ -146,7 +160,7 @@ export default function App() {
 
           <button
             onClick={() => setCurrentTab('vocab')}
-            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors ${
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
               currentTab === 'vocab' ? 'text-primary' : 'text-outline'
             }`}
           >
@@ -156,7 +170,7 @@ export default function App() {
 
           <button
             onClick={() => setCurrentTab('account')}
-            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors ${
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
               currentTab === 'account' ? 'text-primary' : 'text-outline'
             }`}
           >
@@ -169,9 +183,17 @@ export default function App() {
       {/* Global Footer */}
       <footer className="hidden md:block bg-surface-container-lowest border-t border-outline-variant py-6 text-center text-xs text-outline font-label">
         <div className="max-w-7xl mx-auto px-4">
-          <p>© 2026 UKC Learning Portal • Mobile-Optimized 100% Free-Tier Stack</p>
+          <p>© 2026 UKC Learning Portal • Role-Based Authenticated Session</p>
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
