@@ -33,7 +33,7 @@ describe('Admin User Management Screen', () => {
 
   it('triggers onSelectUser callback when View Details button is clicked', () => {
     renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
-    const viewButtons = screen.getAllByTitle(/View details & progress/i);
+    const viewButtons = screen.getAllByTitle(/View details/i);
     expect(viewButtons.length).toBeGreaterThan(0);
     
     fireEvent.click(viewButtons[0]);

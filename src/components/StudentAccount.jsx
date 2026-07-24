@@ -5,7 +5,6 @@ export default function StudentAccount() {
   const [profile, setProfile] = useState({
     name: 'Min-ji Kim',
     email: 'minji.kim@ukc.edu',
-    level: 'Intermediate (Level 3)',
     notifications: true,
     audioAutoPlay: true,
   });
@@ -64,16 +63,6 @@ export default function StudentAccount() {
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-outline mb-1">Current Enrolled Level</label>
-                <input
-                  type="text"
-                  disabled
-                  value={profile.level}
-                  className="w-full px-3.5 py-2.5 bg-surface-container border border-outline-variant/60 rounded-xl text-sm text-outline cursor-not-allowed font-medium"
                 />
               </div>
             </div>

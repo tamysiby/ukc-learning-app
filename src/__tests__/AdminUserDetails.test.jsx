@@ -18,11 +18,10 @@ describe('Admin User Details Screen', () => {
 
   const mockBack = vi.fn();
 
-  it('renders student header details, progress stats, and back button', () => {
+  it('renders student header details, study streak, and back button', () => {
     render(<AdminUserDetails user={sampleUser} onBack={mockBack} />);
     expect(screen.getByText('Min-ji Kim')).toBeInTheDocument();
     expect(screen.getByText('minji.kim@ukc.edu')).toBeInTheDocument();
-    expect(screen.getByText('78%')).toBeInTheDocument();
     expect(screen.getByText('14 Days')).toBeInTheDocument();
   });
 

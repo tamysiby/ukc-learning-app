@@ -18,8 +18,7 @@ export default function AdminUserManagement({ onSelectUser }) {
     name: '',
     email: '',
     password: 'StudentPass123!',
-    role: 'Student',
-    level: 'Beginner (Level 1)'
+    role: 'Student'
   });
 
   const [editingUser, setEditingUser] = useState(null);
@@ -51,7 +50,7 @@ export default function AdminUserManagement({ onSelectUser }) {
       return;
     }
 
-    setNewUser({ name: '', email: '', password: 'StudentPass123!', role: 'Student', level: 'Beginner (Level 1)' });
+    setNewUser({ name: '', email: '', password: 'StudentPass123!', role: 'Student' });
     setIsAddModalOpen(false);
   };
 
@@ -71,7 +70,6 @@ export default function AdminUserManagement({ onSelectUser }) {
       name: editingUser.name,
       email: editingUser.email,
       role: editingUser.role,
-      level: editingUser.level,
       status: editingUser.status
     });
 
@@ -111,7 +109,7 @@ export default function AdminUserManagement({ onSelectUser }) {
         <div>
           <h1 className="text-xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">User Management</h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5 font-label">
-            Admin Portal • Create student accounts, assign levels, and manage access.
+            Admin Portal • Manage student accounts and platform access.
           </p>
         </div>
         <button
@@ -206,12 +204,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-outline-variant/60">
-                <span className="text-outline">Level: <strong className="text-on-surface">{user.level}</strong></span>
-                <span className="text-primary font-bold">{user.progress}% Progress</span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-1">
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-outline-variant/60">
                 <button
                   onClick={() => onSelectUser(user)}
                   className="py-1.5 bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
@@ -248,8 +241,6 @@ export default function AdminUserManagement({ onSelectUser }) {
               <tr>
                 <th className="px-6 py-4">User</th>
                 <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Current Level</th>
-                <th className="px-6 py-4">Progress</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -257,7 +248,7 @@ export default function AdminUserManagement({ onSelectUser }) {
             <tbody className="divide-y divide-outline-variant/60">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-on-surface-variant font-medium">
+                  <td colSpan="4" className="px-6 py-12 text-center text-on-surface-variant font-medium">
                     No users matching search filters.
                   </td>
                 </tr>
@@ -279,20 +270,6 @@ export default function AdminUserManagement({ onSelectUser }) {
                       }`}>
                         {user.role}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-on-surface-variant font-medium text-xs">
-                      {user.level}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="w-36 space-y-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span>{user.progress}%</span>
-                          <span className="text-xs text-outline">{user.streak}d streak</span>
-                        </div>
-                        <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-                          <div className="bg-primary h-full rounded-full transition-all duration-300" style={{ width: `${user.progress}%` }}></div>
-                        </div>
-                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
@@ -319,7 +296,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                       <button
                         onClick={() => onSelectUser(user)}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-2.5 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer"
-                        title="View details & progress"
+                        title="View details"
                       >
                         <span className="material-symbols-outlined text-base">visibility</span>
                       </button>
@@ -402,31 +379,16 @@ export default function AdminUserManagement({ onSelectUser }) {
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary font-mono"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-outline mb-1">Role</label>
-                  <select
-                    value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
-                  >
-                    <option value="Student">Student</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-outline mb-1">Assigned Level</label>
-                  <select
-                    value={newUser.level}
-                    onChange={(e) => setNewUser({ ...newUser, level: e.target.value })}
-                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
-                  >
-                    <option value="Beginner (Level 1)">Beginner L1</option>
-                    <option value="Elementary (Level 2)">Elementary L2</option>
-                    <option value="Intermediate (Level 3)">Intermediate L3</option>
-                    <option value="Advanced (Level 5)">Advanced L5</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase text-outline mb-1">Role</label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
+                >
+                  <option value="Student">Student</option>
+                  <option value="Admin">Admin</option>
+                </select>
               </div>
               <div className="pt-3 flex gap-3 justify-end">
                 <button
@@ -492,17 +454,14 @@ export default function AdminUserManagement({ onSelectUser }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-outline mb-1">Level</label>
+                  <label className="block text-xs font-semibold uppercase text-outline mb-1">Role</label>
                   <select
-                    value={editingUser.level}
-                    onChange={(e) => setEditingUser({ ...editingUser, level: e.target.value })}
+                    value={editingUser.role}
+                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
                   >
-                    <option value="Beginner (Level 1)">Beginner L1</option>
-                    <option value="Elementary (Level 2)">Elementary L2</option>
-                    <option value="Intermediate (Level 3)">Intermediate L3</option>
-                    <option value="Advanced (Level 5)">Advanced L5</option>
-                    <option value="Staff Administrator">Staff Admin</option>
+                    <option value="Student">Student</option>
+                    <option value="Admin">Admin</option>
                   </select>
                 </div>
                 <div>
@@ -560,7 +519,6 @@ export default function AdminUserManagement({ onSelectUser }) {
             <div className="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant text-xs space-y-1">
               <p className="font-bold text-on-surface">{deletingUser.name}</p>
               <p className="text-on-surface-variant">{deletingUser.email}</p>
-              <p className="text-outline text-[11px]">Level: {deletingUser.level}</p>
             </div>
 
             <div className="pt-2 flex gap-3 justify-end">
