@@ -33,30 +33,18 @@ export default function LoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         {/* Brand Header */}
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-primary text-on-primary flex items-center justify-center font-black text-2xl shadow-lg font-headline">
-            U
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-surface-container-lowest border border-outline-variant/80 flex items-center justify-center text-3xl shadow-lg font-headline">
+            🇰🇷
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">
               UKC Learning Portal
             </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1 font-label">
-              Sign in to your learning dashboard or administrative portal.
-            </p>
           </div>
         </div>
 
         {/* Card Box */}
         <div className="mt-8 bg-surface-container-lowest py-8 px-6 sm:px-10 shadow-xl rounded-3xl border border-outline-variant/80 backdrop-blur-sm space-y-6">
-          {/* Admin Managed Account Notice */}
-          <div className="p-3.5 bg-surface-container-low rounded-2xl border border-outline-variant flex items-start gap-3">
-            <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">verified_user</span>
-            <div className="text-xs text-on-surface-variant space-y-0.5">
-              <p className="font-bold text-on-surface">Restricted Access</p>
-              <p>Public sign-up is disabled. Student accounts are added and managed exclusively by Administrators.</p>
-            </div>
-          </div>
-
           {/* Error Message Alert */}
           {authError && (
             <div className="p-3.5 bg-red-500/10 text-red-700 dark:text-red-300 rounded-2xl border border-red-500/20 text-xs flex items-center justify-between gap-2 animate-in fade-in">
@@ -176,7 +164,7 @@ export default function LoginPage() {
 
         {/* Footer info */}
         <p className="text-center text-xs text-outline mt-6 font-label">
-          © 2026 UKC Learning Portal • Role-Based Security Enabled
+          © 2026 UKC Learning Portal
         </p>
       </div>
     </div>

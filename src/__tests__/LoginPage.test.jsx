@@ -8,7 +8,7 @@ describe('LoginPage Component', () => {
     localStorage.clear();
   });
 
-  it('renders login form with email, password, and restricted access notice', () => {
+  it('renders login form with email, password, and submit button', () => {
     render(
       <AuthProvider>
         <LoginPage />
@@ -16,9 +16,9 @@ describe('LoginPage Component', () => {
     );
 
     expect(screen.getByText('UKC Learning Portal')).toBeInTheDocument();
-    expect(screen.getByText(/Public sign-up is disabled/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('name@ukc.edu')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••••••')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
   });
 
   it('shows error badge when invalid credentials are submitted', async () => {
