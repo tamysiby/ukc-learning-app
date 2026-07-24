@@ -6,6 +6,7 @@ import AdminUserDetails from './components/AdminUserDetails';
 import StudentLessonPathway from './components/StudentLessonPathway';
 import StudentVocabLesson from './components/StudentVocabLesson';
 import StudentAccount from './components/StudentAccount';
+import UserAvatar from './components/UserAvatar';
 
 function AppContent() {
   const { currentUser, isAuthenticated, userRole, logout, loading } = useAuth();
@@ -91,11 +92,7 @@ function AppContent() {
             {/* User Profile Pill & Logout Action */}
             <div className="flex items-center gap-2 pl-2 border-l border-outline-variant/60">
               <div className="hidden sm:flex items-center gap-2">
-                <img
-                  src={currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
-                  alt={currentUser?.name}
-                  className="w-8 h-8 rounded-full object-cover border border-outline-variant"
-                />
+                <UserAvatar size="sm" />
                 <div className="text-left text-xs leading-tight">
                   <p className="font-bold text-on-surface">{currentUser?.name}</p>
                   <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-bold ${

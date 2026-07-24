@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import UserAvatar from './UserAvatar';
 
 export default function StudentAccount() {
   const [profile, setProfile] = useState({
@@ -29,16 +30,12 @@ export default function StudentAccount() {
         <div className="md:col-span-2 space-y-6">
           <form onSubmit={handleSave} className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs space-y-6">
             <div className="flex items-center gap-6">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-                alt="Min-ji Kim"
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/20"
-              />
+              <UserAvatar size="xl" />
               <div>
-                <button type="button" className="px-3.5 py-1.5 bg-surface-container-low border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface rounded-lg">
-                  Change Photo
-                </button>
-                <p className="text-[11px] text-outline mt-1">JPG or PNG up to 2MB.</p>
+                <span className="inline-block px-3 py-1 bg-surface-container-low border border-outline-variant text-xs font-semibold text-on-surface-variant rounded-lg">
+                  User Avatar Placeholder Active
+                </span>
+                <p className="text-[11px] text-outline mt-1 font-label">Standardized user icon enabled across portal.</p>
               </div>
             </div>
 

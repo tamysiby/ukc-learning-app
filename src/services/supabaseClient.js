@@ -8,7 +8,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const STORAGE_USERS_KEY = 'ukc_app_users_db_v1';
 const STORAGE_SESSION_KEY = 'ukc_app_session_v1';
 
-// Default Seed Users (Admin & Students)
+// Default Seed Users (Admin & Students) without external image dependencies
 export const initialMockUsers = [
   {
     id: 'usr-admin-1',
@@ -21,8 +21,7 @@ export const initialMockUsers = [
     progress: 100,
     streak: 45,
     lastActive: 'Just now',
-    joinedDate: '2025-08-01',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
+    joinedDate: '2025-08-01'
   },
   {
     id: 'usr-1',
@@ -35,8 +34,7 @@ export const initialMockUsers = [
     progress: 78,
     streak: 14,
     lastActive: '10 mins ago',
-    joinedDate: '2026-01-15',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+    joinedDate: '2026-01-15'
   },
   {
     id: 'usr-2',
@@ -49,8 +47,7 @@ export const initialMockUsers = [
     progress: 42,
     streak: 5,
     lastActive: '2 hours ago',
-    joinedDate: '2026-03-01',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
+    joinedDate: '2026-03-01'
   },
   {
     id: 'usr-3',
@@ -63,8 +60,7 @@ export const initialMockUsers = [
     progress: 95,
     streak: 0,
     lastActive: '4 days ago',
-    joinedDate: '2025-11-10',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
+    joinedDate: '2025-11-10'
   },
   {
     id: 'usr-5',
@@ -77,8 +73,7 @@ export const initialMockUsers = [
     progress: 60,
     streak: 9,
     lastActive: '1 hour ago',
-    joinedDate: '2026-02-14',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80'
+    joinedDate: '2026-02-14'
   }
 ];
 

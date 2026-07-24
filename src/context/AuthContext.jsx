@@ -73,8 +73,7 @@ export function AuthProvider({ children }) {
       progress: 0,
       streak: 0,
       lastActive: 'Never',
-      joinedDate: new Date().toISOString().split('T')[0],
-      avatar: newStudentData.avatar || `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80`
+      joinedDate: new Date().toISOString().split('T')[0]
     };
 
     const updatedList = [createdUser, ...currentUsers];

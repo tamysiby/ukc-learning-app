@@ -1,4 +1,5 @@
 import React from 'react';
+import UserAvatar from './UserAvatar';
 
 export default function AdminUserDetails({ user, onBack }) {
   if (!user) return null;
@@ -19,11 +20,7 @@ export default function AdminUserDetails({ user, onBack }) {
       {/* User Banner Header */}
       <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4 sm:gap-6">
-          <img
-            src={user.avatar}
-            alt={user.name}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-primary/20 shadow-sm"
-          />
+          <UserAvatar size="xl" />
           <div className="space-y-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-extrabold text-on-surface font-headline">{user.name}</h1>
