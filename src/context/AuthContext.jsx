@@ -256,6 +256,54 @@ export function AuthProvider({ children }) {
     updateStudentUser(userId, { status: newStatus });
   };
 
+  const updateStudentAssignedLessons = (userId, lessonIds) => {
+    const currentUsers = getStoredUsers();
+    const updatedList = currentUsers.map(u => {
+      if (u.id === userId) {
+        return { ...u, assignedLessonIds: lessonIds };
+      }
+      return u;
+    });
+
+    saveStoredUsers(updatedList);
+    setUsers(updatedList);
+
+    if (currentUser?.id === userId) {
+      const updatedSelf = { ...currentUser, assignedLessonIds: lessonIds };
+      setCurrentUser(updatedSelf);
+      saveStoredSession(updatedSelf);
+    }
+    return { success: true };
+  };
+
+  const markLessonCompleted = (userId, lessonId) => {
+    const targetUserId = userId || currentUser?.id;
+    if (!targetUserId) return;
+
+    const currentUsers = getStoredUsers();
+    const updatedList = currentUsers.map(u => {
+      if (u.id === targetUserId) {
+        const completed = u.completedLessonIds || [];
+        if (!completed.includes(lessonId)) {
+          return { ...u, completedLessonIds: [...completed, lessonId] };
+        }
+      }
+      return u;
+    });
+
+    saveStoredUsers(updatedList);
+    setUsers(updatedList);
+
+    if (currentUser?.id === targetUserId) {
+      const completed = currentUser.completedLessonIds || [];
+      if (!completed.includes(lessonId)) {
+        const updatedSelf = { ...currentUser, completedLessonIds: [...completed, lessonId] };
+        setCurrentUser(updatedSelf);
+        saveStoredSession(updatedSelf);
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -274,7 +322,9 @@ export function AuthProvider({ children }) {
         createStudentUser,
         updateStudentUser,
         deleteStudentUser,
-        toggleUserStatus
+        toggleUserStatus,
+        updateStudentAssignedLessons,
+        markLessonCompleted
       }}
     >
       {children}

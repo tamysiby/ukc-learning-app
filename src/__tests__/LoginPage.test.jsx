@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import LoginPage from '../components/LoginPage';
 import { AuthProvider } from '../context/AuthContext';
@@ -36,7 +36,10 @@ describe('LoginPage Component', () => {
 
     fireEvent.change(emailInput, { target: { value: 'unknown@ukc.edu' } });
     fireEvent.change(passInput, { target: { value: 'wrongpass' } });
-    fireEvent.click(submitBtn);
+    
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Account not found/i)).toBeInTheDocument();
@@ -54,7 +57,10 @@ describe('LoginPage Component', () => {
     );
 
     const studentDemoBtn = screen.getByRole('button', { name: /Student Login/i });
-    fireEvent.click(studentDemoBtn);
+
+    await act(async () => {
+      fireEvent.click(studentDemoBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Active Session Detected/i)).toBeInTheDocument();

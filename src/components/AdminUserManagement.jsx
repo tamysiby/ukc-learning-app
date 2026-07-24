@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getStoredLessons } from '../services/lessonRegistry';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
@@ -14,11 +15,14 @@ export default function AdminUserManagement({ onSelectUser }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  const availableLessons = getStoredLessons();
+
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     password: 'StudentPass123!',
-    role: 'Student'
+    role: 'Student',
+    assignedLessonIds: ['les-hangul-1', 'les-vocab-1']
   });
 
   const [editingUser, setEditingUser] = useState(null);

@@ -24,7 +24,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
     fireEvent.click(adminDemoBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/User Management/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/User Management/i)[0]).toBeInTheDocument();
       expect(screen.getByText(/Admin Portal/i)).toBeInTheDocument();
     });
 

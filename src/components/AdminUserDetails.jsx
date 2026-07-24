@@ -1,8 +1,24 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getStoredLessons } from '../services/lessonRegistry';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserDetails({ user, onBack }) {
+  const { updateStudentAssignedLessons } = useAuth();
   if (!user) return null;
+
+  const lessons = getStoredLessons();
+  const assigned = user.assignedLessonIds || ['les-hangul-1', 'les-vocab-1'];
+
+  const handleToggleLesson = (lessonId) => {
+    let updated;
+    if (assigned.includes(lessonId)) {
+      updated = assigned.filter(id => id !== lessonId);
+    } else {
+      updated = [...assigned, lessonId];
+    }
+    updateStudentAssignedLessons(user.id, updated);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -59,10 +75,64 @@ export default function AdminUserDetails({ user, onBack }) {
         </div>
       </div>
 
-      {/* Activity Logs & Controls Grid */}
+      {/* Main Grid: Lesson Assignments & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Activity Logs */}
+        {/* Left 2 Cols: Lesson Access Management & Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Assigned Lessons Section */}
+          <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-on-surface font-headline flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">auto_stories</span>
+                Assigned Lessons & Access Control
+              </h2>
+              <span className="text-xs text-outline">
+                {assigned.length} of {lessons.length} Lessons Assigned
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant">
+              Check/uncheck lessons below to configure what this student can see on their learning pathway.
+            </p>
+
+            <div className="divide-y divide-outline-variant/60 border border-outline-variant rounded-2xl overflow-hidden">
+              {lessons.map((lesson) => {
+                const isAssigned = assigned.includes(lesson.id);
+
+                return (
+                  <label
+                    key={lesson.id}
+                    className="p-4 flex items-center justify-between bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-primary-fixed/60 text-primary text-[10px] font-bold rounded-md uppercase">
+                          {lesson.unit}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-on-surface">{lesson.title}</h4>
+                      </div>
+                      <p className="text-xs text-on-surface-variant line-clamp-1">{lesson.description}</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0 ml-4">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isAssigned ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-container text-outline'
+                      }`}>
+                        {isAssigned ? 'Assigned' : 'Hidden'}
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={isAssigned}
+                        onChange={() => handleToggleLesson(lesson.id)}
+                        className="w-4 h-4 text-primary rounded focus:ring-primary accent-primary cursor-pointer"
+                      />
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Activity Logs */}
           <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-xs space-y-4">
             <h2 className="text-lg font-bold text-on-surface font-headline flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">history</span>
@@ -71,15 +141,15 @@ export default function AdminUserDetails({ user, onBack }) {
             <ul className="divide-y divide-outline-variant/60 text-sm text-on-surface">
               <li className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-on-surface">Completed Flashcard Deck: Greetings</p>
-                  <p className="text-xs text-outline">Score: 18 / 20 Words Mastered</p>
+                  <p className="font-semibold text-on-surface">Completed Lesson 1: Introduction to Hangul</p>
+                  <p className="text-xs text-outline font-mono">100% Score on Eumjeol Builder Quiz</p>
                 </div>
                 <span className="text-xs font-medium text-on-surface-variant">Today, 2:15 PM</span>
               </li>
               <li className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-on-surface">Passed Quiz: Unit 2 Grammar</p>
-                  <p className="text-xs text-outline">Passed with 95% score</p>
+                  <p className="font-semibold text-on-surface">Practiced Vocab Flashcards</p>
+                  <p className="text-xs text-outline font-mono">5 / 5 Words Mastered</p>
                 </div>
                 <span className="text-xs font-medium text-on-surface-variant">Yesterday, 4:40 PM</span>
               </li>

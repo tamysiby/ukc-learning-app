@@ -3,15 +3,16 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/LoginPage';
 import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
+import AdminLessonManagement from './components/AdminLessonManagement';
 import StudentLessonPathway from './components/StudentLessonPathway';
 import { HangulLesson, VocabLesson } from './lessons';
 import StudentAccount from './components/StudentAccount';
 import UserAvatar from './components/UserAvatar';
 
 function AppContent() {
-  const { currentUser, isAuthenticated, userRole, logout, loading } = useAuth();
+  const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted } = useAuth();
   
-  // Tabs: 'pathway' | 'hangul' | 'vocab' | 'account' (for Student) | 'admin-list' | 'admin-details' (for Admin)
+  // Tabs: 'pathway' | 'hangul' | 'vocab' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -35,6 +36,16 @@ function AppContent() {
   const handleSelectAdminUser = (user) => {
     setSelectedUser(user);
     setCurrentTab('admin-details');
+  };
+
+  const handleFinishHangulLesson = () => {
+    markLessonCompleted(currentUser?.id, 'les-hangul-1');
+    setCurrentTab('pathway');
+  };
+
+  const handleFinishVocabLesson = () => {
+    markLessonCompleted(currentUser?.id, 'les-vocab-1');
+    setCurrentTab('pathway');
   };
 
   return (
@@ -89,6 +100,35 @@ function AppContent() {
               </nav>
             )}
 
+            {/* Admin Navigation Links */}
+            {userRole === 'Admin' && (
+              <nav className="hidden md:flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentTab('admin-list')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                    currentTab === 'admin-list' || currentTab === 'admin-details'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-on-surface-variant hover:bg-surface-container-low'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">group</span>
+                  User Management
+                </button>
+
+                <button
+                  onClick={() => setCurrentTab('admin-lessons')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                    currentTab === 'admin-lessons'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-on-surface-variant hover:bg-surface-container-low'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">auto_stories</span>
+                  Lesson Management
+                </button>
+              </nav>
+            )}
+
             {/* User Profile Pill & Logout Action */}
             <div className="flex items-center gap-2 pl-2 border-l border-outline-variant/60">
               <div className="hidden sm:flex items-center gap-2">
@@ -128,10 +168,10 @@ function AppContent() {
               />
             )}
             {currentTab === 'hangul' && (
-              <HangulLesson onFinishLesson={() => setCurrentTab('pathway')} />
+              <HangulLesson onFinishLesson={handleFinishHangulLesson} />
             )}
             {currentTab === 'vocab' && (
-              <VocabLesson onFinishLesson={() => setCurrentTab('pathway')} />
+              <VocabLesson onFinishLesson={handleFinishVocabLesson} />
             )}
             {currentTab === 'account' && (
               <StudentAccount />
@@ -139,7 +179,9 @@ function AppContent() {
           </>
         ) : (
           <>
-            {currentTab === 'admin-details' ? (
+            {currentTab === 'admin-lessons' ? (
+              <AdminLessonManagement />
+            ) : currentTab === 'admin-details' ? (
               <AdminUserDetails user={selectedUser} onBack={() => setCurrentTab('admin-list')} />
             ) : (
               <AdminUserManagement onSelectUser={handleSelectAdminUser} />
@@ -179,6 +221,31 @@ function AppContent() {
           >
             <span className="material-symbols-outlined text-xl">person</span>
             <span className="text-[10px] font-bold">Profile</span>
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Navigation for Admin */}
+      {userRole === 'Admin' && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant z-40 px-6 py-2 flex justify-around items-center shadow-lg">
+          <button
+            onClick={() => setCurrentTab('admin-list')}
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
+              currentTab === 'admin-list' || currentTab === 'admin-details' ? 'text-primary' : 'text-outline'
+            }`}
+          >
+            <span className="material-symbols-outlined text-xl">group</span>
+            <span className="text-[10px] font-bold">Users</span>
+          </button>
+
+          <button
+            onClick={() => setCurrentTab('admin-lessons')}
+            className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
+              currentTab === 'admin-lessons' ? 'text-primary' : 'text-outline'
+            }`}
+          >
+            <span className="material-symbols-outlined text-xl">auto_stories</span>
+            <span className="text-[10px] font-bold">Lessons</span>
           </button>
         </div>
       )}

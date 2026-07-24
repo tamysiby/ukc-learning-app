@@ -23,7 +23,9 @@ export const initialMockUsers = [
     lastActive: 'Just now',
     joinedDate: '2025-08-01',
     isOnline: false,
-    activeSessionId: null
+    activeSessionId: null,
+    assignedLessonIds: ['les-hangul-1', 'les-vocab-1', 'les-greetings-2', 'les-grammar-3'],
+    completedLessonIds: ['les-hangul-1', 'les-vocab-1']
   },
   {
     id: 'usr-1',
@@ -38,7 +40,9 @@ export const initialMockUsers = [
     lastActive: '10 mins ago',
     joinedDate: '2026-01-15',
     isOnline: false,
-    activeSessionId: null
+    activeSessionId: null,
+    assignedLessonIds: ['les-hangul-1', 'les-vocab-1', 'les-greetings-2'],
+    completedLessonIds: ['les-hangul-1']
   },
   {
     id: 'usr-2',
@@ -53,7 +57,9 @@ export const initialMockUsers = [
     lastActive: '2 hours ago',
     joinedDate: '2026-03-01',
     isOnline: false,
-    activeSessionId: null
+    activeSessionId: null,
+    assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
+    completedLessonIds: []
   },
   {
     id: 'usr-3',
@@ -68,7 +74,9 @@ export const initialMockUsers = [
     lastActive: '4 days ago',
     joinedDate: '2025-11-10',
     isOnline: false,
-    activeSessionId: null
+    activeSessionId: null,
+    assignedLessonIds: ['les-hangul-1'],
+    completedLessonIds: []
   },
   {
     id: 'usr-5',
@@ -83,7 +91,9 @@ export const initialMockUsers = [
     lastActive: '1 hour ago',
     joinedDate: '2026-02-14',
     isOnline: false,
-    activeSessionId: null
+    activeSessionId: null,
+    assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
+    completedLessonIds: []
   }
 ];
 
