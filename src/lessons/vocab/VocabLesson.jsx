@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VocabIllustration from '../../components/VocabIllustration';
 import { mockFlashcards } from '../../services/supabaseClient';
 
 export default function VocabLesson({ words = [], title = 'Vocabulary Practice Flashcards', onFinishLesson }) {
@@ -125,8 +126,10 @@ export default function VocabLesson({ words = [], title = 'Vocabulary Practice F
           </div>
 
           {/* Back Side */}
-          <div className={`space-y-4 flex flex-col items-center justify-center flex-1 rotate-y-180 ${isFlipped ? 'block' : 'hidden'}`}>
-            <h2 className="text-2xl sm:text-3xl font-bold text-on-surface font-headline text-center">
+          <div className={`space-y-3 flex flex-col items-center justify-center flex-1 rotate-y-180 ${isFlipped ? 'block' : 'hidden'}`}>
+            <VocabIllustration word={currentCard} size="md" />
+
+            <h2 className="text-xl sm:text-2xl font-bold text-on-surface font-headline text-center">
               {currentCard?.english}
             </h2>
           </div>

@@ -1,13 +1,13 @@
+import { hasVocabIllustration } from '../components/VocabIllustration';
+
 /**
  * Dynamic Vocab Quiz Generator
  * Generates a 10-question randomized quiz from a lesson's vocabulary words.
  *
- * Streamlined Data Structure:
- * - Exactly 10 questions.
- * - 2 questions in Matching format.
- * - 8 fill-in-the-blank questions (50% MC, 30% Syllable Blocks, 20% Keyboard Typing).
- * - Shuffled question order.
- * - Randomized direction: Korean -> English or English -> Korean.
+ * Rules:
+ * - Exactly 10 questions (2 Matching, 8 Question items).
+ * - If illustration exists for a word, English text is replaced by the picture in questions/prompts.
+ * - If picture exists and answer is supposed to be English, answer MUST ONLY be multiple_choice.
  */
 export function generateRandomVocabQuiz(vocabWords = []) {
   if (!vocabWords || vocabWords.length === 0) {
@@ -33,12 +33,16 @@ export function generateRandomVocabQuiz(vocabWords = []) {
 
     const leftCol = matchedWords.map(w => ({
       id: w.id,
-      text: isReverse ? (w.romanization || w.english) : w.korean
+      word: w,
+      text: isReverse ? (w.english || w.romanization) : w.korean,
+      showIllustration: isReverse && hasVocabIllustration(w)
     }));
 
     const rightCol = matchedWords.map(w => ({
       id: w.id,
-      text: isReverse ? w.korean : (w.romanization || w.english)
+      word: w,
+      text: isReverse ? w.korean : (w.english || w.romanization),
+      showIllustration: !isReverse && hasVocabIllustration(w)
     }));
 
     questions.push({
@@ -47,18 +51,22 @@ export function generateRandomVocabQuiz(vocabWords = []) {
       pairs: matchedWords.map(w => ({
         id: w.id,
         korean: w.korean,
-        answer: w.romanization || w.english
+        answer: w.english || w.romanization
       })),
       leftItems: shuffle(leftCol),
       rightItems: shuffle(rightCol)
     });
   }
 
-  // 2. Generate 8 Fill-in-the-blank Questions
+  // 2. Generate 8 Question Items
   for (let i = 0; i < 8; i++) {
     const targetWord = vocabWords[i % vocabWords.length] || vocabWords[0];
     const rand = Math.random();
-    const isReverse = Math.random() < 0.5;
+    const hasIllust = hasVocabIllustration(targetWord);
+
+    // isReverse = true  -> Answer is Korean (Prompt is Picture/English)
+    // isReverse = false -> Answer is English (Prompt is Korean/Picture)
+    let isReverse = Math.random() < 0.5;
 
     let questionType;
     if (rand < 0.5) {
@@ -69,15 +77,27 @@ export function generateRandomVocabQuiz(vocabWords = []) {
       questionType = 'keyboard_input';
     }
 
+    // RULE: If picture exists and answer is supposed to be English (!isReverse),
+    // answer MUST ONLY be multiple_choice.
+    if (hasIllust && !isReverse) {
+      questionType = 'multiple_choice';
+    }
+
     const distractors = getDistractors(targetWord, 3);
-    const promptWord = isReverse ? (targetWord.romanization || targetWord.english) : targetWord.korean;
-    const correctAnswer = isReverse ? targetWord.korean : (targetWord.romanization || targetWord.english);
+    const correctAnswer = isReverse ? targetWord.korean : (targetWord.english || targetWord.romanization);
 
     if (questionType === 'multiple_choice') {
       const choices = shuffle([
-        { text: correctAnswer, isCorrect: true },
+        {
+          word: targetWord,
+          text: correctAnswer,
+          showIllustration: !isReverse && hasIllust,
+          isCorrect: true
+        },
         ...distractors.map(d => ({
-          text: isReverse ? d.korean : (d.romanization || d.english),
+          word: d,
+          text: isReverse ? d.korean : (d.english || d.romanization),
+          showIllustration: !isReverse && hasVocabIllustration(d),
           isCorrect: false
         }))
       ]);
@@ -85,19 +105,25 @@ export function generateRandomVocabQuiz(vocabWords = []) {
       questions.push({
         id: `q-fill-${i + 1}`,
         type: 'multiple_choice',
-        targetKorean: promptWord,
+        targetWord: targetWord,
+        hasIllustration: hasIllust,
+        isReverse: isReverse,
+        targetKorean: isReverse ? (targetWord.english || targetWord.romanization) : targetWord.korean,
         correctAnswer: correctAnswer,
         options: choices
       });
 
     } else if (questionType === 'syllable_blocks') {
-      const distractorTexts = distractors.map(d => isReverse ? d.korean : (d.romanization || d.english));
+      const distractorTexts = distractors.map(d => isReverse ? d.korean : (d.english || d.romanization));
       const allBlocks = shuffle(Array.from(new Set([correctAnswer, ...distractorTexts])));
 
       questions.push({
         id: `q-fill-${i + 1}`,
         type: 'syllable_blocks',
-        targetKorean: promptWord,
+        targetWord: targetWord,
+        hasIllustration: hasIllust,
+        isReverse: isReverse,
+        targetKorean: isReverse ? (targetWord.english || targetWord.romanization) : targetWord.korean,
         correctAnswer: correctAnswer,
         blocks: allBlocks
       });
@@ -106,7 +132,10 @@ export function generateRandomVocabQuiz(vocabWords = []) {
       questions.push({
         id: `q-fill-${i + 1}`,
         type: 'keyboard_input',
-        targetKorean: promptWord,
+        targetWord: targetWord,
+        hasIllustration: hasIllust,
+        isReverse: isReverse,
+        targetKorean: isReverse ? (targetWord.english || targetWord.romanization) : targetWord.korean,
         correctAnswer: correctAnswer
       });
     }

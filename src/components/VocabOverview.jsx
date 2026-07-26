@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VocabIllustration, { hasVocabIllustration } from './VocabIllustration';
 
 /**
  * Reusable Vocab Overview Component
@@ -62,7 +63,7 @@ export default function VocabOverview({
       </div>
 
       {/* Vocab Items Grid Matrix - Responsive Centered Tile Cards */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         {words.length === 0 ? (
           <div className="col-span-full bg-surface-container-lowest p-8 text-center text-xs sm:text-sm text-on-surface-variant rounded-2xl border border-outline-variant space-y-2">
             <span className="material-symbols-outlined text-3xl text-outline">auto_stories</span>
@@ -71,27 +72,31 @@ export default function VocabOverview({
         ) : (
           words.map((word) => {
             const isAudioPlaying = playingAudioId === word.id;
+            const hasIllust = hasVocabIllustration(word);
 
             return (
               <div
                 key={word.id}
-                className="bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant shadow-xs hover:border-primary/40 hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative group min-h-[140px] sm:min-h-[160px]"
+                className={`bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant shadow-xs hover:border-primary/40 hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative group ${
+                  hasIllust ? 'min-h-[190px] sm:min-h-[220px]' : 'min-h-[140px] sm:min-h-[160px]'
+                }`}
               >
                 {/* Speaker Pronounce Button - Top Right Corner */}
                 <button
                   onClick={() => handleSpeech(word.id, word.korean)}
                   title={`Pronounce ${word.korean}`}
-                  className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-xl border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${isAudioPlaying
+                  className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-xl border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                    isAudioPlaying
                       ? 'bg-secondary text-on-secondary border-secondary animate-pulse'
                       : 'bg-surface-container-low hover:bg-surface-container text-primary border-outline-variant/80'
-                    }`}
+                  }`}
                 >
                   <span className="material-symbols-outlined text-base select-none">volume_up</span>
                 </button>
 
                 {/* Main Tile Content - Centered Grid Presentation */}
-                <div className="my-auto space-y-1.5 pt-2">
-                  <h3 className="text-3xl sm:text-4xl font-black text-on-surface font-headline tracking-wide leading-none">
+                <div className="my-auto space-y-2 flex flex-col items-center justify-center pt-2">
+                  <h3 className="text-2xl sm:text-3xl font-black text-on-surface font-headline tracking-wide leading-none">
                     {word.korean}
                   </h3>
 
@@ -103,9 +108,15 @@ export default function VocabOverview({
                     </div>
                   )}
 
-                  <p className="text-xs sm:text-sm font-bold text-on-surface-variant line-clamp-2 mt-1">
-                    {word.english}
-                  </p>
+                  {hasIllust ? (
+                    <div className="pt-1 flex items-center justify-center">
+                      <VocabIllustration word={word} size="sm" />
+                    </div>
+                  ) : (
+                    <p className="text-xs sm:text-sm font-bold text-on-surface-variant line-clamp-2 mt-1">
+                      {word.english}
+                    </p>
+                  )}
                 </div>
               </div>
             );

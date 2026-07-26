@@ -24,3 +24,6 @@
 6. **Visual Status Indicators over Text Counters**:
    - Use smooth visual progress bars instead of text counters (e.g., progress bar instead of `"1 / 10"` text).
    - Use visual heart indicators (`❤️❤️❤️`) for quiz life tracking.
+
+7. **Vocabulary English Translation Casing**:
+   - When creating or updating vocabulary items in lessons (`words`), the `english` translation field MUST be **all lowercase** (e.g., `"seesaw"`, `"lion"`, `"bird"`, `"clock"`, `"it's hot"`), UNLESS it is a proper noun (e.g., `"Korea"`, `"Seoul"`).

@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Hangul from 'hangul-js';
 
-export default function KoreanKeypad({ value = '', onChange, onEnter }) {
-  // Standard 2-Set (2벌식) Korean Keyboard Layout
-  const row1 = ['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ'];
+export default function KoreanKeypad({ value = '', onChange }) {
+  const [isShifted, setIsShifted] = useState(false);
+
+  // Standard 2-Set (2벌식) Korean Keyboard Layout & Shift Variants
+  const normalRow1 = ['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ'];
+  const shiftedRow1 = ['ㅃ', 'ㅉ', 'ㄸ', 'ㄲ', 'ㅆ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅒ', 'ㅖ'];
+
+  const row1 = isShifted ? shiftedRow1 : normalRow1;
   const row2 = ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ'];
   const row3 = ['ㅋ', 'ㅌ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ'];
 
@@ -12,6 +17,9 @@ export default function KoreanKeypad({ value = '', onChange, onEnter }) {
     const updatedJamos = [...currentJamos, jamo];
     const assembledString = Hangul.assemble(updatedJamos);
     onChange(assembledString);
+    if (isShifted) {
+      setIsShifted(false);
+    }
   };
 
   const handleBackspace = () => {
@@ -24,10 +32,15 @@ export default function KoreanKeypad({ value = '', onChange, onEnter }) {
 
   const handleClear = () => {
     onChange('');
+    setIsShifted(false);
   };
 
   const handleSpace = () => {
     onChange(value + ' ');
+  };
+
+  const toggleShift = () => {
+    setIsShifted(prev => !prev);
   };
 
   return (
@@ -47,16 +60,23 @@ export default function KoreanKeypad({ value = '', onChange, onEnter }) {
 
       {/* Row 1 */}
       <div className="flex justify-center gap-1 sm:gap-1.5">
-        {row1.map((char) => (
-          <button
-            key={char}
-            type="button"
-            onClick={() => handleKeyPress(char)}
-            className="flex-1 max-w-[40px] h-10 sm:h-11 bg-surface-container-lowest hover:bg-primary/10 active:bg-primary/20 text-on-surface font-bold text-base sm:text-lg rounded-xl border border-outline-variant transition-all flex items-center justify-center shadow-xs cursor-pointer"
-          >
-            {char}
-          </button>
-        ))}
+        {row1.map((char) => {
+          const isShiftChar = isShifted && ['ㅃ', 'ㅉ', 'ㄸ', 'ㄲ', 'ㅆ', 'ㅒ', 'ㅖ'].includes(char);
+          return (
+            <button
+              key={char}
+              type="button"
+              onClick={() => handleKeyPress(char)}
+              className={`flex-1 max-w-[40px] h-10 sm:h-11 font-bold text-base sm:text-lg rounded-xl border transition-all flex items-center justify-center shadow-xs cursor-pointer ${
+                isShiftChar
+                  ? 'bg-primary/20 border-primary text-primary font-black shadow-sm'
+                  : 'bg-surface-container-lowest hover:bg-primary/10 active:bg-primary/20 text-on-surface border-outline-variant'
+              }`}
+            >
+              {char}
+            </button>
+          );
+        })}
       </div>
 
       {/* Row 2 */}
@@ -73,8 +93,21 @@ export default function KoreanKeypad({ value = '', onChange, onEnter }) {
         ))}
       </div>
 
-      {/* Row 3 + Backspace */}
+      {/* Row 3 with Shift & Backspace */}
       <div className="flex justify-center items-center gap-1 sm:gap-1.5">
+        <button
+          type="button"
+          onClick={toggleShift}
+          className={`px-2 sm:px-3 h-10 sm:h-11 font-bold text-xs rounded-xl border flex items-center justify-center cursor-pointer min-w-[44px] transition-colors ${
+            isShifted
+              ? 'bg-primary text-on-primary border-primary shadow-sm'
+              : 'bg-surface-container hover:bg-surface-container-high text-on-surface border-outline-variant'
+          }`}
+          title="Shift (Double Consonants ㅃㅉㄸㄲㅆ & Vowels ㅒㅖ)"
+        >
+          <span className="material-symbols-outlined text-lg">shift</span>
+        </button>
+
         {row3.map((char) => (
           <button
             key={char}
@@ -89,14 +122,14 @@ export default function KoreanKeypad({ value = '', onChange, onEnter }) {
         <button
           type="button"
           onClick={handleBackspace}
-          className="px-3 h-10 sm:h-11 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs sm:text-sm rounded-xl border border-outline-variant flex items-center justify-center cursor-pointer min-w-[50px]"
+          className="px-2 sm:px-3 h-10 sm:h-11 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs sm:text-sm rounded-xl border border-outline-variant flex items-center justify-center cursor-pointer min-w-[44px]"
           title="Backspace"
         >
           <span className="material-symbols-outlined text-lg">backspace</span>
         </button>
       </div>
 
-      {/* Space & Submit / Enter bar */}
+      {/* Space Bar */}
       <div className="flex items-center gap-2 pt-1">
         <button
           type="button"

@@ -67,7 +67,7 @@ export default function StudentLessonPathway({ onStartHangulLesson, onStartVocab
 
                 {/* Node Card Box */}
                 <div
-                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 max-w-sm ${isActive ? 'border-2 border-primary shadow-lg' : 'border-outline-variant'
+                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm ${isActive ? 'border-2 border-primary shadow-lg' : 'border-outline-variant'
                     }`}
                 >
                   <div>

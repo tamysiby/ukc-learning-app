@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import KoreanKeypad from '../../components/KoreanKeypad';
+import VocabIllustration, { hasVocabIllustration } from '../../components/VocabIllustration';
 
 export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Quiz', onFinishQuiz, onExitQuiz }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -131,12 +132,10 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
 
   // --- Move to Next Question ---
   const handleNextQuestion = () => {
-    // If matching question and all pairs matched, give score
     if (currentQ.type === 'matching' && matchedPairs.length === currentQ.pairs.length) {
       setScore(prev => prev + 1);
     }
 
-    // Reset question states
     setSelectedLeft(null);
     setMatchedPairs([]);
     setAnswerFeedback(null);
@@ -149,6 +148,31 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
     } else {
       setIsFinished(true);
     }
+  };
+
+  // --- Helper to Render Question Prompt Header ---
+  const renderQuestionPrompt = () => {
+    const targetWord = currentQ.targetWord;
+    const hasIllust = currentQ.hasIllustration || (targetWord && hasVocabIllustration(targetWord));
+
+    if (hasIllust && targetWord && currentQ.isReverse) {
+      // Reverse direction: Prompt was English -> Replace English text with SVG Picture!
+      return (
+        <div className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant text-center flex flex-col items-center justify-center space-y-2">
+          <VocabIllustration word={targetWord} size="lg" />
+        </div>
+      );
+    }
+
+    // Korean Question (or Fallback if no illustration exists for reverse prompt)
+    return (
+      <div className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant text-center space-y-2">
+        <span className="text-[10px] font-bold text-outline uppercase tracking-wider">
+          {currentQ.isReverse ? 'Hint' : 'Korean Word'}
+        </span>
+        <h2 className="text-4xl font-black text-on-surface font-headline">{currentQ.targetKorean}</h2>
+      </div>
+    );
   };
 
   // --- LESSON FAILED SCREEN (Out of Hearts) ---
@@ -279,48 +303,60 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
         {currentQ.type === 'matching' && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {/* Left Column (Korean) */}
+              {/* Left Column */}
               <div className="space-y-2">
                 {currentQ.leftItems.map((item) => {
                   const isMatched = matchedPairs.includes(item.id);
                   const isSelected = selectedLeft?.id === item.id;
+                  const useIllust = item.showIllustration && item.word && hasVocabIllustration(item.word);
 
                   return (
                     <button
                       key={`left-${item.id}`}
                       disabled={isMatched}
                       onClick={() => handleLeftClick(item)}
-                      className={`w-full py-3 px-3 rounded-2xl border text-sm font-bold text-center transition-all cursor-pointer ${isMatched
+                      className={`w-full py-2 px-3 rounded-2xl border text-sm font-bold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
                         ? 'bg-emerald-100 border-emerald-300 text-emerald-800 cursor-not-allowed opacity-60'
                         : isSelected
                           ? 'bg-primary/20 border-2 border-primary text-primary shadow-md'
                           : 'bg-surface-container-low border-outline-variant hover:bg-surface-container text-on-surface'
                         }`}
                     >
-                      {item.text} {isMatched ? '✓' : ''}
+                      {useIllust ? (
+                        <VocabIllustration word={item.word} size="sm" />
+                      ) : (
+                        <span>{item.text}</span>
+                      )}
+                      {isMatched ? <span className="ml-1 text-emerald-700">✓</span> : null}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Right Column (Translation) */}
+              {/* Right Column */}
               <div className="space-y-2">
                 {currentQ.rightItems.map((item) => {
                   const isMatched = matchedPairs.includes(item.id);
+                  const useIllust = item.showIllustration && item.word && hasVocabIllustration(item.word);
 
                   return (
                     <button
                       key={`right-${item.id}`}
                       disabled={isMatched}
                       onClick={() => handleRightClick(item)}
-                      className={`w-full py-3 px-3 rounded-2xl border text-sm font-semibold text-center transition-all cursor-pointer ${isMatched
+                      className={`w-full py-2 px-3 rounded-2xl border text-sm font-semibold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
                         ? 'bg-emerald-100 border-emerald-300 text-emerald-800 cursor-not-allowed opacity-60'
                         : selectedLeft
                           ? 'bg-surface-container-lowest border-primary/50 text-on-surface hover:bg-primary/10'
                           : 'bg-surface-container-low border-outline-variant text-on-surface hover:bg-surface-container'
                         }`}
                     >
-                      {item.text} {isMatched ? '✓' : ''}
+                      {useIllust ? (
+                        <VocabIllustration word={item.word} size="sm" />
+                      ) : (
+                        <span>{item.text}</span>
+                      )}
+                      {isMatched ? <span className="ml-1 text-emerald-700">✓</span> : null}
                     </button>
                   );
                 })}
@@ -332,10 +368,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
         {/* ---------------- TYPE 2: MULTIPLE CHOICE ---------------- */}
         {currentQ.type === 'multiple_choice' && (
           <div className="space-y-4">
-            <div className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant text-center space-y-2">
-              <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Korean Character</span>
-              <h2 className="text-4xl font-black text-on-surface font-headline">{currentQ.targetKorean}</h2>
-            </div>
+            {renderQuestionPrompt()}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {currentQ.options.map((opt, idx) => {
@@ -350,14 +383,20 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
                   }
                 }
 
+                const useIllust = opt.showIllustration && opt.word && hasVocabIllustration(opt.word);
+
                 return (
                   <button
                     key={idx}
                     onClick={() => handleSelectOption(opt)}
                     disabled={!!answerFeedback}
-                    className={`py-3.5 px-4 rounded-2xl border text-sm font-bold text-center transition-all cursor-pointer min-h-[48px] ${btnStyle}`}
+                    className={`py-2 px-4 rounded-2xl border text-sm font-bold transition-all cursor-pointer min-h-[88px] flex flex-col items-center justify-center ${btnStyle}`}
                   >
-                    {opt.text}
+                    {useIllust ? (
+                      <VocabIllustration word={opt.word} size="sm" />
+                    ) : (
+                      <span>{opt.text}</span>
+                    )}
                   </button>
                 );
               })}
@@ -368,10 +407,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
         {/* ---------------- TYPE 3: SYLLABLE BLOCKS ---------------- */}
         {currentQ.type === 'syllable_blocks' && (
           <div className="space-y-4">
-            <div className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant text-center space-y-2">
-              <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Assemble Block For</span>
-              <h2 className="text-4xl font-black text-on-surface font-headline">{currentQ.targetKorean}</h2>
-            </div>
+            {renderQuestionPrompt()}
 
             {/* Answer Display Drop Area */}
             <div className="p-4 bg-surface-container-lowest rounded-2xl border-2 border-dashed border-outline-variant min-h-[56px] flex items-center justify-between px-4">
@@ -427,10 +463,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
         {/* ---------------- TYPE 4: KEYBOARD INPUT / TYPING ---------------- */}
         {currentQ.type === 'keyboard_input' && (
           <div className="space-y-4">
-            <div className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant text-center space-y-2">
-              <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Target Character</span>
-              <h2 className="text-4xl font-black text-on-surface font-headline">{currentQ.targetKorean}</h2>
-            </div>
+            {renderQuestionPrompt()}
 
             <form onSubmit={handleCheckTypingAnswer} className="space-y-3">
               <input
