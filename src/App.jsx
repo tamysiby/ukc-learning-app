@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/LoginPage';
 import AdminUserManagement from './components/AdminUserManagement';
@@ -11,16 +11,110 @@ import StudentAccount from './components/StudentAccount';
 import UserAvatar from './components/UserAvatar';
 import { getStoredLessons, DEFAULT_LESSONS } from './services/lessonRegistry';
 import { generateRandomVocabQuiz } from './services/quizGenerator';
+import { getStoredUsers } from './services/supabaseClient';
+
+const parseHash = (hashStr, userRole) => {
+  const cleanHash = (hashStr || '').replace(/^#\/?/, '');
+  if (!cleanHash || cleanHash === 'pathway') {
+    return { tab: userRole === 'Admin' ? 'admin-list' : 'pathway' };
+  }
+  if (cleanHash === 'account') {
+    return { tab: 'account' };
+  }
+  if (cleanHash === 'hangul') {
+    return { tab: 'hangul' };
+  }
+  if (cleanHash.startsWith('lesson/')) {
+    const lessonId = cleanHash.replace('lesson/', '');
+    return { tab: 'vocab', lessonId };
+  }
+  if (cleanHash.startsWith('quiz/')) {
+    const lessonId = cleanHash.replace('quiz/', '');
+    return { tab: 'vocab-quiz', lessonId };
+  }
+  if (cleanHash === 'admin-list') {
+    return { tab: 'admin-list' };
+  }
+  if (cleanHash === 'admin-lessons') {
+    return { tab: 'admin-lessons' };
+  }
+  if (cleanHash.startsWith('admin-user/')) {
+    const userId = cleanHash.replace('admin-user/', '');
+    return { tab: 'admin-details', userId };
+  }
+  return { tab: userRole === 'Admin' ? 'admin-list' : 'pathway' };
+};
+
+const navigateTo = (hash) => {
+  const targetHash = hash.startsWith('#') ? hash : `#${hash}`;
+  if (window.location.hash !== targetHash) {
+    window.location.hash = targetHash;
+  }
+};
 
 function AppContent() {
   const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted } = useAuth();
-  
+
   // Tabs: 'pathway' | 'hangul' | 'vocab' | 'vocab-quiz' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeVocabLesson, setActiveVocabLesson] = useState(null);
   const [activeQuizQuestions, setActiveQuizQuestions] = useState([]);
   const [showFlashcardDeck, setShowFlashcardDeck] = useState(false);
+
+  // Sync state with URL hash navigation and prepare history stack for refreshes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const syncRouteFromHash = () => {
+      const route = parseHash(window.location.hash, userRole);
+
+      if (route.tab === 'vocab' && route.lessonId) {
+        const allLessons = getStoredLessons();
+        const target = allLessons.find(l => l.id === route.lessonId) || DEFAULT_LESSONS[0];
+        setActiveVocabLesson(target);
+        setShowFlashcardDeck(false);
+        if (currentUser?.id) {
+          markLessonCompleted(currentUser.id, target.id);
+        }
+        setCurrentTab('vocab');
+      } else if (route.tab === 'vocab-quiz' && route.lessonId) {
+        const allLessons = getStoredLessons();
+        const target = allLessons.find(l => l.id === route.lessonId) || DEFAULT_LESSONS[0];
+        const pairedVocab = allLessons.find(l => l.id === target.pairedVocabId) || DEFAULT_LESSONS[0];
+        const poolWords = pairedVocab.words && pairedVocab.words.length > 0 ? pairedVocab.words : DEFAULT_LESSONS[0].words;
+
+        setActiveVocabLesson(target);
+        setActiveQuizQuestions(prev => (prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords)));
+        setCurrentTab('vocab-quiz');
+      } else if (route.tab === 'hangul') {
+        setCurrentTab('hangul');
+      } else if (route.tab === 'admin-details' && route.userId) {
+        const users = getStoredUsers();
+        const user = users.find(u => u.id === route.userId);
+        if (user) {
+          setSelectedUser(user);
+        }
+        setCurrentTab('admin-details');
+      } else {
+        setCurrentTab(route.tab);
+      }
+    };
+
+    // Prepare history stack when refreshed inside a lesson so browser back button returns to pathway
+    const initialHash = window.location.hash;
+    const initialRoute = parseHash(initialHash, userRole);
+    if (['vocab', 'vocab-quiz', 'hangul'].includes(initialRoute.tab)) {
+      const defaultHash = userRole === 'Admin' ? '#admin-list' : '#pathway';
+      window.history.replaceState(null, '', defaultHash);
+      window.history.pushState(null, '', initialHash);
+    }
+
+    syncRouteFromHash();
+
+    window.addEventListener('hashchange', syncRouteFromHash);
+    return () => window.removeEventListener('hashchange', syncRouteFromHash);
+  }, [isAuthenticated, userRole, currentUser?.id]);
 
   // Focus Mode when student is active inside a lesson or quiz
   const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'hangul');
@@ -44,36 +138,24 @@ function AppContent() {
 
   const handleSelectAdminUser = (user) => {
     setSelectedUser(user);
-    setCurrentTab('admin-details');
+    navigateTo(`admin-user/${user.id}`);
   };
 
   const handleFinishHangulLesson = () => {
     markLessonCompleted(currentUser?.id, 'les-custom-1');
-    setCurrentTab('pathway');
+    navigateTo('pathway');
   };
 
   const handleStartVocabLesson = (lessonId = 'les-vowels-1') => {
     const allLessons = getStoredLessons();
     const target = allLessons.find(l => l.id === lessonId) || DEFAULT_LESSONS[0];
-    setActiveVocabLesson(target);
 
     if (target.type === 'vocab') {
-      // Vocab lessons are completed immediately upon opening
-      markLessonCompleted(currentUser?.id, target.id);
-      setShowFlashcardDeck(false);
-      setCurrentTab('vocab');
+      navigateTo(`lesson/${lessonId}`);
     } else if (target.type === 'vocab quiz') {
-      // Find paired vocab lesson to pool vocabulary words from
-      const pairedVocab = allLessons.find(l => l.id === target.pairedVocabId) || DEFAULT_LESSONS[0];
-      const poolWords = pairedVocab.words && pairedVocab.words.length > 0 ? pairedVocab.words : DEFAULT_LESSONS[0].words;
-
-      // Dynamically generate a 10-question randomized quiz when student starts lesson
-      const generatedQuiz = generateRandomVocabQuiz(poolWords);
-      setActiveQuizQuestions(generatedQuiz);
-      setCurrentTab('vocab-quiz');
+      navigateTo(`quiz/${lessonId}`);
     } else {
-      setShowFlashcardDeck(false);
-      setCurrentTab('vocab');
+      navigateTo(`lesson/${lessonId}`);
     }
   };
 
@@ -81,7 +163,12 @@ function AppContent() {
     if (activeVocabLesson) {
       markLessonCompleted(currentUser?.id, activeVocabLesson.id);
     }
-    setCurrentTab('pathway');
+    navigateTo('pathway');
+  };
+
+  const handleLogout = () => {
+    logout();
+    window.location.hash = '';
   };
 
   return (
@@ -109,24 +196,22 @@ function AppContent() {
               {userRole === 'Student' && (
                 <nav className="hidden md:flex items-center gap-1">
                   <button
-                    onClick={() => setCurrentTab('pathway')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                      currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab' || currentTab === 'vocab-quiz'
+                    onClick={() => navigateTo('pathway')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab' || currentTab === 'vocab-quiz'
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:bg-surface-container-low'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">map</span>
                     Lesson Pathway
                   </button>
 
                   <button
-                    onClick={() => setCurrentTab('account')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                      currentTab === 'account'
+                    onClick={() => navigateTo('account')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${currentTab === 'account'
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:bg-surface-container-low'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">person</span>
                     My Profile
@@ -138,24 +223,22 @@ function AppContent() {
               {userRole === 'Admin' && (
                 <nav className="hidden md:flex items-center gap-1">
                   <button
-                    onClick={() => setCurrentTab('admin-list')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                      currentTab === 'admin-list' || currentTab === 'admin-details'
+                    onClick={() => navigateTo('admin-list')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${currentTab === 'admin-list' || currentTab === 'admin-details'
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:bg-surface-container-low'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">group</span>
                     User Management
                   </button>
 
                   <button
-                    onClick={() => setCurrentTab('admin-lessons')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                      currentTab === 'admin-lessons'
+                    onClick={() => navigateTo('admin-lessons')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${currentTab === 'admin-lessons'
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:bg-surface-container-low'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">auto_stories</span>
                     Lesson Management
@@ -171,7 +254,7 @@ function AppContent() {
                   <p className="text-[10px] text-outline">{currentUser?.role}</p>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-bold text-outline hover:text-rose-600 hover:bg-rose-500/10 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Sign out of portal"
                 >
@@ -190,7 +273,7 @@ function AppContent() {
           <>
             {(currentTab === 'pathway' || currentTab === 'admin-list' || currentTab === 'admin-details') && (
               <StudentLessonPathway
-                onStartHangulLesson={() => setCurrentTab('hangul')}
+                onStartHangulLesson={() => navigateTo('hangul')}
                 onStartVocabLesson={(lessonId) => handleStartVocabLesson(lessonId)}
               />
             )}
@@ -219,7 +302,7 @@ function AppContent() {
                 title={activeVocabLesson?.title || 'Hangeul Vowels Quiz (한글 모음 Quiz)'}
                 quizQuestions={activeQuizQuestions}
                 onFinishQuiz={handleFinishVocabLesson}
-                onExitQuiz={() => setCurrentTab('pathway')}
+                onExitQuiz={() => navigateTo('pathway')}
               />
             )}
             {currentTab === 'account' && (
@@ -235,7 +318,7 @@ function AppContent() {
                 user={selectedUser}
                 onBack={() => {
                   setSelectedUser(null);
-                  setCurrentTab('admin-list');
+                  navigateTo('admin-list');
                 }}
               />
             ) : (
@@ -251,20 +334,18 @@ function AppContent() {
           {userRole === 'Student' ? (
             <>
               <button
-                onClick={() => setCurrentTab('pathway')}
-                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-                  currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab' || currentTab === 'vocab-quiz' ? 'text-primary' : 'text-outline'
-                }`}
+                onClick={() => navigateTo('pathway')}
+                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${currentTab === 'pathway' || currentTab === 'hangul' || currentTab === 'vocab' || currentTab === 'vocab-quiz' ? 'text-primary' : 'text-outline'
+                  }`}
               >
                 <span className="material-symbols-outlined text-xl">map</span>
                 <span className="text-[10px] font-bold">Pathway</span>
               </button>
 
               <button
-                onClick={() => setCurrentTab('account')}
-                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-                  currentTab === 'account' ? 'text-primary' : 'text-outline'
-                }`}
+                onClick={() => navigateTo('account')}
+                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${currentTab === 'account' ? 'text-primary' : 'text-outline'
+                  }`}
               >
                 <span className="material-symbols-outlined text-xl">person</span>
                 <span className="text-[10px] font-bold">Profile</span>
@@ -273,20 +354,18 @@ function AppContent() {
           ) : (
             <>
               <button
-                onClick={() => setCurrentTab('admin-list')}
-                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-                  currentTab === 'admin-list' || currentTab === 'admin-details' ? 'text-primary' : 'text-outline'
-                }`}
+                onClick={() => navigateTo('admin-list')}
+                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${currentTab === 'admin-list' || currentTab === 'admin-details' ? 'text-primary' : 'text-outline'
+                  }`}
               >
                 <span className="material-symbols-outlined text-xl">group</span>
                 <span className="text-[10px] font-bold">Users</span>
               </button>
 
               <button
-                onClick={() => setCurrentTab('admin-lessons')}
-                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${
-                  currentTab === 'admin-lessons' ? 'text-primary' : 'text-outline'
-                }`}
+                onClick={() => navigateTo('admin-lessons')}
+                className={`flex flex-col items-center gap-0.5 min-w-[56px] py-1 transition-colors cursor-pointer ${currentTab === 'admin-lessons' ? 'text-primary' : 'text-outline'
+                  }`}
               >
                 <span className="material-symbols-outlined text-xl">auto_stories</span>
                 <span className="text-[10px] font-bold">Lessons</span>

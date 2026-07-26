@@ -1,7 +1,159 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="50" cy="65" rx="36" ry="22" fill="#78350F" stroke="#451A03" stroke-width="3" />
-  <path d="M22 60 Q50 35 78 60 Q50 78 22 60 Z" fill="#EF4444" stroke="#B91C1C" stroke-width="3" />
-  <path d="M30 54 Q44 42 58 56" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" />
-  <circle cx="45" cy="58" r="2" fill="#FEF08A" />
-  <circle cx="58" cy="62" r="2" fill="#FEF08A" />
+<svg viewBox="0 0 583 497" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="plateClip">
+      <circle cx="301" cy="248" r="206"/>
+    </clipPath>
+  </defs>
+
+  <!-- background -->
+  <rect width="583" height="497" fill="#ffffff"/>
+
+  <!-- plate -->
+  <circle cx="301" cy="248" r="206" fill="#d9eaf4"/>
+  <circle cx="301" cy="248" r="170" fill="#b8d6e7"/>
+
+  <!-- side kimchi leaves -->
+  <path d="M123 229
+           C124 202 140 181 157 171
+           C174 161 192 168 205 182
+           C216 195 218 215 212 232
+           C219 251 217 273 205 290
+           C192 308 174 334 151 329
+           C131 325 124 308 124 288
+           C113 278 109 263 110 248
+           C109 239 114 232 123 229Z"
+        fill="#ef302e"/>
+
+  <path d="M478 229
+           C477 202 461 181 444 171
+           C427 161 409 168 396 182
+           C385 195 383 215 389 232
+           C382 251 384 273 396 290
+           C409 308 427 334 450 329
+           C470 325 477 308 477 288
+           C488 278 492 263 491 248
+           C492 239 487 232 478 229Z"
+        fill="#ef302e"/>
+
+  <!-- main napa cabbage kimchi body -->
+  <path d="M301 42
+           C319 42 330 55 330 73
+           C340 68 350 69 359 73
+           C371 78 378 88 379 100
+           C391 96 404 99 414 107
+           C425 115 428 126 425 139
+           C438 144 447 154 450 167
+           C453 181 448 195 437 204
+           C445 221 446 242 442 260
+           C438 280 426 294 414 307
+           C406 340 389 370 366 391
+           C348 408 326 420 301 427
+           C276 420 254 408 236 391
+           C213 370 196 340 188 307
+           C176 294 164 280 160 260
+           C156 242 157 221 165 204
+           C154 195 149 181 152 167
+           C155 154 164 144 177 139
+           C174 126 177 115 188 107
+           C198 99 211 96 223 100
+           C224 88 231 78 243 73
+           C252 69 262 68 272 73
+           C272 55 283 42 301 42Z"
+        fill="#ff624f"/>
+
+  <!-- center darker half -->
+  <path d="M301 42
+           C319 42 330 55 330 73
+           C340 68 350 69 359 73
+           C371 78 378 88 379 100
+           C391 96 404 99 414 107
+           C425 115 428 126 425 139
+           C438 144 447 154 450 167
+           C453 181 448 195 437 204
+           C445 221 446 242 442 260
+           C438 280 426 294 414 307
+           C406 340 389 370 366 391
+           C348 408 326 420 301 427Z"
+        fill="#f54737"/>
+
+  <!-- lower light panel -->
+  <path d="M301 427
+           C287 424 274 420 261 414
+           L282 333
+           C290 305 296 270 301 229
+           C306 270 312 305 320 333
+           L341 414
+           C328 420 315 424 301 427Z"
+        fill="#ff806f"/>
+
+  <!-- central stem -->
+  <path d="M301 117
+           C307 117 312 122 312 128
+           L312 238
+           C312 253 315 272 321 292
+           L331 337
+           C334 349 327 362 315 366
+           C303 371 290 365 286 353
+           C284 346 286 338 288 329
+           L291 293
+           L291 128
+           C291 122 295 117 301 117Z"
+        fill="#ff927f"/>
+
+  <!-- left veins -->
+  <path d="M292 214 C280 190 264 169 246 151"
+        fill="none" stroke="#ff927f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M291 257 C273 230 249 205 220 180"
+        fill="none" stroke="#ff927f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M289 306 C268 280 244 254 218 230"
+        fill="none" stroke="#ff927f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M289 345 C269 320 248 296 222 268"
+        fill="none" stroke="#ff927f" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- right veins -->
+  <path d="M311 214 C323 190 339 169 357 151"
+        fill="none" stroke="#ff806f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M312 257 C330 230 354 205 383 180"
+        fill="none" stroke="#ff806f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M314 306 C335 280 359 254 385 230"
+        fill="none" stroke="#ff806f" stroke-width="13" stroke-linecap="round"/>
+  <path d="M314 345 C334 320 355 296 381 268"
+        fill="none" stroke="#ff806f" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- chili and vegetable dots -->
+  <g>
+    <!-- red -->
+    <circle cx="216" cy="119" r="4" fill="#ef3e31"/>
+    <circle cx="317" cy="121" r="4" fill="#e63b2f"/>
+    <circle cx="377" cy="136" r="7" fill="#d93632"/>
+    <circle cx="244" cy="174" r="7" fill="#e33d30"/>
+    <circle cx="263" cy="206" r="7" fill="#e53b2e"/>
+    <circle cx="212" cy="238" r="7" fill="#e34231"/>
+    <circle cx="247" cy="324" r="7" fill="#e44236"/>
+    <circle cx="364" cy="296" r="7" fill="#d93431"/>
+    <circle cx="296" cy="338" r="4" fill="#d8322d"/>
+    <circle cx="289" cy="265" r="4" fill="#db352e"/>
+    <circle cx="335" cy="240" r="4" fill="#cc312d"/>
+    <circle cx="367" cy="336" r="4" fill="#c9342f"/>
+    <circle cx="405" cy="238" r="4" fill="#d63b32"/>
+    <circle cx="202" cy="192" r="4" fill="#e64634"/>
+    <circle cx="217" cy="267" r="4" fill="#f24a3a"/>
+    <circle cx="152" cy="225" r="4" fill="#f34537"/>
+    <circle cx="133" cy="169" r="4" fill="#e22f2e"/>
+
+    <!-- green -->
+    <circle cx="277" cy="134" r="7" fill="#4db94f"/>
+    <circle cx="388" cy="118" r="4" fill="#47b953"/>
+    <circle cx="230" cy="248" r="7" fill="#47b94f"/>
+    <circle cx="180" cy="280" r="7" fill="#42b64a"/>
+    <circle cx="279" cy="282" r="7" fill="#4db84f"/>
+    <circle cx="396" cy="255" r="7" fill="#46b749"/>
+    <circle cx="357" cy="354" r="7" fill="#3eaf48"/>
+    <circle cx="325" cy="395" r="7" fill="#46b94f"/>
+    <circle cx="429" cy="212" r="4" fill="#47b84c"/>
+  </g>
+
+  <!-- scattered outside dots -->
+  <circle cx="147" cy="148" r="10" fill="#eb302f"/>
+  <circle cx="429" cy="348" r="10" fill="#e73230"/>
 </svg>
