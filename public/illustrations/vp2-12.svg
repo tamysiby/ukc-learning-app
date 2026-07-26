@@ -1,8 +1,51 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="50" r="38" fill="#1E293B" stroke="#0F172A" stroke-width="4" />
-  <circle cx="50" cy="50" r="30" fill="#F8FAFC" />
-  <circle cx="50" cy="50" r="16" fill="#F59E0B" />
-  <circle cx="42" cy="46" r="6" fill="#EF4444" />
-  <circle cx="58" cy="46" r="6" fill="#22C55E" />
-  <circle cx="50" cy="58" r="5" fill="#EAB308" />
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="431" viewBox="0 0 420 431">
+<defs>
+<g id="roll">
+  <!-- seaweed -->
+  <ellipse cx="105" cy="105" rx="95" ry="95" fill="#203326"/>
+  <path d="M170 40c18 18 26 45 20 70-8-20-18-32-33-42z" fill="#2b4934" opacity=".8"/>
+  <!-- rice -->
+  <circle cx="95" cy="105" r="74" fill="#fff8ea"/>
+  <circle cx="95" cy="105" r="73" fill="none" stroke="#eadab7" stroke-width="3"/>
+
+  <!-- rice texture -->
+  <g stroke="#efdcae" stroke-width="2" fill="none" opacity=".9">
+    <path d="M60 55q5-5 10 0"/>
+    <path d="M88 48q5-4 10 0"/>
+    <path d="M120 55q5-5 10 0"/>
+    <path d="M145 72q5-5 10 0"/>
+    <path d="M48 92q5-5 10 0"/>
+    <path d="M150 108q5-5 10 0"/>
+    <path d="M48 132q5-5 10 0"/>
+    <path d="M142 145q5-5 10 0"/>
+    <path d="M82 162q5-5 10 0"/>
+    <path d="M112 162q5-5 10 0"/>
+  </g>
+
+  <!-- egg -->
+  <circle cx="95" cy="108" r="47" fill="#ffe46d"/>
+  <!-- spinach -->
+  <path d="M53 70c8-14 34-18 58-10 12 4 18 12 17 24H57c-9-2-10-7-4-14z" fill="#1f6f37"/>
+  <!-- carrot -->
+  <path d="M93 92l28 12-22 34-24-14z" fill="#f68a18"/>
+  <path d="M88 103l16 7-12 19-15-8z" fill="#ea6e08"/>
+  <!-- crab -->
+  <path d="M122 89c12 2 21 11 21 23-1 18-16 42-36 55l-14-8c14-18 22-41 29-70z" fill="#ff6f6f"/>
+  <!-- sausage -->
+  <circle cx="136" cy="118" r="12" fill="#ff4b42"/>
+</g>
+</defs>
+
+
+<g transform="translate(120 15)">
+ <use href="#roll"/>
+</g>
+
+<g transform="translate(15 180)">
+ <use href="#roll"/>
+</g>
+
+<g transform="translate(195 180)">
+ <use href="#roll"/>
+</g>
 </svg>
