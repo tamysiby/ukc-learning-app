@@ -24,8 +24,8 @@ export const initialMockUsers = [
     joinedDate: '2025-08-01',
     isOnline: false,
     activeSessionId: null,
-    assignedLessonIds: ['les-hangul-1', 'les-vocab-1', 'les-greetings-2', 'les-grammar-3'],
-    completedLessonIds: ['les-hangul-1', 'les-vocab-1']
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'],
+    completedLessonIds: ['les-vowels-1']
   },
   {
     id: 'usr-1',
@@ -41,8 +41,8 @@ export const initialMockUsers = [
     joinedDate: '2026-01-15',
     isOnline: false,
     activeSessionId: null,
-    assignedLessonIds: ['les-hangul-1', 'les-vocab-1', 'les-greetings-2'],
-    completedLessonIds: ['les-hangul-1']
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'],
+    completedLessonIds: ['les-vowels-1']
   },
   {
     id: 'usr-2',
@@ -58,7 +58,7 @@ export const initialMockUsers = [
     joinedDate: '2026-03-01',
     isOnline: false,
     activeSessionId: null,
-    assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
     completedLessonIds: []
   },
   {
@@ -104,9 +104,7 @@ export const mockFlashcards = [
     romanization: 'An-nyeong-ha-se-yo',
     english: 'Hello / Good day (Formal)',
     category: 'Greetings',
-    audioUrl: '',
-    exampleSentence: '안녕하세요! 만나서 반갑습니다.',
-    exampleTranslation: 'Hello! Nice to meet you.'
+    audioUrl: ''
   },
   {
     id: 'fc-2',
@@ -114,9 +112,7 @@ export const mockFlashcards = [
     romanization: 'Gam-sa-ham-ni-da',
     english: 'Thank you (Formal)',
     category: 'Etiquette',
-    audioUrl: '',
-    exampleSentence: '도와주셔서 감사합니다.',
-    exampleTranslation: 'Thank you for helping me.'
+    audioUrl: ''
   },
   {
     id: 'fc-3',
@@ -124,9 +120,7 @@ export const mockFlashcards = [
     romanization: 'Hak-gyo',
     english: 'School',
     category: 'Places & Education',
-    audioUrl: '',
-    exampleSentence: '저는 아침 일찍 학교에 갑니다.',
-    exampleTranslation: 'I go to school early in the morning.'
+    audioUrl: ''
   },
   {
     id: 'fc-4',
@@ -134,9 +128,7 @@ export const mockFlashcards = [
     romanization: 'Hak-saeng',
     english: 'Student',
     category: 'People',
-    audioUrl: '',
-    exampleSentence: '민지 씨는 열심히 공부하는 학생입니다.',
-    exampleTranslation: 'Minji is a student who studies hard.'
+    audioUrl: ''
   },
   {
     id: 'fc-5',
@@ -144,9 +136,7 @@ export const mockFlashcards = [
     romanization: 'Seon-saeng-nim',
     english: 'Teacher / Instructor',
     category: 'People',
-    audioUrl: '',
-    exampleSentence: '선생님께 질문을 드렸습니다.',
-    exampleTranslation: 'I asked the teacher a question.'
+    audioUrl: ''
   }
 ];
 

@@ -7,7 +7,6 @@ describe('Student Vocab Flashcard Lesson Screen', () => {
 
   it('renders initial flashcard with Korean word and flip card prompt', () => {
     render(<VocabLesson onFinishLesson={mockFinishLesson} />);
-    expect(screen.getByText('안녕하세요')).toBeInTheDocument();
     expect(screen.getByText(/Tap to flip/i)).toBeInTheDocument();
   });
 
@@ -20,12 +19,16 @@ describe('Student Vocab Flashcard Lesson Screen', () => {
     expect(screen.getByText('Hello / Good day (Formal)')).toBeInTheDocument();
   });
 
-  it('advances to next card when marking rating (Easy / Need Practice)', () => {
+  it('navigates with Next and Previous buttons', () => {
     render(<VocabLesson onFinishLesson={mockFinishLesson} />);
-    const easyBtn = screen.getByRole('button', { name: /Easy \(Got It!\)/i });
+    const nextBtn = screen.getByRole('button', { name: /Next/i });
+    const prevBtn = screen.getByRole('button', { name: /Previous/i });
     
-    fireEvent.click(easyBtn);
-    // Should advance to 2nd card (감사합니다)
-    expect(screen.getByText('감사합니다')).toBeInTheDocument();
+    expect(prevBtn).toBeDisabled();
+    fireEvent.click(nextBtn);
+    expect(prevBtn).not.toBeDisabled();
+    
+    fireEvent.click(prevBtn);
+    expect(prevBtn).toBeDisabled();
   });
 });

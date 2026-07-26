@@ -15,22 +15,22 @@ describe('HangulLesson Component', () => {
     render(<HangulLesson onFinishLesson={mockFinish} />);
 
     // Click Consonants tab
-    const consonantsTab = screen.getByText('2. Consonants (자음)');
+    const consonantsTab = screen.getByText(/2. Consonants/i);
     fireEvent.click(consonantsTab);
     expect(screen.getByText(/14 Basic Consonants \(자음\)/i)).toBeInTheDocument();
     expect(screen.getByText('Giyeok')).toBeInTheDocument();
 
     // Click Interactive Builder tab
-    const builderTab = screen.getByText('5. Interactive Builder');
+    const builderTab = screen.getByText(/5. Syllable Builder/i);
     fireEvent.click(builderTab);
     expect(screen.getByText(/Interactive Syllable Block Builder/i)).toBeInTheDocument();
     expect(screen.getByText(/Formed Syllable Block/i)).toBeInTheDocument();
   });
 
-  it('calls onFinishLesson when Back to Pathway button is clicked', () => {
+  it('calls onFinishLesson when Exit Lesson to Pathway button is clicked', () => {
     render(<HangulLesson onFinishLesson={mockFinish} />);
 
-    const backBtn = screen.getByRole('button', { name: /Back to Pathway/i });
+    const backBtn = screen.getByTitle(/Exit Lesson to Pathway/i);
     fireEvent.click(backBtn);
     expect(mockFinish).toHaveBeenCalledTimes(1);
   });

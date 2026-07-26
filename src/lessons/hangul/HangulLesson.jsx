@@ -10,33 +10,23 @@ export default function HangulLesson({ onFinishLesson }) {
   const [activeTab, setActiveTab] = useState('intro'); // 'intro' | 'consonants' | 'vowels' | 'eumjeol' | 'builder' | 'quiz'
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      {/* Header Banner */}
-      <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="space-y-2 text-center sm:text-left">
-          <div className="flex items-center gap-2 justify-center sm:justify-start">
-            <span className="px-3 py-1 bg-primary-fixed/60 text-primary text-xs font-bold rounded-full">
-              Lesson 1 • Introductory Korean
-            </span>
-            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full">
-              Hangul Basics (한글)
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface font-headline">
+    <div className="max-w-4xl mx-auto px-4 py-3 sm:py-5 space-y-5">
+      {/* Full Screen Focus Header - Sticky Top */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-xs flex items-center justify-between gap-3 py-3 border-b border-outline-variant/40">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onFinishLesson}
+            className="p-2 rounded-xl text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px]"
+            title="Exit Lesson to Pathway"
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+
+          {/* Lesson Title in Low Contrast Color */}
+          <h1 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-outline font-label">
             Introduction to Hangul & 음절 (Syllable Block) Formation
           </h1>
-          <p className="text-sm text-on-surface-variant max-w-xl font-label">
-            Learn the Korean alphabet (한글), master each consonant and vowel character, and build syllable blocks (음절) step-by-step.
-          </p>
         </div>
-
-        <button
-          onClick={onFinishLesson}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-outline hover:text-on-surface px-4 py-2 rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all cursor-pointer shrink-0"
-        >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Back to Pathway
-        </button>
       </div>
 
       {/* Navigation Step Tabs */}
@@ -65,7 +55,7 @@ export default function HangulLesson({ onFinishLesson }) {
             activeTab === 'vowels' ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-low'
           }`}
         >
-          <span className="material-symbols-outlined text-base">spellcheck</span>
+          <span className="material-symbols-outlined text-base">font_download</span>
           3. Vowels (모음)
         </button>
         <button
@@ -74,36 +64,38 @@ export default function HangulLesson({ onFinishLesson }) {
             activeTab === 'eumjeol' ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-low'
           }`}
         >
-          <span className="material-symbols-outlined text-base">category</span>
-          4. Syllable (음절) Rules
+          <span className="material-symbols-outlined text-base">schema</span>
+          4. Block Rules (음절)
         </button>
         <button
           onClick={() => setActiveTab('builder')}
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeTab === 'builder' ? 'bg-secondary text-on-secondary shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-low'
+            activeTab === 'builder' ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-low'
           }`}
         >
-          <span className="material-symbols-outlined text-base">build</span>
-          5. Interactive Builder
+          <span className="material-symbols-outlined text-base">extension</span>
+          5. Syllable Builder
         </button>
         <button
           onClick={() => setActiveTab('quiz')}
           className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-            activeTab === 'quiz' ? 'bg-tertiary text-on-tertiary shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-low'
+            activeTab === 'quiz' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-700 bg-amber-50 hover:bg-amber-100'
           }`}
         >
-          <span className="material-symbols-outlined text-base">task_alt</span>
-          6. Knowledge Check
+          <span className="material-symbols-outlined text-base">quiz</span>
+          6. Knowledge Quiz
         </button>
       </div>
 
-      {/* Step Views */}
-      {activeTab === 'intro' && <HangulIntroStep onNext={() => setActiveTab('consonants')} />}
-      {activeTab === 'consonants' && <HangulConsonantsStep onPrev={() => setActiveTab('intro')} onNext={() => setActiveTab('vowels')} />}
-      {activeTab === 'vowels' && <HangulVowelsStep onPrev={() => setActiveTab('consonants')} onNext={() => setActiveTab('eumjeol')} />}
-      {activeTab === 'eumjeol' && <HangulEumjeolRulesStep onPrev={() => setActiveTab('vowels')} onNext={() => setActiveTab('builder')} />}
-      {activeTab === 'builder' && <HangulBuilderStep onPrev={() => setActiveTab('eumjeol')} onNext={() => setActiveTab('quiz')} />}
-      {activeTab === 'quiz' && <HangulQuizStep onPrev={() => setActiveTab('builder')} onFinishLesson={onFinishLesson} />}
+      {/* Step Content */}
+      <div className="transition-all">
+        {activeTab === 'intro' && <HangulIntroStep onNext={() => setActiveTab('consonants')} />}
+        {activeTab === 'consonants' && <HangulConsonantsStep onNext={() => setActiveTab('vowels')} />}
+        {activeTab === 'vowels' && <HangulVowelsStep onNext={() => setActiveTab('eumjeol')} />}
+        {activeTab === 'eumjeol' && <HangulEumjeolRulesStep onNext={() => setActiveTab('builder')} />}
+        {activeTab === 'builder' && <HangulBuilderStep onNext={() => setActiveTab('quiz')} />}
+        {activeTab === 'quiz' && <HangulQuizStep onFinish={onFinishLesson} />}
+      </div>
     </div>
   );
 }

@@ -280,13 +280,21 @@ export function AuthProvider({ children }) {
     const targetUserId = userId || currentUser?.id;
     if (!targetUserId) return;
 
+    let extraLessonId = null;
+    if (lessonId === 'les-vowels-quiz-1') extraLessonId = 'les-vowels-1';
+    if (lessonId === 'les-consonants-quiz-1') extraLessonId = 'les-consonants-1';
+
     const currentUsers = getStoredUsers();
     const updatedList = currentUsers.map(u => {
       if (u.id === targetUserId) {
-        const completed = u.completedLessonIds || [];
+        let completed = u.completedLessonIds || [];
         if (!completed.includes(lessonId)) {
-          return { ...u, completedLessonIds: [...completed, lessonId] };
+          completed = [...completed, lessonId];
         }
+        if (extraLessonId && !completed.includes(extraLessonId)) {
+          completed = [...completed, extraLessonId];
+        }
+        return { ...u, completedLessonIds: completed };
       }
       return u;
     });
@@ -295,12 +303,57 @@ export function AuthProvider({ children }) {
     setUsers(updatedList);
 
     if (currentUser?.id === targetUserId) {
-      const completed = currentUser.completedLessonIds || [];
+      let completed = currentUser.completedLessonIds || [];
+      let updated = false;
       if (!completed.includes(lessonId)) {
-        const updatedSelf = { ...currentUser, completedLessonIds: [...completed, lessonId] };
+        completed = [...completed, lessonId];
+        updated = true;
+      }
+      if (extraLessonId && !completed.includes(extraLessonId)) {
+        completed = [...completed, extraLessonId];
+        updated = true;
+      }
+      if (updated) {
+        const updatedSelf = { ...currentUser, completedLessonIds: completed };
         setCurrentUser(updatedSelf);
         saveStoredSession(updatedSelf);
       }
+    }
+  };
+
+  const toggleStudentLessonCompletion = (userId, lessonId) => {
+    const currentUsers = getStoredUsers();
+    const target = currentUsers.find(u => u.id === userId);
+    if (!target) return;
+
+    const completed = target.completedLessonIds || [];
+    let updatedCompleted;
+    if (completed.includes(lessonId)) {
+      updatedCompleted = completed.filter(id => id !== lessonId);
+    } else {
+      updatedCompleted = [...completed, lessonId];
+      if (lessonId === 'les-vowels-quiz-1' && !updatedCompleted.includes('les-vowels-1')) {
+        updatedCompleted.push('les-vowels-1');
+      }
+      if (lessonId === 'les-consonants-quiz-1' && !updatedCompleted.includes('les-consonants-1')) {
+        updatedCompleted.push('les-consonants-1');
+      }
+    }
+
+    const updatedList = currentUsers.map(u => {
+      if (u.id === userId) {
+        return { ...u, completedLessonIds: updatedCompleted };
+      }
+      return u;
+    });
+
+    saveStoredUsers(updatedList);
+    setUsers(updatedList);
+
+    if (currentUser?.id === userId) {
+      const updatedSelf = { ...currentUser, completedLessonIds: updatedCompleted };
+      setCurrentUser(updatedSelf);
+      saveStoredSession(updatedSelf);
     }
   };
 
@@ -324,7 +377,8 @@ export function AuthProvider({ children }) {
         deleteStudentUser,
         toggleUserStatus,
         updateStudentAssignedLessons,
-        markLessonCompleted
+        markLessonCompleted,
+        toggleStudentLessonCompletion
       }}
     >
       {children}

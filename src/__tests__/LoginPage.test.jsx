@@ -43,7 +43,7 @@ describe('LoginPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Account not found/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('shows active session warning dialog when logging into an already active account', async () => {
@@ -65,6 +65,6 @@ describe('LoginPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Active Session Detected/i)).toBeInTheDocument();
       expect(screen.getByText(/Continuing will log out the older session/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 });

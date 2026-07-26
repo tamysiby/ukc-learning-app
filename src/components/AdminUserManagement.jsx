@@ -4,25 +4,46 @@ import { getStoredLessons } from '../services/lessonRegistry';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
-  const { users, createStudentUser, updateStudentUser, deleteStudentUser, toggleUserStatus, currentUser } = useAuth();
-  
+  const { users, createStudentUser, updateStudentUser, deleteStudentUser, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser } = useAuth();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  
+
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userForLessonsModal, setUserForLessonsModal] = useState(null);
 
   const availableLessons = getStoredLessons();
+
+  const handleToggleSelectAllLessons = () => {
+    if (!userForLessonsModal) return;
+    const currentAssigned = userForLessonsModal.assignedLessonIds || [];
+    const areAllAssigned = availableLessons.length > 0 && availableLessons.every(l => currentAssigned.includes(l.id));
+
+    let updatedAssignedIds;
+    if (areAllAssigned) {
+      updatedAssignedIds = [];
+    } else {
+      updatedAssignedIds = availableLessons.map(l => l.id);
+    }
+
+    updateStudentAssignedLessons(userForLessonsModal.id, updatedAssignedIds);
+
+    setUserForLessonsModal({
+      ...userForLessonsModal,
+      assignedLessonIds: updatedAssignedIds
+    });
+  };
 
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     password: 'StudentPass123!',
     role: 'Student',
-    assignedLessonIds: ['les-hangul-1', 'les-vocab-1']
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1']
   });
 
   const [editingUser, setEditingUser] = useState(null);
@@ -32,7 +53,7 @@ export default function AdminUserManagement({ onSelectUser }) {
   // Filtering users
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'All' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'All'
       ? true
@@ -41,6 +62,33 @@ export default function AdminUserManagement({ onSelectUser }) {
         : user.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  // Calculate student lesson progress stats
+  const getUserProgressStats = (user) => {
+    const assigned = user.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1'];
+    const completed = user.completedLessonIds || [];
+    const assignedCount = assigned.length;
+    const completedCount = completed.filter(id => assigned.includes(id)).length;
+    const percentage = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+    return { assignedCount, completedCount, percentage };
+  };
+
+  // Toggle student lesson assignment
+  const handleToggleStudentLesson = (user, lessonId) => {
+    const currentAssigned = user.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1'];
+    let updatedAssigned;
+    if (currentAssigned.includes(lessonId)) {
+      updatedAssigned = currentAssigned.filter(id => id !== lessonId);
+    } else {
+      updatedAssigned = [...currentAssigned, lessonId];
+    }
+    updateStudentAssignedLessons(user.id, updatedAssigned);
+    // Update local modal user state
+    setUserForLessonsModal({
+      ...user,
+      assignedLessonIds: updatedAssigned
+    });
+  };
 
   // Handle Add Student Submit
   const handleAddUserSubmit = (e) => {
@@ -113,7 +161,7 @@ export default function AdminUserManagement({ onSelectUser }) {
         <div>
           <h1 className="text-xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">User Management</h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5 font-label">
-            Admin Portal • Manage student accounts and platform access.
+            Admin Portal • Manage student accounts, available lessons, and learning progress.
           </p>
         </div>
         <button
@@ -124,7 +172,7 @@ export default function AdminUserManagement({ onSelectUser }) {
           className="inline-flex items-center justify-center px-4 py-2.5 bg-primary text-on-primary font-bold text-xs sm:text-sm rounded-xl shadow-xs hover:bg-primary-container transition-colors gap-2 min-h-[44px] cursor-pointer"
         >
           <span className="material-symbols-outlined text-lg">person_add</span>
-          Add New Student Account
+          <span>Register Student</span>
         </button>
       </div>
 
@@ -180,60 +228,82 @@ export default function AdminUserManagement({ onSelectUser }) {
             No users found matching search filters.
           </div>
         ) : (
-          filteredUsers.map((user) => (
-            <div key={user.id} className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant shadow-xs space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <UserAvatar size="md" />
-                  <div>
-                    <h3 className="font-bold text-sm text-on-surface">{user.name}</h3>
-                    <p className="text-xs text-on-surface-variant">{user.email}</p>
+          filteredUsers.map((user) => {
+            const stats = getUserProgressStats(user);
+
+            return (
+              <div key={user.id} className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant shadow-xs space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <UserAvatar size="md" />
+                    <div>
+                      <h3 className="font-bold text-sm text-on-surface">{user.name}</h3>
+                      <p className="text-xs text-on-surface-variant">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {user.isOnline && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Online
+                      </span>
+                    )}
+                    <button
+                      onClick={() => toggleUserStatus(user.id)}
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${user.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                        }`}
+                    >
+                      {user.status}
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  {user.isOnline && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Online
+
+                {user.role === 'Student' && (
+                  <div className="p-2.5 bg-surface-container-low rounded-xl border border-outline-variant/60 flex items-center justify-between text-xs">
+                    <span className="font-semibold text-outline">Lesson Progress:</span>
+                    <span className="font-extrabold text-primary font-mono">
+                      {stats.completedCount} / {stats.assignedCount} ({stats.percentage}%)
                     </span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-4 gap-1.5 pt-1 border-t border-outline-variant/60">
+                  {user.role === 'Student' && (
+                    <button
+                      onClick={() => setUserForLessonsModal(user)}
+                      className="py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                      title="Manage available lessons for this student"
+                    >
+                      <span className="material-symbols-outlined text-sm">auto_stories</span>
+                      Lessons
+                    </button>
                   )}
                   <button
-                    onClick={() => toggleUserStatus(user.id)}
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${
-                      user.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                    }`}
+                    onClick={() => onSelectUser(user)}
+                    className="py-1.5 bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
                   >
-                    {user.status}
+                    <span className="material-symbols-outlined text-sm">visibility</span>
+                    View
+                  </button>
+                  <button
+                    onClick={(e) => handleOpenEdit(user, e)}
+                    className="py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-sm">edit</span>
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => handleOpenDelete(user, e)}
+                    disabled={user.id === currentUser?.id}
+                    className="py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer disabled:opacity-30"
+                  >
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                    Delete
                   </button>
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-outline-variant/60">
-                <button
-                  onClick={() => onSelectUser(user)}
-                  className="py-1.5 bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-sm">visibility</span>
-                  View
-                </button>
-                <button
-                  onClick={(e) => handleOpenEdit(user, e)}
-                  className="py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-sm">edit</span>
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => handleOpenDelete(user, e)}
-                  disabled={user.id === currentUser?.id}
-                  className="py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer disabled:opacity-30"
-                >
-                  <span className="material-symbols-outlined text-sm">delete</span>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -245,6 +315,7 @@ export default function AdminUserManagement({ onSelectUser }) {
               <tr>
                 <th className="px-6 py-4">User</th>
                 <th className="px-6 py-4">Role</th>
+                <th className="px-6 py-4">Progress (Completed / Available)</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -252,81 +323,212 @@ export default function AdminUserManagement({ onSelectUser }) {
             <tbody className="divide-y divide-outline-variant/60">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-on-surface-variant font-medium">
+                  <td colSpan="5" className="px-6 py-12 text-center text-on-surface-variant font-medium">
                     No users matching search filters.
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-surface-container-low/40 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <UserAvatar size="md" />
-                        <div>
-                          <p className="font-semibold text-on-surface">{user.name}</p>
-                          <p className="text-xs text-on-surface-variant">{user.email}</p>
+                filteredUsers.map((user) => {
+                  const stats = getUserProgressStats(user);
+
+                  return (
+                    <tr key={user.id} className="hover:bg-surface-container-low/40 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <UserAvatar size="md" />
+                          <div>
+                            <p className="font-semibold text-on-surface">{user.name}</p>
+                            <p className="text-xs text-on-surface-variant">{user.email}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                        user.role === 'Admin' ? 'bg-tertiary-container/30 text-tertiary' : 'bg-primary-fixed/60 text-primary'
-                      }`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        {user.isOnline && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Online
-                          </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${user.role === 'Admin' ? 'bg-tertiary-container/30 text-tertiary' : 'bg-primary-fixed/60 text-primary'
+                          }`}>
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {user.role === 'Student' ? (
+                          <div className="space-y-1 max-w-[160px]">
+                            <div className="flex justify-between text-xs font-mono font-bold">
+                              <span className="text-on-surface">{stats.completedCount} / {stats.assignedCount} Lessons</span>
+                              <span className="text-primary">{stats.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                              <div
+                                className="bg-primary h-full rounded-full transition-all duration-300"
+                                style={{ width: `${stats.percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs font-mono text-outline">N/A (Admin)</span>
                         )}
-                        <button
-                          onClick={() => toggleUserStatus(user.id)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors ${
-                            user.status === 'Active'
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          {user.isOnline && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                              Online
+                            </span>
+                          )}
+                          <button
+                            onClick={() => toggleUserStatus(user.id)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors ${user.status === 'Active'
                               ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
                               : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
-                          }`}
+                              }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                            {user.status}
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                        {user.role === 'Student' && (
+                          <button
+                            onClick={() => setUserForLessonsModal(user)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 transition-all cursor-pointer"
+                            title="Manage lessons available to this student"
+                          >
+                            <span className="material-symbols-outlined text-base">auto_stories</span>
+                            <span>Lessons</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => onSelectUser(user)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-2.5 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer"
+                          title="View details"
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                          {user.status}
+                          <span className="material-symbols-outlined text-base">visibility</span>
                         </button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                      <button
-                        onClick={() => onSelectUser(user)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-2.5 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer"
-                        title="View details"
-                      >
-                        <span className="material-symbols-outlined text-base">visibility</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleOpenEdit(user, e)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface hover:bg-surface-container-high px-2.5 py-1.5 rounded-lg border border-outline-variant transition-all cursor-pointer"
-                        title="Edit user"
-                      >
-                        <span className="material-symbols-outlined text-base">edit</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleOpenDelete(user, e)}
-                        disabled={user.id === currentUser?.id}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-rose-700 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg border border-rose-200 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Delete user"
-                      >
-                        <span className="material-symbols-outlined text-base">delete</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                        <button
+                          onClick={(e) => handleOpenEdit(user, e)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface hover:bg-surface-container-high px-2.5 py-1.5 rounded-lg border border-outline-variant transition-all cursor-pointer"
+                          title="Edit user"
+                        >
+                          <span className="material-symbols-outlined text-base">edit</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleOpenDelete(user, e)}
+                          disabled={user.id === currentUser?.id}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-rose-700 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg border border-rose-200 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Delete user"
+                        >
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* MANAGE STUDENT AVAILABLE LESSONS MODAL */}
+      {userForLessonsModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Configure Student Lessons</span>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAllLessons}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1 rounded-xl border border-primary/20 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {availableLessons.length > 0 && availableLessons.every(l => (userForLessonsModal.assignedLessonIds || []).includes(l.id)) ? 'check_box' : 'check_box_outline_blank'}
+                  </span>
+                  <span>
+                    {availableLessons.length > 0 && availableLessons.every(l => (userForLessonsModal.assignedLessonIds || []).includes(l.id)) ? 'Deselect All' : 'Select All'}
+                  </span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setUserForLessonsModal(null)}
+                className="text-outline hover:text-on-surface cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="max-h-72 overflow-y-auto divide-y divide-outline-variant/60 border border-outline-variant rounded-2xl p-2 bg-surface-container-low/30 space-y-1">
+              {availableLessons.map((lesson) => {
+                const assigned = (userForLessonsModal.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1']).includes(lesson.id);
+                const isCompleted = (userForLessonsModal.completedLessonIds || []).includes(lesson.id);
+
+                return (
+                  <div
+                    key={lesson.id}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-low transition-colors"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-xs text-on-surface">{lesson.title}</p>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant uppercase">
+                          {lesson.type}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 ml-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toggleStudentLessonCompletion(userForLessonsModal.id, lesson.id);
+                          // Refresh current modal user object
+                          const updatedUsers = getStoredUsers();
+                          const updatedModalUser = updatedUsers.find(u => u.id === userForLessonsModal.id);
+                          if (updatedModalUser) setUserForLessonsModal(updatedModalUser);
+                        }}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors cursor-pointer ${isCompleted
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                          : 'bg-surface-container text-outline hover:bg-surface-container-high'
+                          }`}
+                        title={isCompleted ? 'Click to mark incomplete' : 'Click to mark completed'}
+                      >
+                        {isCompleted ? 'Completed ✓' : 'Mark Completed'}
+                      </button>
+
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${assigned ? 'bg-primary/10 text-primary' : 'bg-surface-container text-outline'}`}>
+                          {assigned ? 'Available' : 'Hidden'}
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={assigned}
+                          onChange={() => {
+                            handleToggleStudentLesson(userForLessonsModal, lesson.id);
+                            const updatedUsers = getStoredUsers();
+                            const updatedModalUser = updatedUsers.find(u => u.id === userForLessonsModal.id);
+                            if (updatedModalUser) setUserForLessonsModal(updatedModalUser);
+                          }}
+                          className="w-4 h-4 text-primary rounded focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setUserForLessonsModal(null)}
+                className="px-5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-xs cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CREATE STUDENT MODAL */}
       {isAddModalOpen && (

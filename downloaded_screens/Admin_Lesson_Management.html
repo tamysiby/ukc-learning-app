@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin User Management - UKC Learning Portal</title>
+  <title>Admin Lesson Management - UKC Learning Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -64,11 +64,11 @@
 
       <div class="flex items-center gap-3">
         <nav class="hidden md:flex items-center gap-1">
-          <a href="Admin_User_Management.html" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary flex items-center gap-1.5 cursor-pointer">
+          <a href="Admin_User_Management.html" class="px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-low transition-colors flex items-center gap-1.5 cursor-pointer">
             <span class="material-symbols-outlined text-base">group</span>
             User Management
           </a>
-          <a href="Admin_Lesson_Management.html" class="px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-low transition-colors flex items-center gap-1.5 cursor-pointer">
+          <a href="Admin_Lesson_Management.html" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary flex items-center gap-1.5 cursor-pointer">
             <span class="material-symbols-outlined text-base">auto_stories</span>
             Lesson Management
           </a>
@@ -97,85 +97,83 @@
 
   <!-- Main Content -->
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="text-xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">User Management</h1>
-        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5 font-label">
-          Admin Portal • Manage student accounts, available lessons, and learning progress.
-        </p>
-      </div>
-      <button class="inline-flex items-center justify-center px-4 py-2.5 bg-primary text-on-primary font-bold text-xs sm:text-sm rounded-xl shadow-xs hover:bg-primary-container transition-colors gap-2 min-h-[44px] cursor-pointer">
-        <span class="material-symbols-outlined text-lg">person_add</span>
-        <span>Register Student</span>
-      </button>
+    <div>
+      <h1 class="text-xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-headline">
+        Lesson Management
+      </h1>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-surface-container-lowest p-3.5 sm:p-6 rounded-2xl border border-outline-variant shadow-xs space-y-3">
-      <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        <div class="relative flex-1">
-          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
-          <input type="text" placeholder="Search users by name, email..." class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary min-h-[44px]">
-        </div>
-      </div>
-    </div>
-
-    <!-- Desktop Table View -->
+    <!-- Table View -->
     <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-xs overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm text-on-surface">
           <thead class="bg-surface-container-low text-xs uppercase tracking-wider text-outline font-semibold border-b border-outline-variant">
             <tr>
-              <th class="px-6 py-4">User</th>
-              <th class="px-6 py-4">Role</th>
-              <th class="px-6 py-4">Progress (Completed / Available)</th>
-              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4 w-20">Order</th>
+              <th class="px-6 py-4">Unit</th>
+              <th class="px-6 py-4">Lesson Details</th>
+              <th class="px-6 py-4">Student Access</th>
               <th class="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-outline-variant/60">
             <!-- Row 1 -->
             <tr class="hover:bg-surface-container-low/40 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
-                    MK
-                  </div>
-                  <div>
-                    <p class="font-semibold text-on-surface">Min-ji Kim</p>
-                    <p class="text-xs text-on-surface-variant">minji.kim@ukc.edu</p>
-                  </div>
-                </div>
+              <td class="px-6 py-4 whitespace-nowrap font-mono text-xs font-bold text-outline">
+                #1
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-fixed/60 text-primary">
-                  Student
+                  Unit 1: Hangul & Korean Basics
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="space-y-1 max-w-[160px]">
-                  <div class="flex justify-between text-xs font-mono font-bold">
-                    <span class="text-on-surface">1 / 2 Lessons</span>
-                    <span class="text-primary">50%</span>
-                  </div>
-                  <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-                    <div class="bg-primary h-full rounded-full transition-all duration-300 w-1/2"></div>
-                  </div>
+              <td class="px-6 py-4">
+                <div>
+                  <p class="font-semibold text-on-surface">Lesson 1: Introduction to Hangul</p>
+                  <p class="text-xs text-on-surface-variant line-clamp-1 mt-0.5">Learn the Korean alphabet (한글), consonants, vowels, and syllable structure.</p>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                  Active
+                <div class="flex items-center gap-1.5 text-xs text-on-surface font-semibold">
+                  <span class="material-symbols-outlined text-base text-primary">groups</span>
+                  <span>Assigned to <strong>2</strong> / 2 Students</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <button class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer" title="Manage student access">
+                  <span class="material-symbols-outlined text-base">manage_accounts</span>
+                  <span>Manage Student Access</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-surface-container-low/40 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap font-mono text-xs font-bold text-outline">
+                #2
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-fixed/60 text-primary">
+                  Unit 1: Hangul & Korean Basics
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                <button class="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 transition-all cursor-pointer" title="Manage lessons available to this student">
-                  <span class="material-symbols-outlined text-base">auto_stories</span>
-                  <span>Lessons</span>
+              <td class="px-6 py-4">
+                <div>
+                  <p class="font-semibold text-on-surface">Lesson 2: Essential Vocabulary</p>
+                  <p class="text-xs text-on-surface-variant line-clamp-1 mt-0.5">Master key daily Korean words, greetings, numbers, and basic expressions.</p>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-1.5 text-xs text-on-surface font-semibold">
+                  <span class="material-symbols-outlined text-base text-primary">groups</span>
+                  <span>Assigned to <strong>2</strong> / 2 Students</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <button class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer" title="Manage student access">
+                  <span class="material-symbols-outlined text-base">manage_accounts</span>
+                  <span>Manage Student Access</span>
                 </button>
-                <a href="Admin_User_Details_&_Progress.html" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-container px-2.5 py-1.5 rounded-lg border border-primary/20 hover:border-primary/40 bg-primary/5 transition-all cursor-pointer">
-                  <span class="material-symbols-outlined text-base">visibility</span>
-                </a>
               </td>
             </tr>
           </tbody>
@@ -183,5 +181,17 @@
       </div>
     </div>
   </main>
+
+  <!-- Mobile Bottom Nav -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant z-40 px-6 py-2 flex justify-around items-center shadow-lg">
+    <a href="Admin_User_Management.html" class="flex flex-col items-center gap-0.5 min-w-[56px] py-1 text-outline">
+      <span class="material-symbols-outlined text-xl">group</span>
+      <span class="text-[10px] font-bold">Users</span>
+    </a>
+    <a href="Admin_Lesson_Management.html" class="flex flex-col items-center gap-0.5 min-w-[56px] py-1 text-primary">
+      <span class="material-symbols-outlined text-xl">auto_stories</span>
+      <span class="text-[10px] font-bold">Lessons</span>
+    </a>
+  </div>
 </body>
 </html>

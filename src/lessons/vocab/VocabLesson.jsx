@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { mockFlashcards } from '../../services/supabaseClient';
 
-export default function VocabLesson({ onFinishLesson }) {
+export default function VocabLesson({ words = [], title = 'Vocabulary Practice Flashcards', onFinishLesson }) {
+  const flashcards = words.length > 0 ? words : mockFlashcards;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [scores, setScores] = useState({ easy: 0, hard: 0 });
   const [isCompleted, setIsCompleted] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
-  const currentCard = mockFlashcards[currentIndex];
+  const currentCard = flashcards[currentIndex] || flashcards[0];
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -26,14 +27,15 @@ export default function VocabLesson({ onFinishLesson }) {
     }
   };
 
-  const handleAnswer = (rating) => {
-    const updatedScores = {
-      ...scores,
-      [rating]: scores[rating] + 1
-    };
-    setScores(updatedScores);
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+    }
+  };
 
-    if (currentIndex + 1 < mockFlashcards.length) {
+  const handleNext = () => {
+    if (currentIndex + 1 < flashcards.length) {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
     } else {
@@ -50,18 +52,9 @@ export default function VocabLesson({ onFinishLesson }) {
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-on-surface font-headline">Lesson Completed!</h2>
-            <p className="text-xs sm:text-sm text-on-surface-variant mt-1 font-label">You reviewed all 5 flashcards in Unit 3 deck.</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 py-2">
-            <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200">
-              <p className="text-xl sm:text-2xl font-black text-emerald-700">{scores.easy}</p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800">Mastered (Easy)</p>
-            </div>
-            <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
-              <p className="text-xl sm:text-2xl font-black text-amber-700">{scores.hard}</p>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-800">Need Practice</p>
-            </div>
+            <p className="text-xs sm:text-sm text-on-surface-variant mt-1 font-label">
+              You reviewed all {flashcards.length} flashcards in this deck.
+            </p>
           </div>
 
           <button
@@ -76,33 +69,26 @@ export default function VocabLesson({ onFinishLesson }) {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 sm:py-8 space-y-4 sm:space-y-6">
-      {/* Header bar */}
-      <div className="flex items-center justify-between gap-2">
-        <button
-          onClick={onFinishLesson}
-          className="p-2 text-outline hover:text-on-surface rounded-full hover:bg-surface-container-low min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-xl">close</span>
-        </button>
-
-        {/* Progress indicators */}
-        <div className="flex-1 max-w-xs mx-2 space-y-1">
-          <div className="flex justify-between text-[11px] font-bold text-outline">
-            <span>Card {currentIndex + 1} of {mockFlashcards.length}</span>
-            <span>{Math.round(((currentIndex + 1) / mockFlashcards.length) * 100)}%</span>
-          </div>
-          <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-primary h-full rounded-full transition-all duration-300"
-              style={{ width: `${((currentIndex + 1) / mockFlashcards.length) * 100}%` }}
-            ></div>
-          </div>
+    <div className="max-w-xl mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      {/* Full Screen Focus Header - Sticky Top */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-xs flex items-center justify-between gap-3 py-3 border-b border-outline-variant/40">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onFinishLesson}
+            className="p-2 text-outline hover:text-on-surface rounded-xl hover:bg-surface-container-low min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer"
+            title="Exit Lesson to Pathway"
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-outline font-label">
+            {title}
+          </span>
         </div>
 
-        <span className="px-2.5 py-1 bg-surface-container-low text-xs font-bold text-on-surface-variant rounded-lg border border-outline-variant">
-          {currentCard.category}
-        </span>
+        {/* Progress indicator */}
+        <div className="text-[11px] font-mono font-bold text-outline">
+          {currentIndex + 1} / {flashcards.length}
+        </div>
       </div>
 
       {/* 3D Flashcard Container */}
@@ -118,66 +104,58 @@ export default function VocabLesson({ onFinishLesson }) {
         >
           {/* Front Side */}
           <div className={`space-y-4 flex flex-col items-center justify-center flex-1 ${isFlipped ? 'hidden' : 'block'}`}>
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-outline font-label">
-              Korean Flashcard • Tap to flip
-            </span>
-
             <h2 className="text-4xl sm:text-5xl font-black text-on-surface font-headline tracking-wide">
-              {currentCard.korean}
+              {currentCard?.korean}
             </h2>
-
-            <p className="text-sm font-semibold text-primary font-mono bg-primary-fixed/40 px-3 py-1 rounded-full">
-              [{currentCard.romanization}]
-            </p>
 
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleSpeech(currentCard.korean);
+                handleSpeech(currentCard?.korean);
               }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-low hover:bg-surface-container text-primary font-bold text-xs rounded-xl border border-outline-variant transition-colors min-h-[40px] cursor-pointer"
             >
               <span className={`material-symbols-outlined text-lg ${isPlayingAudio ? 'animate-pulse text-secondary' : ''}`}>
                 volume_up
               </span>
-              <span>Listen Pronunciation</span>
             </button>
+            <span className="text-[10px] sm:text-xs font-bold py-2 uppercase tracking-wider text-outline font-label">
+              Tap to flip
+            </span>
           </div>
 
           {/* Back Side */}
           <div className={`space-y-4 flex flex-col items-center justify-center flex-1 rotate-y-180 ${isFlipped ? 'block' : 'hidden'}`}>
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-700 font-label">
-              English Translation & Meaning
-            </span>
-
             <h2 className="text-2xl sm:text-3xl font-bold text-on-surface font-headline text-center">
-              {currentCard.english}
+              {currentCard?.english}
             </h2>
-
-            <div className="p-4 bg-surface-container-low rounded-2xl border border-outline-variant text-center max-w-sm space-y-1">
-              <p className="text-xs font-bold text-on-surface font-headline">"{currentCard.exampleSentence}"</p>
-              <p className="text-[11px] text-on-surface-variant italic font-label">{currentCard.exampleTranslation}</p>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Answer Rating Buttons */}
+      {/* Navigation Buttons (Previous / Next) */}
       <div className="grid grid-cols-2 gap-3 pt-2">
         <button
-          onClick={() => handleAnswer('hard')}
-          className="py-3.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 font-bold text-xs sm:text-sm rounded-2xl border border-amber-500/30 flex items-center justify-center gap-2 cursor-pointer transition-colors min-h-[48px]"
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          className={`py-3.5 font-bold text-xs sm:text-sm rounded-2xl border flex items-center justify-center gap-2 transition-colors min-h-[48px] ${
+            currentIndex === 0
+              ? 'bg-surface-container text-outline border-outline-variant cursor-not-allowed opacity-50'
+              : 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant cursor-pointer'
+          }`}
         >
-          <span className="material-symbols-outlined text-lg">refresh</span>
-          Hard (Needs Review)
+          <span className="material-symbols-outlined text-lg">arrow_back</span>
+          <span>Previous</span>
         </button>
 
         <button
-          onClick={() => handleAnswer('easy')}
-          className="py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-colors min-h-[48px]"
+          onClick={handleNext}
+          className="py-3.5 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs sm:text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-colors min-h-[48px]"
         >
-          <span className="material-symbols-outlined text-lg">check_circle</span>
-          Easy (Got It!)
+          <span>{currentIndex === flashcards.length - 1 ? 'Finish Lesson' : 'Next'}</span>
+          <span className="material-symbols-outlined text-lg">
+            {currentIndex === flashcards.length - 1 ? 'check_circle' : 'arrow_forward'}
+          </span>
         </button>
       </div>
     </div>

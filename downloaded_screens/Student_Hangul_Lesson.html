@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Hangul Lesson - UKC Learning Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0058bc",
+              "primary-container": "#0070eb",
+              "primary-fixed": "#d8e2ff",
+              "on-primary": "#ffffff",
+              "secondary": "#785900",
+              "tertiary": "#a83206",
+              "tertiary-container": "#ca4a20",
+              "background": "#f8f9fa",
+              "on-background": "#191c1d",
+              "surface": "#f8f9fa",
+              "on-surface": "#191c1d",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f3f4f5",
+              "surface-container": "#edeeef",
+              "surface-container-high": "#e7e8e9",
+              "surface-container-highest": "#e1e3e4",
+              "on-surface-variant": "#414755",
+              "outline": "#717786",
+              "outline-variant": "#c1c6d7",
+            },
+            fontFamily: {
+              headline: ["Plus Jakarta Sans"],
+              body: ["Plus Jakarta Sans"],
+              label: ["Inter"]
+            }
+          }
+        }
+      }
+    } catch (_e) {}
+  </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body pb-16 md:pb-0">
+
+  <!-- Header -->
+  <header class="bg-surface-container-lowest border-b border-outline-variant sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-black text-lg sm:text-xl shadow-xs font-headline shrink-0">
+          U
+        </div>
+        <div class="leading-tight">
+          <span class="font-extrabold text-base sm:text-lg text-on-surface tracking-tight font-headline block sm:inline">
+            UKC Learning
+          </span>
+          <span class="hidden sm:inline-block ml-1 text-on-surface font-extrabold">Portal</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="Student_Lesson_Pathway.html" class="px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-low transition-colors flex items-center gap-1.5 cursor-pointer">
+          <span class="material-symbols-outlined text-base">map</span>
+          Pathway
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-6">
+    <!-- Header Banner -->
+    <div class="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="space-y-2 text-center sm:text-left">
+        <div class="flex items-center gap-2 justify-center sm:justify-start">
+          <span class="px-3 py-1 bg-primary-fixed/60 text-primary text-xs font-bold rounded-full">
+            Lesson 1 • Introductory Korean
+          </span>
+          <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full">
+            Hangul Basics (한글)
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-on-surface font-headline">
+          Introduction to Hangul & 음절 (Syllable Block) Formation
+        </h1>
+        <p class="text-sm text-on-surface-variant max-w-xl font-label">
+          Learn the Korean alphabet (한글), master each consonant and vowel character, and build syllable blocks (음절) step-by-step.
+        </p>
+      </div>
+
+      <a href="Student_Lesson_Pathway.html" class="inline-flex items-center gap-1.5 text-xs font-bold text-outline hover:text-on-surface px-4 py-2 rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all cursor-pointer shrink-0">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Back to Pathway
+      </a>
+    </div>
+
+    <!-- Navigation Step Tabs -->
+    <div class="bg-surface-container-lowest p-2 rounded-2xl border border-outline-variant shadow-xs flex flex-wrap gap-1.5 justify-center sm:justify-start overflow-x-auto">
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 bg-primary text-on-primary shadow-xs">
+        <span class="material-symbols-outlined text-base">auto_stories</span>
+        1. Intro & Origin
+      </button>
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-base">grid_view</span>
+        2. Consonants (자음)
+      </button>
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-base">spellcheck</span>
+        3. Vowels (모음)
+      </button>
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-base">category</span>
+        4. Syllable (음절) Rules
+      </button>
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-base">build</span>
+        5. Interactive Builder
+      </button>
+      <button class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-base">task_alt</span>
+        6. Knowledge Check
+      </button>
+    </div>
+
+    <!-- Active Step View: Hangul Intro -->
+    <div class="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs space-y-6">
+      <div class="space-y-3">
+        <h2 class="text-xl font-bold text-on-surface font-headline">What is Hangul (한글)?</h2>
+        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-body">
+          Hangul is the native alphabet of the Korean language created in 1443 by King Sejong the Great to promote literacy.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant space-y-1">
+          <span class="text-xs font-bold text-primary font-mono uppercase">Consonants (자음)</span>
+          <p class="text-lg font-black text-on-surface font-headline">14 Basic Consonants</p>
+          <p class="text-xs text-on-surface-variant">Model the shape of the mouth and tongue during speech sound generation (ㄱ, ㄴ, ㄷ, ㄹ, ㅁ...)</p>
+        </div>
+
+        <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant space-y-1">
+          <span class="text-xs font-bold text-secondary font-mono uppercase">Vowels (모음)</span>
+          <p class="text-lg font-black text-on-surface font-headline">10 Basic Vowels</p>
+          <p class="text-xs text-on-surface-variant">Represent Heaven (•), Earth (ㅡ), and Man (ㅣ) in eastern philosophy (ㅏ, ㅑ, ㅓ, ㅕ, ㅗ...)</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

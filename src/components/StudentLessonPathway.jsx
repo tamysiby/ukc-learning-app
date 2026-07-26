@@ -5,46 +5,23 @@ import { getStudentPathwayNodes } from '../services/lessonRegistry';
 export default function StudentLessonPathway({ onStartHangulLesson, onStartVocabLesson }) {
   const { currentUser } = useAuth();
 
-  const assignedLessonIds = currentUser?.assignedLessonIds || ['les-hangul-1', 'les-vocab-1'];
+  const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'];
   const completedLessonIds = currentUser?.completedLessonIds || [];
 
   const pathwayNodes = getStudentPathwayNodes(assignedLessonIds, completedLessonIds);
 
   const handleLaunchLesson = (lesson) => {
-    if (lesson.type === 'hangul') {
+    if (lesson.type === 'custom') {
       onStartHangulLesson();
     } else {
-      onStartVocabLesson();
+      onStartVocabLesson(lesson.id);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      {/* Header Info Card */}
-      <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline-variant shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="space-y-2 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-fixed/60 text-primary rounded-full text-xs font-bold tracking-wide">
-            <span className="material-symbols-outlined text-sm">auto_awesome</span>
-            KOREAN FOUNDATIONS
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface font-headline">Unit 1: Hangul & Korean Basics</h1>
-          <p className="text-sm text-on-surface-variant max-w-lg font-label">
-            Master the Korean alphabet (한글), consonants, vowels, and how to form syllable blocks (음절).
-          </p>
-        </div>
-
-        {/* Streak Counter Widget */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-100/60 p-4 rounded-2xl border border-amber-200/80 text-center min-w-36 space-y-1 shadow-xs">
-          <div className="flex items-center justify-center gap-1 text-amber-600 font-bold">
-            <span className="material-symbols-outlined fill-1 text-2xl">local_fire_department</span>
-            <span className="text-2xl font-black font-headline">{currentUser?.streak || 14}</span>
-          </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Day Streak!</p>
-        </div>
-      </div>
-
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8">
       {/* Dynamic Visual Roadmap Pathway */}
-      <div className="relative py-6 flex flex-col items-center space-y-12">
+      <div className="relative flex flex-col items-center space-y-12">
         {/* Curving Pathway Background Line */}
         <div className="absolute top-10 bottom-10 w-1 bg-surface-container-high rounded-full z-0"></div>
 
@@ -55,13 +32,18 @@ export default function StudentLessonPathway({ onStartHangulLesson, onStartVocab
             <p className="text-xs text-on-surface-variant">Your administrator has not assigned any lessons to your account yet.</p>
           </div>
         ) : (
-          pathwayNodes.map((lesson) => {
+          pathwayNodes.map((lesson, index) => {
             const isCompleted = lesson.nodeStatus === 'completed';
             const isActive = lesson.nodeStatus === 'active';
             const isLocked = lesson.nodeStatus === 'locked';
+            const isTopLesson = index === 0;
 
             return (
-              <div key={lesson.id} className={`relative z-10 flex flex-col items-center space-y-3 group ${isLocked ? 'opacity-70' : ''}`}>
+              <div
+                key={lesson.id}
+                className={`relative z-10 flex flex-col items-center space-y-3 group ${isTopLesson ? 'pb-6' : 'py-6'
+                  } ${isLocked ? 'opacity-70' : ''}`}
+              >
                 {/* Node Icon */}
                 {isCompleted && (
                   <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md ring-4 ring-emerald-100 transition-transform group-hover:scale-105">
@@ -72,7 +54,7 @@ export default function StudentLessonPathway({ onStartHangulLesson, onStartVocab
                 {isActive && (
                   <div className="w-20 h-20 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg ring-8 ring-primary/20 transition-transform group-hover:scale-105 animate-pulse">
                     <span className="material-symbols-outlined text-4xl">
-                      {lesson.type === 'hangul' ? 'menu_book' : 'style'}
+                      {lesson.type === 'custom' ? 'menu_book' : lesson.type === 'vocab quiz' ? 'quiz' : 'style'}
                     </span>
                   </div>
                 )}
@@ -84,18 +66,19 @@ export default function StudentLessonPathway({ onStartHangulLesson, onStartVocab
                 )}
 
                 {/* Node Card Box */}
-                <div className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 max-w-sm ${
-                  isActive ? 'border-2 border-primary shadow-lg' : 'border-outline-variant'
-                }`}>
+                <div
+                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 max-w-sm ${isActive ? 'border-2 border-primary shadow-lg' : 'border-outline-variant'
+                    }`}
+                >
                   <div>
                     {isCompleted && (
                       <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-md uppercase">
-                        Completed • 100% ✓
+                        Completed
                       </span>
                     )}
                     {isActive && (
                       <span className="px-2 py-0.5 bg-primary-fixed/60 text-primary text-[10px] font-bold rounded-md uppercase">
-                        Current Lesson ▶️
+                        Current Lesson ▶
                       </span>
                     )}
                     {isLocked && (
@@ -105,17 +88,15 @@ export default function StudentLessonPathway({ onStartHangulLesson, onStartVocab
                     )}
 
                     <h3 className="text-base font-bold text-on-surface font-headline mt-1">{lesson.title}</h3>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{lesson.description}</p>
                   </div>
 
                   {!isLocked && (
                     <button
                       onClick={() => handleLaunchLesson(lesson)}
-                      className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                        isCompleted
-                          ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
-                          : 'bg-primary hover:bg-primary-container text-on-primary'
-                      }`}
+                      className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${isCompleted
+                        ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
+                        : 'bg-primary hover:bg-primary-container text-on-primary'
+                        }`}
                     >
                       <span className="material-symbols-outlined text-base">
                         {isCompleted ? 'replay' : 'play_circle'}
