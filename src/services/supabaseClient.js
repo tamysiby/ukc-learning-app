@@ -24,7 +24,7 @@ export const initialMockUsers = [
     joinedDate: '2025-08-01',
     isOnline: false,
     activeSessionId: null,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'],
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
   },
   {
@@ -41,7 +41,7 @@ export const initialMockUsers = [
     joinedDate: '2026-01-15',
     isOnline: false,
     activeSessionId: null,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'],
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
   },
   {

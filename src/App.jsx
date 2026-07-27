@@ -5,7 +5,7 @@ import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
 import AdminLessonManagement from './components/AdminLessonManagement';
 import StudentLessonPathway from './components/StudentLessonPathway';
-import { HangulLesson, VocabLesson, VocabQuizLesson } from './lessons';
+import { BatchimLesson, EyoLesson, VocabLesson, VocabQuizLesson } from './lessons';
 import VocabOverview from './components/VocabOverview';
 import StudentAccount from './components/StudentAccount';
 import UserAvatar from './components/UserAvatar';
@@ -21,11 +21,20 @@ const parseHash = (hashStr, userRole) => {
   if (cleanHash === 'account') {
     return { tab: 'account' };
   }
-  if (cleanHash === 'hangul') {
-    return { tab: 'hangul' };
+  if (cleanHash === 'batchim') {
+    return { tab: 'batchim', lessonId: 'les-batchim-1' };
+  }
+  if (cleanHash === 'eyo') {
+    return { tab: 'eyo', lessonId: 'les-eyo-1' };
   }
   if (cleanHash.startsWith('lesson/')) {
     const lessonId = cleanHash.replace('lesson/', '');
+    if (lessonId === 'les-batchim-1') {
+      return { tab: 'batchim', lessonId };
+    }
+    if (lessonId === 'les-eyo-1') {
+      return { tab: 'eyo', lessonId };
+    }
     return { tab: 'vocab', lessonId };
   }
   if (cleanHash.startsWith('quiz/')) {
@@ -55,7 +64,7 @@ const navigateTo = (hash) => {
 function AppContent() {
   const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted } = useAuth();
 
-  // Tabs: 'pathway' | 'hangul' | 'vocab' | 'vocab-quiz' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
+  // Tabs: 'pathway' | 'hangul' | 'batchim' | 'vocab' | 'vocab-quiz' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeVocabLesson, setActiveVocabLesson] = useState(null);
@@ -78,6 +87,16 @@ function AppContent() {
           markLessonCompleted(currentUser.id, target.id);
         }
         setCurrentTab('vocab');
+      } else if (route.tab === 'batchim') {
+        if (currentUser?.id) {
+          markLessonCompleted(currentUser.id, 'les-batchim-1');
+        }
+        setCurrentTab('batchim');
+      } else if (route.tab === 'eyo') {
+        if (currentUser?.id) {
+          markLessonCompleted(currentUser.id, 'les-eyo-1');
+        }
+        setCurrentTab('eyo');
       } else if (route.tab === 'vocab-quiz' && route.lessonId) {
         const allLessons = getStoredLessons();
         const target = allLessons.find(l => l.id === route.lessonId) || DEFAULT_LESSONS[0];
@@ -104,7 +123,7 @@ function AppContent() {
     // Prepare history stack when refreshed inside a lesson so browser back button returns to pathway
     const initialHash = window.location.hash;
     const initialRoute = parseHash(initialHash, userRole);
-    if (['vocab', 'vocab-quiz', 'hangul'].includes(initialRoute.tab)) {
+    if (['vocab', 'vocab-quiz', 'batchim', 'eyo'].includes(initialRoute.tab)) {
       const defaultHash = userRole === 'Admin' ? '#admin-list' : '#pathway';
       window.history.replaceState(null, '', defaultHash);
       window.history.pushState(null, '', initialHash);
@@ -117,7 +136,7 @@ function AppContent() {
   }, [isAuthenticated, userRole, currentUser?.id]);
 
   // Focus Mode when student is active inside a lesson or quiz
-  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'hangul');
+  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo');
 
   // If loading session check
   if (loading) {
@@ -143,6 +162,20 @@ function AppContent() {
 
   const handleFinishHangulLesson = () => {
     markLessonCompleted(currentUser?.id, 'les-custom-1');
+    navigateTo('pathway');
+  };
+
+  const handleFinishBatchimLesson = () => {
+    if (currentUser?.id) {
+      markLessonCompleted(currentUser.id, 'les-batchim-1');
+    }
+    navigateTo('pathway');
+  };
+
+  const handleFinishEyoLesson = () => {
+    if (currentUser?.id) {
+      markLessonCompleted(currentUser.id, 'les-eyo-1');
+    }
     navigateTo('pathway');
   };
 
@@ -273,12 +306,14 @@ function AppContent() {
           <>
             {(currentTab === 'pathway' || currentTab === 'admin-list' || currentTab === 'admin-details') && (
               <StudentLessonPathway
-                onStartHangulLesson={() => navigateTo('hangul')}
                 onStartVocabLesson={(lessonId) => handleStartVocabLesson(lessonId)}
               />
             )}
-            {currentTab === 'hangul' && (
-              <HangulLesson onFinishLesson={handleFinishHangulLesson} />
+            {currentTab === 'batchim' && (
+              <BatchimLesson onFinishLesson={handleFinishBatchimLesson} />
+            )}
+            {currentTab === 'eyo' && (
+              <EyoLesson onFinishLesson={handleFinishEyoLesson} />
             )}
             {currentTab === 'vocab' && (
               showFlashcardDeck ? (

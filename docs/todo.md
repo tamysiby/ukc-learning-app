@@ -33,9 +33,3 @@ there are three ways to answer fill in the blank quizzes. multiple choice, sylla
 lessons are currently stored in localStorage. move this to DB if pattern is found, if not, then save it as data?? idk i guess we'll figure this out later.
 
 how do you suggest i effectively and efficiently store the lessons? consider future additional lessons. see if there are patterns in the lessons created so that code won't be redundant and data model is efficient.
-
-add [lessonRegistry.js](file;vscode-remote://wsl%2Bubuntu/home/tamy/p/ukc-learning-app/src/services/lessonRegistry.js) a vocab lesson titled 단어연습1 and with the following words: 시소, 사자, 새, 뼈, 시계, 소주, 쏘다, 자두, 싸다, 바지, 피자, 고추, 치즈, 휴지, 호수, 나무, 나비, 바나나, 우유, 사과, 왜, 더워요, 가위, 오리, 토마토, 의사, 모자, 스웨터, 모래, 의자, 주사위. 
-
-use generate-illust skill to create assets for words in this lesson. add the image urls to the word data. 
-
-Generate picture: A minimalist, friendly, and colorful illustration. Clean lines, simple shapes, flat design style. Professional educational app style.

@@ -27,3 +27,7 @@
 
 7. **Vocabulary English Translation Casing**:
    - When creating or updating vocabulary items in lessons (`words`), the `english` translation field MUST be **all lowercase** (e.g., `"seesaw"`, `"lion"`, `"bird"`, `"clock"`, `"it's hot"`), UNLESS it is a proper noun (e.g., `"Korea"`, `"Seoul"`).
+
+8. **Minimal English in Lessons**:
+   - When creating or updating lessons, stick to as little English explanation as possible. The target audience may not be fluent in English.
+   - Keep lessons intuitive using visual graphics, clean simple Korean, or minimal English only when strictly necessary.

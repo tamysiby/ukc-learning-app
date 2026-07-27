@@ -91,6 +91,55 @@ export const DEFAULT_LESSONS = [
     status: 'Active'
   },
   {
+    id: 'les-batchim-1',
+    order: 4.5,
+    unit: 'Unit 1: Hangul & Korean Basics',
+    title: '자음 4: 받침',
+    description: 'Learn the concept of 받침 (final consonants) and the 7 representative sound groups.',
+    type: 'custom',
+    status: 'Active',
+    words: [
+      { id: 'bat-1', korean: '밥', romanization: 'bap', english: 'rice', category: 'ㅂ [p]' },
+      { id: 'bat-2', korean: '무릎', romanization: 'mu-reup', english: 'knee', category: 'ㅂ [p]' },
+      { id: 'bat-3', korean: '없다', romanization: 'eop-da', english: 'to not have', category: 'ㅂ [p]' },
+      { id: 'bat-4', korean: '옷', romanization: 'ot', english: 'clothes', category: 'ㄷ [t]' },
+      { id: 'bat-5', korean: '걷다', romanization: 'geot-da', english: 'to walk', category: 'ㄷ [t]' },
+      { id: 'bat-6', korean: '맞다', romanization: 'mat-da', english: 'to be right', category: 'ㄷ [t]' },
+      { id: 'bat-7', korean: '하얗다', romanization: 'ha-yat-da', english: 'to be white', category: 'ㄷ [t]' },
+      { id: 'bat-8', korean: '목', romanization: 'mok', english: 'neck', category: 'ㄱ [k]' },
+      { id: 'bat-9', korean: '부엌', romanization: 'bu-eok', english: 'kitchen', category: 'ㄱ [k]' },
+      { id: 'bat-10', korean: '읽다', romanization: 'ik-da', english: 'to read', category: 'ㄱ [k]' },
+      { id: 'bat-11', korean: '감', romanization: 'gam', english: 'persimmon', category: 'ㅁ [m]' },
+      { id: 'bat-12', korean: '마음', romanization: 'ma-um', english: 'mind', category: 'ㅁ [m]' },
+      { id: 'bat-13', korean: '젊다', romanization: 'jeom-da', english: 'to be young', category: 'ㅁ [m]' },
+      { id: 'bat-14', korean: '산', romanization: 'san', english: 'mountain', category: 'ㄴ [n]' },
+      { id: 'bat-15', korean: '안다', romanization: 'an-da', english: 'to hug', category: 'ㄴ [n]' },
+      { id: 'bat-16', korean: '앉다', romanization: 'an-da', english: 'to sit', category: 'ㄴ [n]' },
+      { id: 'bat-17', korean: '강', romanization: 'gang', english: 'river', category: 'ㅇ [ng]' },
+      { id: 'bat-18', korean: '방', romanization: 'bang', english: 'room', category: 'ㅇ [ng]' },
+      { id: 'bat-19', korean: '발', romanization: 'bal', english: 'foot', category: 'ㄹ [l]' },
+      { id: 'bat-20', korean: '길', romanization: 'gil', english: 'road', category: 'ㄹ [l]' },
+      { id: 'bat-21', korean: '당근', romanization: 'dang-geun', english: 'carrot', category: 'ㅇ / ㄴ' }
+    ]
+  },
+  {
+    id: 'les-eyo-1',
+    order: 4.6,
+    unit: 'Unit 1: Hangul & Korean Basics',
+    title: '입니다 & 이에요/예요',
+    description: 'Learn sentence endings: 받침 O + 이에요 / 받침 X + 예요 and formal 입니다/입니까?.',
+    type: 'custom',
+    status: 'Active',
+    words: [
+      { id: 'eyo-1', korean: '가방이에요', romanization: 'ga-bang-i-e-yo', english: "it's a bag", category: '받침 O' },
+      { id: 'eyo-2', korean: '의자예요', romanization: 'ui-ja-ye-yo', english: "it's a chair", category: '받침 X' },
+      { id: 'eyo-3', korean: '선생님이에요', romanization: 'seon-saeng-nim-i-e-yo', english: "it's a teacher", category: '받침 O' },
+      { id: 'eyo-4', korean: '의사예요', romanization: 'ui-sa-ye-yo', english: "it's a doctor", category: '받침 X' },
+      { id: 'eyo-5', korean: '교실이에요', romanization: 'gyo-sil-i-e-yo', english: "it's a classroom", category: '받침 O' },
+      { id: 'eyo-6', korean: '학교예요', romanization: 'hak-gyo-ye-yo', english: "it's a school", category: '받침 X' }
+    ]
+  },
+  {
     id: 'les-vocab-practice-1',
     order: 5,
     unit: 'Unit 1: Hangul & Korean Basics',
@@ -198,11 +247,15 @@ export function getStoredLessons() {
         if (l.id === 'les-consonants-1') {
           return { ...l, words: DEFAULT_LESSONS[2].words };
         }
+        if (l.id === 'les-batchim-1') {
+          const batchimDef = DEFAULT_LESSONS.find(d => d.id === 'les-batchim-1');
+          return { ...l, words: batchimDef?.words || l.words };
+        }
         if (l.id === 'les-vocab-practice-1') {
-          return { ...l, words: DEFAULT_LESSONS[4].words };
+          return { ...l, words: DEFAULT_LESSONS[5].words };
         }
         if (l.id === 'les-vocab-practice-2') {
-          return { ...l, words: DEFAULT_LESSONS[6].words };
+          return { ...l, words: DEFAULT_LESSONS[7].words };
         }
         if (l.type === 'vocab quiz') {
           const { words, ...quizLessonWithoutWords } = l;
@@ -245,6 +298,7 @@ export function getStudentPathwayNodes(
   assignedLessonIds = [
     'les-vowels-1', 'les-vowels-quiz-1',
     'les-consonants-1', 'les-consonants-quiz-1',
+    'les-batchim-1', 'les-eyo-1',
     'les-vocab-practice-1', 'les-vocab-practice-quiz-1',
     'les-vocab-practice-2', 'les-vocab-practice-quiz-2'
   ],

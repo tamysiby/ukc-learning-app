@@ -2,20 +2,16 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getStudentPathwayNodes } from '../services/lessonRegistry';
 
-export default function StudentLessonPathway({ onStartHangulLesson, onStartVocabLesson }) {
+export default function StudentLessonPathway({ onStartVocabLesson }) {
   const { currentUser } = useAuth();
 
-  const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-custom-1'];
+  const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-batchim-1'];
   const completedLessonIds = currentUser?.completedLessonIds || [];
 
   const pathwayNodes = getStudentPathwayNodes(assignedLessonIds, completedLessonIds);
 
   const handleLaunchLesson = (lesson) => {
-    if (lesson.type === 'custom') {
-      onStartHangulLesson();
-    } else {
-      onStartVocabLesson(lesson.id);
-    }
+    onStartVocabLesson(lesson.id);
   };
 
   return (
