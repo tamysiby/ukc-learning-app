@@ -57,12 +57,12 @@ export default function AdminUserDetails({ user, onBack }) {
                 </span>
               )}
             </div>
-            <p className="text-sm text-on-surface-variant font-label">{user.email}</p>
+            <p className="text-sm text-on-surface-variant font-label">{user.username}</p>
             <p className="text-xs text-outline">Joined {user.joinedDate}</p>
           </div>
         </div>
 
-        {/* Quick stat cards */}
+        {/* Quick stat cards & Actions */}
         <div className="flex items-center gap-4 sm:gap-6 border-t md:border-t-0 md:border-l border-outline-variant pt-4 md:pt-0 md:pl-6">
           <div className="text-center">
             <p className="text-xs uppercase tracking-wider text-outline font-semibold">Study Streak</p>

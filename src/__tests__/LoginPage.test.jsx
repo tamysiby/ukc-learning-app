@@ -10,7 +10,7 @@ describe('LoginPage Component', () => {
     sessionStorage.clear();
   });
 
-  it('renders login form with email, password, and submit button', () => {
+  it('renders login form with username, password, and submit button', () => {
     render(
       <AuthProvider>
         <LoginPage />
@@ -18,7 +18,7 @@ describe('LoginPage Component', () => {
     );
 
     expect(screen.getByText('UKC Learning Portal')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('name@ukc.edu')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('minji.kim')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••••••')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
   });
@@ -30,11 +30,11 @@ describe('LoginPage Component', () => {
       </AuthProvider>
     );
 
-    const emailInput = screen.getByPlaceholderText('name@ukc.edu');
+    const usernameInput = screen.getByPlaceholderText('minji.kim');
     const passInput = screen.getByPlaceholderText('••••••••••••');
     const submitBtn = screen.getByRole('button', { name: /Sign In to Portal/i });
 
-    fireEvent.change(emailInput, { target: { value: 'unknown@ukc.edu' } });
+    fireEvent.change(usernameInput, { target: { value: 'unknown_user' } });
     fireEvent.change(passInput, { target: { value: 'wrongpass' } });
     
     await act(async () => {
@@ -42,7 +42,7 @@ describe('LoginPage Component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Account not found/i)).toBeInTheDocument();
+      expect(screen.getByText(/Invalid username or password/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 

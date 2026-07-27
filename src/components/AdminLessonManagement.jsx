@@ -485,7 +485,7 @@ export default function AdminLessonManagement() {
                       <UserAvatar name={student.name} size="sm" />
                       <div>
                         <p className="font-bold text-xs text-on-surface">{student.name}</p>
-                        <p className="text-[11px] text-outline">{student.email}</p>
+                        <p className="text-[11px] text-outline">{student.username}</p>
                       </div>
                     </div>
 

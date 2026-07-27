@@ -5,8 +5,11 @@ import {
   getStoredSession,
   getStoredUsers,
   saveStoredUsers,
-  saveStoredSession
+  saveStoredSession,
+  fetchUsersFromSupabase,
+  isSupabaseConfigured
 } from '../services/supabaseClient';
+import { hashPassword } from '../services/cryptoUtils';
 
 const AuthContext = createContext(null);
 
@@ -25,20 +28,29 @@ export function AuthProvider({ children }) {
   const sessionCheckTimerRef = useRef(null);
   const throttleTimerRef = useRef(0);
 
-  // Load session & sync users list
+  // Load session & sync users list from Supabase DB on startup
   useEffect(() => {
     const savedUser = getStoredSession();
     if (savedUser) {
       setCurrentUser(savedUser);
     }
-    const allUsers = getStoredUsers();
-    setUsers(allUsers);
+    // Instant initial load from local storage
+    const cachedUsers = getStoredUsers();
+    setUsers(cachedUsers);
     setLoading(false);
+
+    // Asynchronous background live DB fetch on startup
+    if (isSupabaseConfigured) {
+      fetchUsersFromSupabase().then(freshUsers => {
+        setUsers(freshUsers);
+      }).catch(() => {});
+    }
   }, []);
 
   // Sync users list
-  const refreshUsersList = () => {
-    setUsers(getStoredUsers());
+  const refreshUsersList = async () => {
+    const freshUsers = await fetchUsersFromSupabase();
+    setUsers(freshUsers);
   };
 
   // Single-session enforcement: Validate if current session was superseded
@@ -143,12 +155,12 @@ export function AuthProvider({ children }) {
     };
   }, [currentUser]);
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     setAuthError('');
     setSessionNotice('');
     setLoading(true);
 
-    const res = await authSignIn(email, password);
+    const res = await authSignIn(username, password);
     setLoading(false);
 
     if (res.error) {
@@ -173,23 +185,25 @@ export function AuthProvider({ children }) {
     refreshUsersList();
   };
 
-  const createStudentUser = (newStudentData) => {
+  const createStudentUser = async (newStudentData) => {
     if (!currentUser || currentUser.role !== 'Admin') {
       return { success: false, error: 'Only Administrators can create new student accounts.' };
     }
 
     const currentUsers = getStoredUsers();
-    const existing = currentUsers.find(u => u.email.toLowerCase() === newStudentData.email.trim().toLowerCase());
+    const existing = currentUsers.find(u => u.username?.toLowerCase() === newStudentData.username.trim().toLowerCase());
 
     if (existing) {
-      return { success: false, error: `An account with email '${newStudentData.email}' already exists.` };
+      return { success: false, error: `An account with username '${newStudentData.username}' already exists.` };
     }
+
+    const hashedPassword = await hashPassword(newStudentData.password || 'StudentPass123!');
 
     const createdUser = {
       id: `usr-${Date.now()}`,
       name: newStudentData.name.trim(),
-      email: newStudentData.email.trim().toLowerCase(),
-      password: newStudentData.password || 'StudentPass123!',
+      username: newStudentData.username.trim().toLowerCase(),
+      password: hashedPassword,
       role: newStudentData.role || 'Student',
       status: 'Active',
       level: newStudentData.level || 'Beginner (Level 1)',
@@ -198,13 +212,72 @@ export function AuthProvider({ children }) {
       lastActive: 'Never',
       joinedDate: new Date().toISOString().split('T')[0],
       isOnline: false,
-      activeSessionId: null
+      activeSessionId: null,
+      mustChangePassword: true
     };
 
     const updatedList = [createdUser, ...currentUsers];
     saveStoredUsers(updatedList);
     setUsers(updatedList);
     return { success: true, user: createdUser };
+  };
+
+  const adminResetPassword = async (userId, newPassword) => {
+    if (!currentUser || currentUser.role !== 'Admin') {
+      return { success: false, error: 'Only Administrators can reset account passwords.' };
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    const currentUsers = getStoredUsers();
+    const updatedList = currentUsers.map(u => {
+      if (u.id === userId) {
+        return {
+          ...u,
+          password: hashedPassword,
+          mustChangePassword: true
+        };
+      }
+      return u;
+    });
+
+    saveStoredUsers(updatedList);
+    setUsers(updatedList);
+
+    if (currentUser.id === userId) {
+      const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: true };
+      setCurrentUser(updatedSelf);
+      saveStoredSession(updatedSelf);
+    }
+
+    return { success: true };
+  };
+
+  const changeUserPassword = async (newPassword) => {
+    if (!currentUser) {
+      return { success: false, error: 'You must be signed in to change your password.' };
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    const currentUsers = getStoredUsers();
+    const updatedList = currentUsers.map(u => {
+      if (u.id === currentUser.id) {
+        return {
+          ...u,
+          password: hashedPassword,
+          mustChangePassword: false
+        };
+      }
+      return u;
+    });
+
+    saveStoredUsers(updatedList);
+    setUsers(updatedList);
+
+    const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: false };
+    setCurrentUser(updatedSelf);
+    saveStoredSession(updatedSelf);
+
+    return { success: true };
   };
 
   const updateStudentUser = (userId, updates) => {
@@ -375,6 +448,8 @@ export function AuthProvider({ children }) {
         createStudentUser,
         updateStudentUser,
         deleteStudentUser,
+        adminResetPassword,
+        changeUserPassword,
         toggleUserStatus,
         updateStudentAssignedLessons,
         markLessonCompleted,

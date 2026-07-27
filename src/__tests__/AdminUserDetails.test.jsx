@@ -15,7 +15,7 @@ describe('Admin User Details Screen', () => {
   const sampleUser = {
     id: 'usr-1',
     name: 'Min-ji Kim',
-    email: 'minji.kim@ukc.edu',
+    username: 'minji.kim',
     role: 'Student',
     status: 'Active',
     streak: 14,
@@ -29,7 +29,7 @@ describe('Admin User Details Screen', () => {
   it('renders student header details, study streak, and back button', () => {
     renderWithAuth(<AdminUserDetails user={sampleUser} onBack={mockBack} />);
     expect(screen.getByText('Min-ji Kim')).toBeInTheDocument();
-    expect(screen.getByText('minji.kim@ukc.edu')).toBeInTheDocument();
+    expect(screen.getByText('minji.kim')).toBeInTheDocument();
     expect(screen.getByText('14 Days')).toBeInTheDocument();
   });
 

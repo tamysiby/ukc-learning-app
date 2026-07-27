@@ -4,7 +4,7 @@ import { getStoredLessons } from '../services/lessonRegistry';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
-  const { users, createStudentUser, updateStudentUser, deleteStudentUser, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser } = useAuth();
+  const { users, createStudentUser, updateStudentUser, deleteStudentUser, adminResetPassword, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
@@ -14,6 +14,8 @@ export default function AdminUserManagement({ onSelectUser }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [resetPasswordUser, setResetPasswordUser] = useState(null);
+  const [resetPasswordInput, setResetPasswordInput] = useState('StudentPass123!');
   const [userForLessonsModal, setUserForLessonsModal] = useState(null);
 
   const availableLessons = getStoredLessons();
@@ -40,7 +42,7 @@ export default function AdminUserManagement({ onSelectUser }) {
 
   const [newUser, setNewUser] = useState({
     name: '',
-    email: '',
+    username: '',
     password: 'StudentPass123!',
     role: 'Student',
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1']
@@ -53,7 +55,7 @@ export default function AdminUserManagement({ onSelectUser }) {
   // Filtering users
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesRole = roleFilter === 'All' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'All'
       ? true
@@ -91,18 +93,18 @@ export default function AdminUserManagement({ onSelectUser }) {
   };
 
   // Handle Add Student Submit
-  const handleAddUserSubmit = (e) => {
+  const handleAddUserSubmit = async (e) => {
     e.preventDefault();
     setCrudError('');
-    if (!newUser.name || !newUser.email) return;
+    if (!newUser.name || !newUser.username) return;
 
-    const res = createStudentUser(newUser);
+    const res = await createStudentUser(newUser);
     if (!res.success) {
       setCrudError(res.error);
       return;
     }
 
-    setNewUser({ name: '', email: '', password: 'StudentPass123!', role: 'Student' });
+    setNewUser({ name: '', username: '', password: 'StudentPass123!', role: 'Student' });
     setIsAddModalOpen(false);
   };
 
@@ -120,7 +122,7 @@ export default function AdminUserManagement({ onSelectUser }) {
     if (!editingUser) return;
     const res = updateStudentUser(editingUser.id, {
       name: editingUser.name,
-      email: editingUser.email,
+      username: editingUser.username,
       role: editingUser.role,
       status: editingUser.status
     });
@@ -154,6 +156,26 @@ export default function AdminUserManagement({ onSelectUser }) {
     setDeletingUser(null);
   };
 
+  // Open Reset Password Modal
+  const handleOpenResetPassword = (user, e) => {
+    e.stopPropagation();
+    setResetPasswordUser(user);
+    setResetPasswordInput('StudentPass123!');
+    setCrudError('');
+  };
+
+  // Handle Reset Password Submit
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!resetPasswordUser || !resetPasswordInput) return;
+    const res = await adminResetPassword(resetPasswordUser.id, resetPasswordInput);
+    if (!res.success) {
+      setCrudError(res.error);
+      return;
+    }
+    setResetPasswordUser(null);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
       {/* Header section */}
@@ -185,7 +207,7 @@ export default function AdminUserManagement({ onSelectUser }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search users by name, email..."
+              placeholder="Search users by name, username..."
               className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary min-h-[44px]"
             />
           </div>
@@ -238,7 +260,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                     <UserAvatar size="md" />
                     <div>
                       <h3 className="font-bold text-sm text-on-surface">{user.name}</h3>
-                      <p className="text-xs text-on-surface-variant">{user.email}</p>
+                      <p className="text-xs text-on-surface-variant">{user.username}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -293,6 +315,14 @@ export default function AdminUserManagement({ onSelectUser }) {
                     Edit
                   </button>
                   <button
+                    onClick={(e) => handleOpenResetPassword(user, e)}
+                    className="py-1.5 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                    title="Reset user password"
+                  >
+                    <span className="material-symbols-outlined text-sm">key</span>
+                    Reset
+                  </button>
+                  <button
                     onClick={(e) => handleOpenDelete(user, e)}
                     disabled={user.id === currentUser?.id}
                     className="py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer disabled:opacity-30"
@@ -338,7 +368,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                           <UserAvatar size="md" />
                           <div>
                             <p className="font-semibold text-on-surface">{user.name}</p>
-                            <p className="text-xs text-on-surface-variant">{user.email}</p>
+                            <p className="text-xs text-on-surface-variant">{user.username}</p>
                           </div>
                         </div>
                       </td>
@@ -410,6 +440,13 @@ export default function AdminUserManagement({ onSelectUser }) {
                           title="Edit user"
                         >
                           <span className="material-symbols-outlined text-base">edit</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleOpenResetPassword(user, e)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-tertiary hover:bg-tertiary/10 px-2.5 py-1.5 rounded-lg border border-tertiary/20 transition-all cursor-pointer"
+                          title="Reset Password"
+                        >
+                          <span className="material-symbols-outlined text-base">key</span>
                         </button>
                         <button
                           onClick={(e) => handleOpenDelete(user, e)}
@@ -564,13 +601,13 @@ export default function AdminUserManagement({ onSelectUser }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase text-outline mb-1">Email Address</label>
+                <label className="block text-xs font-semibold uppercase text-outline mb-1">Username</label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  placeholder="e.g. soojin@ukc.edu"
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  placeholder="e.g. soojin.park"
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
@@ -649,12 +686,12 @@ export default function AdminUserManagement({ onSelectUser }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase text-outline mb-1">Email Address</label>
+                <label className="block text-xs font-semibold uppercase text-outline mb-1">Username</label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={editingUser.email}
-                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  value={editingUser.username}
+                  onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
@@ -702,6 +739,64 @@ export default function AdminUserManagement({ onSelectUser }) {
         </div>
       )}
 
+      {/* RESET PASSWORD MODAL */}
+      {resetPasswordUser && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant max-w-md w-full p-5 sm:p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 font-body">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-tertiary text-xl">key</span>
+                <h2 className="text-lg sm:text-xl font-bold text-on-surface font-headline">Reset Account Password</h2>
+              </div>
+              <button onClick={() => setResetPasswordUser(null)} className="text-outline hover:text-on-surface cursor-pointer">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant text-xs space-y-1">
+              <p className="font-bold text-on-surface">{resetPasswordUser.name}</p>
+              <p className="text-on-surface-variant">Username: {resetPasswordUser.username}</p>
+            </div>
+
+            {crudError && (
+              <div className="p-3 bg-rose-500/10 text-rose-700 text-xs rounded-xl border border-rose-500/20">
+                {crudError}
+              </div>
+            )}
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-outline mb-1">New Temporary Password</label>
+                <input
+                  type="password"
+                  required
+                  value={resetPasswordInput}
+                  onChange={(e) => setResetPasswordInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary font-mono"
+                />
+                <p className="text-[11px] text-outline mt-1">User will be required to change this password upon their next login.</p>
+              </div>
+
+              <div className="pt-2 flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setResetPasswordUser(null)}
+                  className="px-4 py-2 border border-outline-variant rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container-low min-h-[40px] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-tertiary text-on-tertiary rounded-xl text-xs font-bold hover:opacity-90 shadow-xs min-h-[40px] cursor-pointer"
+                >
+                  Reset Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* DELETE CONFIRMATION MODAL */}
       {isDeleteModalOpen && deletingUser && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
@@ -724,7 +819,7 @@ export default function AdminUserManagement({ onSelectUser }) {
 
             <div className="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant text-xs space-y-1">
               <p className="font-bold text-on-surface">{deletingUser.name}</p>
-              <p className="text-on-surface-variant">{deletingUser.email}</p>
+              <p className="text-on-surface-variant">{deletingUser.username}</p>
             </div>
 
             <div className="pt-2 flex gap-3 justify-end">

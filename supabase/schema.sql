@@ -2,15 +2,16 @@
 -- UKC Learning App - Supabase Database Schema & Migration
 -- ==========================================
 
--- 1. Enable UUID Extension
+-- 1. Enable UUID & Cryptographic Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ------------------------------------------
 -- 2. USERS TABLE
 -- ------------------------------------------
 CREATE TABLE IF NOT EXISTS public.users (
     id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
-    email TEXT UNIQUE NOT NULL,
+    username TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     password TEXT NOT NULL DEFAULT 'StudentPass123!',
     role TEXT NOT NULL CHECK (role IN ('Student', 'Admin')) DEFAULT 'Student',
@@ -20,12 +21,13 @@ CREATE TABLE IF NOT EXISTS public.users (
     streak INTEGER DEFAULT 0 CHECK (streak >= 0),
     is_online BOOLEAN DEFAULT false,
     active_session_id TEXT,
+    must_change_password BOOLEAN DEFAULT false,
     last_active TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Index for lookup
-CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
 CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
 
 -- Enable RLS
@@ -123,10 +125,10 @@ ON CONFLICT (id) DO UPDATE SET
 -- ------------------------------------------
 -- 7. SEED DATA FOR USERS
 -- ------------------------------------------
-INSERT INTO public.users (id, email, name, password, role, status, level, progress, streak) VALUES
-('usr-admin-1', 'admin@ukc.edu', 'Tae-hyun Choi (Admin)', 'AdminPass123!', 'Admin', 'Active', 'Staff Administrator', 100, 45),
-('usr-1', 'minji.kim@ukc.edu', 'Min-ji Kim', 'StudentPass123!', 'Student', 'Active', 'Intermediate (Level 3)', 78, 14),
-('usr-2', 'jihoon.park@ukc.edu', 'Ji-hoon Park', 'StudentPass123!', 'Student', 'Active', 'Beginner (Level 1)', 42, 5),
-('usr-3', 'soojin.lee@ukc.edu', 'Soo-jin Lee', 'StudentPass123!', 'Student', 'Inactive', 'Advanced (Level 5)', 95, 0),
-('usr-5', 'eunji.choi@ukc.edu', 'Eun-ji Choi', 'StudentPass123!', 'Student', 'Active', 'Elementary (Level 2)', 60, 9)
+INSERT INTO public.users (id, username, name, password, role, status, level, progress, streak) VALUES
+('usr-admin-1', 'admin', 'Tae-hyun Choi (Admin)', crypt('AdminPass123!', gen_salt('bf')), 'Admin', 'Active', 'Staff Administrator', 100, 45),
+('usr-1', 'minji.kim', 'Min-ji Kim', crypt('StudentPass123!', gen_salt('bf')), 'Student', 'Active', 'Intermediate (Level 3)', 78, 14),
+('usr-2', 'jihoon.park', 'Ji-hoon Park', crypt('StudentPass123!', gen_salt('bf')), 'Student', 'Active', 'Beginner (Level 1)', 42, 5),
+('usr-3', 'soojin.lee', 'Soo-jin Lee', crypt('StudentPass123!', gen_salt('bf')), 'Student', 'Inactive', 'Advanced (Level 5)', 95, 0),
+('usr-5', 'eunji.choi', 'Eun-ji Choi', crypt('StudentPass123!', gen_salt('bf')), 'Student', 'Active', 'Elementary (Level 2)', 60, 9)
 ON CONFLICT (id) DO NOTHING;

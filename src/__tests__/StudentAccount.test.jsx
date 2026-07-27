@@ -7,7 +7,7 @@ describe('Student Account Management Screen', () => {
     render(<StudentAccount />);
     expect(screen.getByText('Account Settings')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Min-ji Kim')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('minji.kim@ukc.edu')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('minji.kim')).toBeInTheDocument();
   });
 
   it('allows editing full name input', () => {

@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import { verifyPassword } from './cryptoUtils';
 
 const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const STORAGE_USERS_KEY = 'ukc_app_users_db_v1';
+const STORAGE_USERS_KEY = 'ukc_app_users_db_v2';
 const STORAGE_SESSION_KEY = 'ukc_app_session_v1';
 
 // Default Seed Users (Admin & Students)
@@ -13,7 +14,7 @@ export const initialMockUsers = [
   {
     id: 'usr-admin-1',
     name: 'Tae-hyun Choi (Admin)',
-    email: 'admin@ukc.edu',
+    username: 'admin',
     password: 'AdminPass123!',
     role: 'Admin',
     status: 'Active',
@@ -24,13 +25,14 @@ export const initialMockUsers = [
     joinedDate: '2025-08-01',
     isOnline: false,
     activeSessionId: null,
+    mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
   },
   {
     id: 'usr-1',
     name: 'Min-ji Kim',
-    email: 'minji.kim@ukc.edu',
+    username: 'minji.kim',
     password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
@@ -41,13 +43,14 @@ export const initialMockUsers = [
     joinedDate: '2026-01-15',
     isOnline: false,
     activeSessionId: null,
+    mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
   },
   {
     id: 'usr-2',
     name: 'Ji-hoon Park',
-    email: 'jihoon.park@ukc.edu',
+    username: 'jihoon.park',
     password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
@@ -58,13 +61,14 @@ export const initialMockUsers = [
     joinedDate: '2026-03-01',
     isOnline: false,
     activeSessionId: null,
+    mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
     completedLessonIds: []
   },
   {
     id: 'usr-3',
     name: 'Soo-jin Lee',
-    email: 'soojin.lee@ukc.edu',
+    username: 'soojin.lee',
     password: 'StudentPass123!',
     role: 'Student',
     status: 'Inactive',
@@ -75,13 +79,14 @@ export const initialMockUsers = [
     joinedDate: '2025-11-10',
     isOnline: false,
     activeSessionId: null,
+    mustChangePassword: false,
     assignedLessonIds: ['les-hangul-1'],
     completedLessonIds: []
   },
   {
     id: 'usr-5',
     name: 'Eun-ji Choi',
-    email: 'eunji.choi@ukc.edu',
+    username: 'eunji.choi',
     password: 'StudentPass123!',
     role: 'Student',
     status: 'Active',
@@ -92,6 +97,7 @@ export const initialMockUsers = [
     joinedDate: '2026-02-14',
     isOnline: false,
     activeSessionId: null,
+    mustChangePassword: false,
     assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
     completedLessonIds: []
   }
@@ -145,12 +151,12 @@ export const generateSessionId = () => {
   return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
-// Check if an active session currently exists for an email address
-export const checkActiveSessionExists = (email) => {
-  if (!email) return false;
-  const cleanEmail = email.trim().toLowerCase();
+// Check if an active session currently exists for a username
+export const checkActiveSessionExists = (username) => {
+  if (!username) return false;
+  const cleanUsername = username.trim().toLowerCase();
   const users = getStoredUsers();
-  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+  const user = users.find(u => u.username?.toLowerCase() === cleanUsername);
   return !!(user && (user.isOnline || user.activeSessionId));
 };
 
@@ -158,7 +164,26 @@ export const checkActiveSessionExists = (email) => {
 export const getStoredUsers = () => {
   try {
     const raw = localStorage.getItem(STORAGE_USERS_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const users = JSON.parse(raw);
+      if (Array.isArray(users) && users.length > 0) {
+        const hasLegacy = users.some(u => !u.username && u.email);
+        if (hasLegacy) {
+          const migrated = users.map(u => {
+            if (!u.username && u.email) {
+              return {
+                ...u,
+                username: u.email === 'admin@ukc.edu' ? 'admin' : u.email.split('@')[0]
+              };
+            }
+            return u;
+          });
+          saveStoredUsers(migrated);
+          return migrated;
+        }
+        return users;
+      }
+    }
   } catch (e) {
     console.error('Error reading stored users:', e);
   }
@@ -219,25 +244,66 @@ export const setUserOnlineState = (userId, isOnline, sessionId = null) => {
   return updatedList;
 };
 
+export const isSupabaseConfigured = !!(
+  import.meta.env?.VITE_SUPABASE_URL &&
+  !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder') &&
+  import.meta.env?.VITE_SUPABASE_ANON_KEY &&
+  !import.meta.env?.VITE_SUPABASE_ANON_KEY.includes('placeholder')
+);
+
+// Fetch users directly from Supabase DB (with fallback to local storage)
+export const fetchUsersFromSupabase = async () => {
+  if (!isSupabaseConfigured) {
+    return getStoredUsers();
+  }
+
+  try {
+    const { data, error } = await supabase.from('users').select('*');
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const mappedUsers = data.map(u => ({
+        id: u.id,
+        username: u.username,
+        name: u.name,
+        password: u.password,
+        role: u.role,
+        status: u.status,
+        level: u.level || 'Beginner (Level 1)',
+        progress: u.progress || 0,
+        streak: u.streak || 0,
+        isOnline: u.is_online || false,
+        activeSessionId: u.active_session_id || null,
+        mustChangePassword: u.must_change_password ?? false,
+        lastActive: u.last_active ? new Date(u.last_active).toLocaleString() : 'Never',
+        joinedDate: u.created_at ? u.created_at.split('T')[0] : '2026-01-01',
+        assignedLessonIds: u.assigned_lesson_ids || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
+        completedLessonIds: u.completed_lesson_ids || []
+      }));
+      saveStoredUsers(mappedUsers);
+      return mappedUsers;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch users from Supabase DB, using local store fallback:', err);
+  }
+
+  return getStoredUsers();
+};
+
 // Authentic Authentication Functions
-export const authSignIn = async (email, password) => {
-  const cleanEmail = email?.trim().toLowerCase();
+export const authSignIn = async (username, password) => {
+  const cleanUsername = username?.trim().toLowerCase();
   const newSessionId = generateSessionId();
 
-  // Attempt Supabase auth if real URL configured
-  const isSupabaseConfigured = import.meta.env?.VITE_SUPABASE_URL && !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder');
-  
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanUsername, password });
       if (!error && data.user) {
         // Fetch user profile
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
         const userObj = {
           ...(profile || {
             id: data.user.id,
-            name: data.user.email.split('@')[0],
-            email: data.user.email,
+            name: data.user.email ? data.user.email.split('@')[0] : cleanUsername,
+            username: cleanUsername,
             role: data.user.user_metadata?.role || 'Student',
             status: 'Active',
             level: 'Beginner (Level 1)'
@@ -261,18 +327,19 @@ export const authSignIn = async (email, password) => {
 
   // Local fallback authentication
   const users = getStoredUsers();
-  const matchedUser = users.find(u => u.email.toLowerCase() === cleanEmail);
+  const matchedUser = users.find(u => u.username?.toLowerCase() === cleanUsername);
 
   if (!matchedUser) {
-    return { user: null, error: 'Account not found. Student accounts must be added by an Administrator.' };
+    return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
   }
 
   if (matchedUser.status === 'Inactive') {
     return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
   }
 
-  if (matchedUser.password && matchedUser.password !== password) {
-    return { user: null, error: 'Invalid password. Please check your credentials and try again.' };
+  const isPasswordValid = await verifyPassword(password, matchedUser.password);
+  if (!isPasswordValid) {
+    return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
   }
 
   const updatedUser = {

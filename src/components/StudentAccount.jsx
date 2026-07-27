@@ -4,7 +4,7 @@ import UserAvatar from './UserAvatar';
 export default function StudentAccount() {
   const [profile, setProfile] = useState({
     name: 'Min-ji Kim',
-    email: 'minji.kim@ukc.edu',
+    username: 'minji.kim',
     notifications: true,
     audioAutoPlay: true,
   });
@@ -21,7 +21,7 @@ export default function StudentAccount() {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface font-headline">Account Settings</h1>
-        <p className="text-sm text-on-surface-variant mt-1 font-label">Manage your profile, email preferences, audio settings, and learning statistics.</p>
+        <p className="text-sm text-on-surface-variant mt-1 font-label">Manage your profile, username preferences, audio settings, and learning statistics.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -57,11 +57,11 @@ export default function StudentAccount() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-outline mb-1">Email Address</label>
+                <label className="block text-xs font-semibold uppercase text-outline mb-1">Username</label>
                 <input
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  type="text"
+                  value={profile.username}
+                  onChange={(e) => setProfile({ ...profile, username: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>

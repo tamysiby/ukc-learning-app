@@ -8,6 +8,7 @@ import StudentLessonPathway from './components/StudentLessonPathway';
 import { BatchimLesson, EyoLesson, VocabLesson, VocabQuizLesson } from './lessons';
 import VocabOverview from './components/VocabOverview';
 import StudentAccount from './components/StudentAccount';
+import ForceChangePasswordModal from './components/ForceChangePasswordModal';
 import UserAvatar from './components/UserAvatar';
 import { getStoredLessons, DEFAULT_LESSONS } from './services/lessonRegistry';
 import { generateRandomVocabQuiz } from './services/quizGenerator';
@@ -418,6 +419,9 @@ function AppContent() {
           </div>
         </footer>
       )}
+
+      {/* Mandatory Force Change Password Modal Overlay */}
+      <ForceChangePasswordModal />
     </div>
   );
 }

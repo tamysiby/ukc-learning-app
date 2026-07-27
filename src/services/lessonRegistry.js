@@ -67,7 +67,7 @@ export const DEFAULT_LESSONS = [
       { id: 'c-6', korean: 'ㅂ', romanization: 'b', english: 'b', category: 'Consonants' },
       { id: 'c-7', korean: 'ㅅ', romanization: 's', english: 's', category: 'Consonants' },
       { id: 'c-8', korean: 'ㅇ', romanization: 'ng', english: 'ng', category: 'Consonants' },
-      { id: 'c-9', korean: 'ㅈ', romanization: 'j', english: 'jt', category: 'Consonants' },
+      { id: 'c-9', korean: 'ㅈ', romanization: 'j', english: 'j', category: 'Consonants' },
       { id: 'c-10', korean: 'ㅊ', romanization: 'ch', english: 'ch', category: 'Consonants' },
       { id: 'c-11', korean: 'ㅋ', romanization: 'k', english: 'k', category: 'Consonants' },
       { id: 'c-12', korean: 'ㅌ', romanization: 't', english: 't', category: 'Consonants' },

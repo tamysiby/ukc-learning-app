@@ -4,7 +4,7 @@ import { checkActiveSessionExists } from '../services/supabaseClient';
 
 export default function LoginPage() {
   const { login, authError, clearError, sessionNotice, clearSessionNotice, loading } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -12,30 +12,30 @@ export default function LoginPage() {
   // Pending active session confirm modal state
   const [pendingLogin, setPendingLogin] = useState(null);
 
-  const attemptLogin = async (loginEmail, loginPassword, isConfirmed = false) => {
-    if (!loginEmail || !loginPassword) return;
+  const attemptLogin = async (loginUsername, loginPassword, isConfirmed = false) => {
+    if (!loginUsername || !loginPassword) return;
 
     // Check if another session is currently active for this user account
-    if (!isConfirmed && checkActiveSessionExists(loginEmail)) {
-      setPendingLogin({ email: loginEmail, password: loginPassword });
+    if (!isConfirmed && checkActiveSessionExists(loginUsername)) {
+      setPendingLogin({ username: loginUsername, password: loginPassword });
       return;
     }
 
     setIsSubmitting(true);
-    await login(loginEmail, loginPassword);
+    await login(loginUsername, loginPassword);
     setIsSubmitting(false);
     setPendingLogin(null);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    attemptLogin(email, password);
+    attemptLogin(username, password);
   };
 
-  const handleQuickDemo = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
+  const handleQuickDemo = (demoUsername, demoPass) => {
+    setUsername(demoUsername);
     setPassword(demoPass);
-    attemptLogin(demoEmail, demoPass);
+    attemptLogin(demoUsername, demoPass);
   };
 
   return (
@@ -94,21 +94,21 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-label">
-                Email Address
+                Username
               </label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg">
-                  mail
+                  account_circle
                 </span>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
+                  value={username}
                   onChange={(e) => {
                     clearError();
-                    setEmail(e.target.value);
+                    setUsername(e.target.value);
                   }}
-                  placeholder="name@ukc.edu"
+                  placeholder="minji.kim"
                   className="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
@@ -164,32 +164,30 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Login Shortcut Section (Development Mode Only) */}
-          {import.meta.env.DEV && (
-            <div className="pt-4 border-t border-outline-variant/60 space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-outline text-center">
-                Quick Testing Shortcuts
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemo('admin@ukc.edu', 'AdminPass123!')}
-                  className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-base">admin_panel_settings</span>
-                  Admin Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemo('minji.kim@ukc.edu', 'StudentPass123!')}
-                  className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-base">school</span>
-                  Student Login
-                </button>
-              </div>
+          {/* Quick Demo Login Shortcut Section */}
+          <div className="pt-4 border-t border-outline-variant/60 space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-outline text-center">
+              Quick Testing Shortcuts
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('admin', 'AdminPass123!')}
+                className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">admin_panel_settings</span>
+                Admin Login
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('minji.kim', 'StudentPass123!')}
+                className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">school</span>
+                Student Login
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Footer info */}
@@ -229,7 +227,7 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => attemptLogin(pendingLogin.email, pendingLogin.password, true)}
+                onClick={() => attemptLogin(pendingLogin.username, pendingLogin.password, true)}
                 className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors min-h-[40px] cursor-pointer"
               >
                 Log In & Disconnect Older Session
