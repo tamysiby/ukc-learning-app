@@ -15,19 +15,82 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   const completedCount = pathwayNodes.filter(n => completedLessonIds.includes(n.id)).length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  // Track progress increase animation on completion
-  const prevCompletedCountRef = useRef(completedCount);
+  // Track previous progress from sessionStorage to animate progress bar & number count-up on return
+  const [displayedBarPercentage, setDisplayedBarPercentage] = useState(() => {
+    const saved = sessionStorage.getItem('ukc_pathway_prev_percentage');
+    const numSaved = saved !== null ? Number(saved) : progressPercentage;
+    return numSaved < progressPercentage ? numSaved : progressPercentage;
+  });
+
+  const [displayedTextPercentage, setDisplayedTextPercentage] = useState(() => {
+    const saved = sessionStorage.getItem('ukc_pathway_prev_percentage');
+    const numSaved = saved !== null ? Number(saved) : progressPercentage;
+    return numSaved < progressPercentage ? numSaved : progressPercentage;
+  });
+
   const [isAnimatingProgress, setIsAnimatingProgress] = useState(false);
 
   useEffect(() => {
-    if (completedCount > prevCompletedCountRef.current) {
+    const saved = sessionStorage.getItem('ukc_pathway_prev_percentage');
+    const startPct = saved !== null ? Number(saved) : progressPercentage;
+
+    if (startPct < progressPercentage) {
       setIsAnimatingProgress(true);
-      const timer = setTimeout(() => setIsAnimatingProgress(false), 3000);
-      prevCompletedCountRef.current = completedCount;
+
+      // Smooth transition for visual bar fill
+      const barTimer = setTimeout(() => {
+        setDisplayedBarPercentage(progressPercentage);
+      }, 100);
+
+      // Smooth count-up for percentage text badge
+      const duration = 1200;
+      const steps = Math.max(1, progressPercentage - startPct);
+      const stepTime = Math.max(20, Math.floor(duration / steps));
+      let current = startPct;
+
+      const countInterval = setInterval(() => {
+        current += 1;
+        if (current >= progressPercentage) {
+          setDisplayedTextPercentage(progressPercentage);
+          clearInterval(countInterval);
+        } else {
+          setDisplayedTextPercentage(current);
+        }
+      }, stepTime);
+
+      const endTimer = setTimeout(() => {
+        setIsAnimatingProgress(false);
+        sessionStorage.setItem('ukc_pathway_prev_percentage', String(progressPercentage));
+      }, duration + 500);
+
+      return () => {
+        clearTimeout(barTimer);
+        clearInterval(countInterval);
+        clearTimeout(endTimer);
+      };
+    } else {
+      sessionStorage.setItem('ukc_pathway_prev_percentage', String(progressPercentage));
+      setDisplayedBarPercentage(progressPercentage);
+      setDisplayedTextPercentage(progressPercentage);
+    }
+  }, [progressPercentage]);
+
+  // Auto scroll to the last exited/started lesson when returning to pathway
+  useEffect(() => {
+    const lastActiveId = sessionStorage.getItem('ukc_last_active_lesson_id');
+    if (lastActiveId) {
+      const timer = setTimeout(() => {
+        const el = nodeRefs.current[lastActiveId];
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedId(lastActiveId);
+          setTimeout(() => setHighlightedId(null), 2000);
+        }
+        sessionStorage.removeItem('ukc_last_active_lesson_id');
+      }, 200);
       return () => clearTimeout(timer);
     }
-    prevCompletedCountRef.current = completedCount;
-  }, [completedCount]);
+  }, []);
 
   // Topmost incomplete lesson
   const topmostIncompleteLesson = pathwayNodes.find(n => !completedLessonIds.includes(n.id));
@@ -46,6 +109,7 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   };
 
   const handleLaunchLesson = (lesson) => {
+    sessionStorage.setItem('ukc_last_active_lesson_id', lesson.id);
     onStartVocabLesson(lesson.id);
   };
 
@@ -68,10 +132,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
           <div className="flex-1 min-w-0">
             <div className="h-4 w-full bg-surface-container-high rounded-full overflow-hidden p-0.5 border border-outline-variant/30 shadow-inner relative group">
               <div
-                className={`h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 transition-all duration-700 ease-out shadow-[0_0_12px_rgba(16,185,129,0.5)] ${
+                className={`h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(16,185,129,0.5)] ${
                   isAnimatingProgress ? 'animate-pulse' : ''
                 }`}
-                style={{ width: `${progressPercentage}%` }}
+                style={{ width: `${displayedBarPercentage}%` }}
               />
             </div>
           </div>
@@ -79,7 +143,7 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
           {/* Progress Percentage Badge (Always on Right Side of Progress Bar) */}
           <div className="shrink-0 flex items-center">
             <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-              {progressPercentage}%
+              {displayedTextPercentage}%
             </span>
           </div>
         </div>

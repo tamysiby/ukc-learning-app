@@ -69,6 +69,25 @@ export function AuthProvider({ children }) {
       setAuthError(res.error);
     } else if (res.users) {
       setUsers(res.users);
+
+      // Preserve completedLessonIds & assignedLessonIds from active local session if newer
+      if (currentUser?.id) {
+        const dbRecord = res.users.find(u => u.id === currentUser.id);
+        if (dbRecord) {
+          const mergedCompleted = Array.from(new Set([
+            ...(currentUser.completedLessonIds || []),
+            ...(dbRecord.completedLessonIds || [])
+          ]));
+          const updatedSelf = {
+            ...dbRecord,
+            ...currentUser,
+            completedLessonIds: mergedCompleted,
+            activeSessionId: currentUser.activeSessionId
+          };
+          setCurrentUser(updatedSelf);
+          saveStoredSession(updatedSelf);
+        }
+      }
     }
   };
 
@@ -381,6 +400,7 @@ export function AuthProvider({ children }) {
 
     saveStoredUsers(updatedList);
     setUsers(updatedList);
+    updateStudentUserInDb(userId, { assignedLessonIds: lessonIds });
 
     if (currentUser?.id === userId) {
       const updatedSelf = { ...currentUser, assignedLessonIds: lessonIds };
@@ -398,6 +418,7 @@ export function AuthProvider({ children }) {
     if (lessonId === 'les-vowels-quiz-1') extraLessonId = 'les-vowels-1';
     if (lessonId === 'les-consonants-quiz-1') extraLessonId = 'les-consonants-1';
 
+    let updatedCompleted = [];
     const currentUsers = getStoredUsers();
     const updatedList = currentUsers.map(u => {
       if (u.id === targetUserId) {
@@ -408,6 +429,7 @@ export function AuthProvider({ children }) {
         if (extraLessonId && !completed.includes(extraLessonId)) {
           completed = [...completed, extraLessonId];
         }
+        updatedCompleted = completed;
         return { ...u, completedLessonIds: completed };
       }
       return u;
@@ -433,6 +455,8 @@ export function AuthProvider({ children }) {
         saveStoredSession(updatedSelf);
       }
     }
+
+    updateStudentUserInDb(targetUserId, { completedLessonIds: updatedCompleted });
   };
 
   const toggleStudentLessonCompletion = (userId, lessonId) => {
@@ -469,6 +493,8 @@ export function AuthProvider({ children }) {
       setCurrentUser(updatedSelf);
       saveStoredSession(updatedSelf);
     }
+
+    updateStudentUserInDb(userId, { completedLessonIds: updatedCompleted });
   };
 
   return (

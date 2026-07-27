@@ -390,7 +390,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
                     key={idx}
                     onClick={() => handleSelectOption(opt)}
                     disabled={!!answerFeedback}
-                    className={`py-2 px-4 rounded-2xl border text-sm font-bold transition-all cursor-pointer min-h-[88px] flex flex-col items-center justify-center ${btnStyle}`}
+                    className={`py-2 px-4 rounded-2xl border text-xl font-bold transition-all cursor-pointer min-h-[88px] flex flex-col items-center justify-center ${btnStyle}`}
                   >
                     {useIllust ? (
                       <VocabIllustration word={opt.word} size="sm" />
@@ -416,7 +416,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
                   <span className="text-xs text-outline italic">Tap blocks below to build answer...</span>
                 ) : (
                   selectedBlocks.map((blk, i) => (
-                    <span key={i} className="px-3 py-1 bg-primary/20 text-primary font-mono font-bold text-sm rounded-lg">
+                    <span key={i} className="px-3 py-1 bg-primary/20 text-primary font-mono font-bold text-md rounded-lg">
                       {blk}
                     </span>
                   ))

@@ -497,6 +497,8 @@ export const updateStudentUserInDb = async (userId, updates) => {
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
     if (updates.streak !== undefined) dbUpdates.streak = updates.streak;
     if (updates.mustChangePassword !== undefined) dbUpdates.must_change_password = updates.mustChangePassword;
+    if (updates.assignedLessonIds !== undefined) dbUpdates.assigned_lesson_ids = updates.assignedLessonIds;
+    if (updates.completedLessonIds !== undefined) dbUpdates.completed_lesson_ids = updates.completedLessonIds;
 
     const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
     if (error) {
