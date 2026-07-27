@@ -244,6 +244,8 @@ export const setUserOnlineState = (userId, isOnline, sessionId = null) => {
   return updatedList;
 };
 
+export const isDev = !!(import.meta.env?.DEV || import.meta.env?.MODE === 'development');
+
 export const isSupabaseConfigured = !!(
   import.meta.env?.VITE_SUPABASE_URL &&
   !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder') &&
@@ -251,15 +253,32 @@ export const isSupabaseConfigured = !!(
   !import.meta.env?.VITE_SUPABASE_ANON_KEY.includes('placeholder')
 );
 
-// Fetch users directly from Supabase DB (with fallback to local storage)
+// Fetch users directly from Supabase DB (with fallback to local storage ONLY in dev)
 export const fetchUsersFromSupabase = async () => {
   if (!isSupabaseConfigured) {
-    return getStoredUsers();
+    if (isDev) {
+      return { users: getStoredUsers(), error: null };
+    }
+    return {
+      users: [],
+      error: 'Database Configuration Missing: Supabase URL and Anon Key are not configured for production.'
+    };
   }
 
   try {
     const { data, error } = await supabase.from('users').select('*');
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (error) {
+      if (isDev) {
+        console.warn('Supabase DB fetch error, falling back to local storage (DEV):', error);
+        return { users: getStoredUsers(), error: null };
+      }
+      return {
+        users: [],
+        error: `Database Service Failure: Unable to fetch user records from Supabase (${error.message || 'Connection error'}).`
+      };
+    }
+
+    if (Array.isArray(data)) {
       const mappedUsers = data.map(u => ({
         id: u.id,
         username: u.username,
@@ -278,14 +297,23 @@ export const fetchUsersFromSupabase = async () => {
         assignedLessonIds: u.assigned_lesson_ids || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
         completedLessonIds: u.completed_lesson_ids || []
       }));
-      saveStoredUsers(mappedUsers);
-      return mappedUsers;
+      if (isDev) {
+        saveStoredUsers(mappedUsers);
+      }
+      return { users: mappedUsers, error: null };
     }
   } catch (err) {
-    console.warn('Failed to fetch users from Supabase DB, using local store fallback:', err);
+    if (isDev) {
+      console.warn('Failed to fetch users from Supabase DB, using local store fallback (DEV):', err);
+      return { users: getStoredUsers(), error: null };
+    }
+    return {
+      users: [],
+      error: `Database Connection Error: ${err.message || 'Failed to communicate with Supabase database.'}`
+    };
   }
 
-  return getStoredUsers();
+  return { users: isDev ? getStoredUsers() : [], error: isDev ? null : 'No user data returned from database.' };
 };
 
 // Authentic Authentication Functions
@@ -295,37 +323,76 @@ export const authSignIn = async (username, password) => {
 
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanUsername, password });
-      if (!error && data.user) {
-        // Fetch user profile
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+      // 1. Query user from public.users table in Supabase DB
+      const { data: dbUser, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', cleanUsername)
+        .single();
+
+      if (dbError || !dbUser) {
+        if (!isDev) {
+          return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
+        }
+      } else {
+        if (dbUser.status === 'Inactive') {
+          return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
+        }
+
+        const isPasswordValid = await verifyPassword(password, dbUser.password);
+        if (!isPasswordValid) {
+          return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
+        }
+
+        // Update online status in Supabase DB
+        const nowIso = new Date().toISOString();
+        await supabase
+          .from('users')
+          .update({ is_online: true, active_session_id: newSessionId, last_active: nowIso })
+          .eq('id', dbUser.id);
+
         const userObj = {
-          ...(profile || {
-            id: data.user.id,
-            name: data.user.email ? data.user.email.split('@')[0] : cleanUsername,
-            username: cleanUsername,
-            role: data.user.user_metadata?.role || 'Student',
-            status: 'Active',
-            level: 'Beginner (Level 1)'
-          }),
+          id: dbUser.id,
+          name: dbUser.name,
+          username: dbUser.username,
+          password: dbUser.password,
+          role: dbUser.role,
+          status: dbUser.status,
+          level: dbUser.level || 'Beginner (Level 1)',
+          progress: dbUser.progress || 0,
+          streak: dbUser.streak || 0,
           isOnline: true,
           activeSessionId: newSessionId,
-          lastActive: 'Just now'
+          mustChangePassword: dbUser.must_change_password ?? false,
+          lastActive: 'Just now',
+          joinedDate: dbUser.created_at ? dbUser.created_at.split('T')[0] : '2026-01-01',
+          assignedLessonIds: dbUser.assigned_lesson_ids || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
+          completedLessonIds: dbUser.completed_lesson_ids || []
         };
-        
-        // Update profile online state in Supabase
-        await supabase.from('profiles').update({ last_active: new Date().toISOString() }).eq('id', data.user.id);
-        
-        setUserOnlineState(userObj.id, true, newSessionId);
+
         saveStoredSession(userObj);
         return { user: userObj, error: null };
       }
     } catch (err) {
-      console.warn('Supabase auth failed, trying local store:', err);
+      if (!isDev) {
+        return {
+          user: null,
+          error: `Database Authentication Error: Unable to connect to Supabase database. ${err.message || ''}`
+        };
+      }
+      console.warn('Supabase DB query failed, using dev fallback:', err);
     }
   }
 
-  // Local fallback authentication
+  // Production check: DO NOT allow localStorage fallback in Prod!
+  if (!isDev) {
+    return {
+      user: null,
+      error: 'Database Unavailable: Supabase database connection is not configured or failed to respond in production.'
+    };
+  }
+
+  // Local fallback authentication (DEV ONLY)
   const users = getStoredUsers();
   const matchedUser = users.find(u => u.username?.toLowerCase() === cleanUsername);
 
@@ -361,6 +428,16 @@ export const authSignOut = async (userId = null) => {
   const targetId = userId || currentSession?.id;
 
   if (targetId) {
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('users')
+          .update({ is_online: false, active_session_id: null })
+          .eq('id', targetId);
+      } catch (e) {
+        // Suppress network errors on signout
+      }
+    }
     setUserOnlineState(targetId, false, null);
   }
 
@@ -370,4 +447,82 @@ export const authSignOut = async (userId = null) => {
     // Ignore offline errors
   }
   saveStoredSession(null);
+};
+
+// Database Mutations (Create, Update, Delete)
+export const createStudentUserInDb = async (userData) => {
+  if (!isSupabaseConfigured) {
+    if (!isDev) {
+      return { success: false, error: 'Database Unconfigured: Cannot create student account without a live Supabase database connection in production.' };
+    }
+    return { success: true };
+  }
+
+  try {
+    const { data, error } = await supabase.from('users').insert([{
+      username: userData.username,
+      name: userData.name,
+      password: userData.password,
+      role: userData.role || 'Student',
+      status: userData.status || 'Active',
+      level: userData.level || 'Beginner (Level 1)',
+      must_change_password: userData.mustChangePassword ?? true
+    }]).select().single();
+
+    if (error) {
+      return { success: false, error: `Database Create Failed: ${error.message}` };
+    }
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: `Database Connection Failed: ${err.message}` };
+  }
+};
+
+export const updateStudentUserInDb = async (userId, updates) => {
+  if (!isSupabaseConfigured) {
+    if (!isDev) {
+      return { success: false, error: 'Database Unconfigured: Cannot update account without a live Supabase database connection in production.' };
+    }
+    return { success: true };
+  }
+
+  try {
+    const dbUpdates = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.username !== undefined) dbUpdates.username = updates.username;
+    if (updates.password !== undefined) dbUpdates.password = updates.password;
+    if (updates.role !== undefined) dbUpdates.role = updates.role;
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.level !== undefined) dbUpdates.level = updates.level;
+    if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
+    if (updates.streak !== undefined) dbUpdates.streak = updates.streak;
+    if (updates.mustChangePassword !== undefined) dbUpdates.must_change_password = updates.mustChangePassword;
+
+    const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
+    if (error) {
+      return { success: false, error: `Database Update Failed: ${error.message}` };
+    }
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: `Database Connection Error: ${err.message}` };
+  }
+};
+
+export const deleteStudentUserInDb = async (userId) => {
+  if (!isSupabaseConfigured) {
+    if (!isDev) {
+      return { success: false, error: 'Database Unconfigured: Cannot delete account without a live Supabase database connection in production.' };
+    }
+    return { success: true };
+  }
+
+  try {
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (error) {
+      return { success: false, error: `Database Delete Failed: ${error.message}` };
+    }
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: `Database Connection Error: ${err.message}` };
+  }
 };

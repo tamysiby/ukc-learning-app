@@ -7,7 +7,11 @@ import {
   saveStoredUsers,
   saveStoredSession,
   fetchUsersFromSupabase,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  isDev,
+  createStudentUserInDb,
+  updateStudentUserInDb,
+  deleteStudentUserInDb
 } from '../services/supabaseClient';
 import { hashPassword } from '../services/cryptoUtils';
 
@@ -34,23 +38,38 @@ export function AuthProvider({ children }) {
     if (savedUser) {
       setCurrentUser(savedUser);
     }
-    // Instant initial load from local storage
-    const cachedUsers = getStoredUsers();
-    setUsers(cachedUsers);
-    setLoading(false);
+
+    if (isDev) {
+      const cachedUsers = getStoredUsers();
+      setUsers(cachedUsers);
+      setLoading(false);
+    }
 
     // Asynchronous background live DB fetch on startup
-    if (isSupabaseConfigured) {
-      fetchUsersFromSupabase().then(freshUsers => {
-        setUsers(freshUsers);
-      }).catch(() => {});
-    }
+    fetchUsersFromSupabase().then(res => {
+      if (res.error && !isDev) {
+        setAuthError(res.error);
+        setUsers([]);
+      } else if (res.users) {
+        setUsers(res.users);
+      }
+      setLoading(false);
+    }).catch(err => {
+      if (!isDev) {
+        setAuthError(err.message || 'Database Connection Failed');
+      }
+      setLoading(false);
+    });
   }, []);
 
   // Sync users list
   const refreshUsersList = async () => {
-    const freshUsers = await fetchUsersFromSupabase();
-    setUsers(freshUsers);
+    const res = await fetchUsersFromSupabase();
+    if (res.error && !isDev) {
+      setAuthError(res.error);
+    } else if (res.users) {
+      setUsers(res.users);
+    }
   };
 
   // Single-session enforcement: Validate if current session was superseded
@@ -199,8 +218,22 @@ export function AuthProvider({ children }) {
 
     const hashedPassword = await hashPassword(newStudentData.password || 'StudentPass123!');
 
+    const dbRes = await createStudentUserInDb({
+      username: newStudentData.username.trim().toLowerCase(),
+      name: newStudentData.name.trim(),
+      password: hashedPassword,
+      role: newStudentData.role || 'Student',
+      status: 'Active',
+      level: newStudentData.level || 'Beginner (Level 1)',
+      mustChangePassword: true
+    });
+
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
+    }
+
     const createdUser = {
-      id: `usr-${Date.now()}`,
+      id: dbRes.data?.id || `usr-${Date.now()}`,
       name: newStudentData.name.trim(),
       username: newStudentData.username.trim().toLowerCase(),
       password: hashedPassword,
@@ -216,8 +249,8 @@ export function AuthProvider({ children }) {
       mustChangePassword: true
     };
 
-    const updatedList = [createdUser, ...currentUsers];
-    saveStoredUsers(updatedList);
+    const updatedList = [createdUser, ...users];
+    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
     return { success: true, user: createdUser };
   };
@@ -227,8 +260,12 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Only Administrators can reset account passwords.' };
     }
 
-    const hashedPassword = await hashPassword(newPassword);
-    const currentUsers = getStoredUsers();
+    const dbRes = await updateStudentUserInDb(userId, { password: hashedPassword, mustChangePassword: true });
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
+    }
+
+    const currentUsers = users.length > 0 ? users : getStoredUsers();
     const updatedList = currentUsers.map(u => {
       if (u.id === userId) {
         return {
@@ -240,7 +277,7 @@ export function AuthProvider({ children }) {
       return u;
     });
 
-    saveStoredUsers(updatedList);
+    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     if (currentUser.id === userId) {
@@ -257,8 +294,12 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'You must be signed in to change your password.' };
     }
 
-    const hashedPassword = await hashPassword(newPassword);
-    const currentUsers = getStoredUsers();
+    const dbRes = await updateStudentUserInDb(currentUser.id, { password: hashedPassword, mustChangePassword: false });
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
+    }
+
+    const currentUsers = users.length > 0 ? users : getStoredUsers();
     const updatedList = currentUsers.map(u => {
       if (u.id === currentUser.id) {
         return {
@@ -270,7 +311,7 @@ export function AuthProvider({ children }) {
       return u;
     });
 
-    saveStoredUsers(updatedList);
+    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: false };
