@@ -35,38 +35,59 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     onStartVocabLesson(lesson.id);
   };
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 space-y-6 font-body">
-      {/* Top Sticky Header Card with Visual Progress Bar */}
-      <div className="sticky top-2 sm:top-4 z-40 bg-surface-container-lowest/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-outline-variant/80 shadow-md space-y-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-xl">insights</span>
-            <span className="text-xs sm:text-sm font-extrabold text-on-surface font-headline uppercase tracking-wider">
-              Course Progress
-            </span>
-          </div>
-          <span className="text-xs font-bold text-outline font-label">
-            {progressPercentage}%
-          </span>
-        </div>
+  const strokeDasharray = 138.23;
+  const strokeDashoffset = strokeDasharray - (progressPercentage / 100) * strokeDasharray;
 
-        {/* Visual Progress Bar (Clickable to scroll to topmost incomplete lesson) */}
-        <div
-          onClick={handleProgressBarClick}
-          className={`w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden border border-outline-variant/40 transition-all ${
-            progressPercentage < 100 ? 'cursor-pointer hover:ring-2 hover:ring-primary/40' : ''
-          }`}
-          role="progressbar"
-          aria-valuenow={progressPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          title={progressPercentage < 100 ? "Click to scroll to topmost unfinished lesson" : "100% Completed!"}
-        >
-          <div
-            className="bg-primary h-full rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${progressPercentage}%` }}
-          />
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 font-body relative">
+      {/* Floating Circular Progress Bar Widget (Fixed at bottom-right) */}
+      <div
+        onClick={handleProgressBarClick}
+        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/80 rounded-full p-2 shadow-2xl flex items-center justify-center transition-all duration-300 ${
+          progressPercentage < 100
+            ? 'cursor-pointer hover:scale-110 hover:shadow-primary/20 hover:border-primary/50'
+            : 'cursor-default'
+        }`}
+        role="progressbar"
+        aria-valuenow={progressPercentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        title={progressPercentage < 100 ? "Click to scroll to topmost unfinished lesson" : "100% Completed!"}
+      >
+        <div className="relative w-14 h-14 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 52 52">
+            {/* Background Track Circle */}
+            <circle
+              cx="26"
+              cy="26"
+              r="22"
+              className="text-surface-container-high stroke-current"
+              strokeWidth="4"
+              fill="transparent"
+            />
+            {/* Animated Progress Ring */}
+            <circle
+              cx="26"
+              cy="26"
+              r="22"
+              className="text-primary stroke-current transition-all duration-700 ease-out"
+              strokeWidth="4"
+              strokeDasharray={strokeDasharray}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+            />
+          </svg>
+          {/* Center Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            {progressPercentage >= 100 ? (
+              <span className="material-symbols-outlined text-emerald-600 text-xl font-bold">check_circle</span>
+            ) : (
+              <span className="text-[11px] font-extrabold text-on-surface font-headline leading-none">
+                {progressPercentage}%
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
