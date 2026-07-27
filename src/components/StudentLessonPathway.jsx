@@ -49,67 +49,44 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     onStartVocabLesson(lesson.id);
   };
 
-  // SVG Ring dimensions for 100px (r=32, viewBox 0 0 80 80)
-  const strokeDasharray = 201.06;
-  const strokeDashoffset = strokeDasharray - (progressPercentage / 100) * strokeDasharray;
-
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 font-body relative">
-      {/* Large Floating Green Circular Progress Bar Widget (Fixed at bottom-right) */}
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8 font-body relative">
+      {/* Sleek Non-Overlapping Sticky Progress Header */}
       <div
         onClick={handleProgressBarClick}
-        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest text-on-surface border-2 border-emerald-500/70 rounded-full p-3 shadow-2xl backdrop-blur-md flex items-center justify-center transition-all duration-500 ${
-          isAnimatingProgress
-            ? 'scale-125 ring-8 ring-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.6)] animate-bounce'
-            : progressPercentage < 100
-            ? 'cursor-pointer hover:scale-110 hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/30'
-            : 'cursor-default border-emerald-500'
-        }`}
         role="progressbar"
         aria-valuenow={progressPercentage}
         aria-valuemin={0}
         aria-valuemax={100}
-        title={progressPercentage < 100 ? "Click to scroll to topmost unfinished lesson" : "100% Course Completed!"}
+        title={progressPercentage < 100 ? "Click to jump to current lesson" : "100% Course Completed!"}
+        className={`sticky top-20 z-30 bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant rounded-3xl p-4 sm:p-5 shadow-md transition-all duration-300 ${
+          progressPercentage < 100 ? 'cursor-pointer hover:shadow-lg hover:border-emerald-500/50' : ''
+        } ${isAnimatingProgress ? 'ring-4 ring-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : ''}`}
       >
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-            {/* Background Track Circle */}
-            <circle
-              cx="40"
-              cy="40"
-              r="32"
-              className="text-surface-container-high stroke-current"
-              strokeWidth="6"
-              fill="transparent"
-            />
-            {/* Vibrant Green Progress Ring */}
-            <circle
-              cx="40"
-              cy="40"
-              r="32"
-              className="text-emerald-500 stroke-current transition-all duration-1200 ease-out"
-              strokeWidth="6"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              fill="transparent"
-            />
-          </svg>
-          {/* Center Content with Large Font */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            {progressPercentage >= 100 ? (
-              <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-3xl font-extrabold">workspace_premium</span>
-            ) : (
-              <span className="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-headline leading-none">
-                {progressPercentage}%
-              </span>
-            )}
+        <div className="flex flex-row items-center justify-between gap-3">
+          {/* Visual Progress Bar */}
+          <div className="flex-1 min-w-0">
+            <div className="h-4 w-full bg-surface-container-high rounded-full overflow-hidden p-0.5 border border-outline-variant/30 shadow-inner relative group">
+              <div
+                className={`h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 transition-all duration-700 ease-out shadow-[0_0_12px_rgba(16,185,129,0.5)] ${
+                  isAnimatingProgress ? 'animate-pulse' : ''
+                }`}
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Progress Percentage Badge (Always on Right Side of Progress Bar) */}
+          <div className="shrink-0 flex items-center">
+            <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+              {progressPercentage}%
+            </span>
           </div>
         </div>
       </div>
 
       {/* Dynamic Visual Roadmap Pathway */}
-      <div className="relative flex flex-col items-center space-y-12">
+      <div className="relative flex flex-col items-center space-y-12 pt-2">
         {/* Curving Pathway Background Line */}
         <div className="absolute top-10 bottom-10 w-1 bg-surface-container-high rounded-full z-0"></div>
 
@@ -130,22 +107,20 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
               <div
                 key={lesson.id}
                 ref={(el) => (nodeRefs.current[lesson.id] = el)}
-                className={`relative z-10 flex flex-col items-center space-y-3 group ${
-                  isTopLesson ? 'pb-6' : 'py-6'
-                } transition-all duration-300`}
+                className={`relative z-10 flex flex-col items-center space-y-3 group ${isTopLesson ? 'pb-6' : 'py-6'
+                  } transition-all duration-300`}
               >
                 {/* Node Icon */}
                 {isCompleted ? (
-                  <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md ring-4 ring-emerald-100 transition-transform group-hover:scale-105">
+                  <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md ring-4 ring-emerald-100 dark:ring-emerald-900/40 transition-transform group-hover:scale-105">
                     <span className="material-symbols-outlined text-3xl font-bold">check</span>
                   </div>
                 ) : (
                   <div
-                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${
-                      isCurrentTopIncomplete
-                        ? 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
-                        : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
-                    }`}
+                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${isCurrentTopIncomplete
+                      ? 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
+                      : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
+                      }`}
                   >
                     <span className="material-symbols-outlined text-3xl">
                       {lesson.type === 'custom' ? 'menu_book' : lesson.type === 'vocab quiz' ? 'quiz' : 'style'}
@@ -155,17 +130,16 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                 {/* Node Card Box */}
                 <div
-                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${
-                    isHighlighted
-                      ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105'
-                      : isCurrentTopIncomplete
+                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${isHighlighted
+                    ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105 shadow-xl'
+                    : isCurrentTopIncomplete
                       ? 'border-2 border-primary shadow-lg'
                       : 'border-outline-variant'
-                  }`}
+                    }`}
                 >
                   <div>
                     {isCompleted && (
-                      <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-md uppercase">
+                      <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold rounded-md uppercase">
                         Completed
                       </span>
                     )}
@@ -180,11 +154,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                   <button
                     onClick={() => handleLaunchLesson(lesson)}
-                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                      isCompleted
-                        ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
-                        : 'bg-primary hover:bg-primary-container text-on-primary'
-                    }`}
+                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${isCompleted
+                      ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
+                      : 'bg-primary hover:bg-primary-container text-on-primary'
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">
                       {isCompleted ? 'replay' : 'play_circle'}
@@ -200,3 +173,4 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     </div>
   );
 }
+
