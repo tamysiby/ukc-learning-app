@@ -195,7 +195,9 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                 {/* Node Card Box */}
                 <div
                   className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${isHighlighted
-                    ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105 shadow-xl'
+                    ? isCompleted
+                      ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105 shadow-xl'
+                      : 'border-2 border-primary ring-4 ring-primary/20 scale-105 shadow-xl'
                     : isCurrentTopIncomplete
                       ? 'border-2 border-primary shadow-lg'
                       : 'border-outline-variant'
