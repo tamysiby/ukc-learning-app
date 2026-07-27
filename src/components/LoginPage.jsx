@@ -93,7 +93,7 @@ export default function LoginPage() {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-label">
+              <label htmlFor="login-username-input" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-label">
                 Username
               </label>
               <div className="relative">
@@ -101,6 +101,7 @@ export default function LoginPage() {
                   account_circle
                 </span>
                 <input
+                  id="login-username-input"
                   type="text"
                   required
                   value={username}
@@ -114,7 +115,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-label">
+              <label htmlFor="login-password-input" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-label">
                 Password
               </label>
               <div className="relative">
@@ -122,6 +123,7 @@ export default function LoginPage() {
                   lock
                 </span>
                 <input
+                  id="login-password-input"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}

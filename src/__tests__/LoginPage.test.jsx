@@ -18,8 +18,8 @@ describe('LoginPage Component', () => {
     );
 
     expect(screen.getByText('UKC Learning Portal')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('minji.kim')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('••••••••••••')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
   });
 
@@ -30,8 +30,8 @@ describe('LoginPage Component', () => {
       </AuthProvider>
     );
 
-    const usernameInput = screen.getByPlaceholderText('minji.kim');
-    const passInput = screen.getByPlaceholderText('••••••••••••');
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const passInput = screen.getByLabelText(/Password/i);
     const submitBtn = screen.getByRole('button', { name: /Sign In to Portal/i });
 
     fireEvent.change(usernameInput, { target: { value: 'unknown_user' } });

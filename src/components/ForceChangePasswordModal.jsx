@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function ForceChangePasswordModal() {
-  const { currentUser, changeUserPassword } = useAuth();
+  const { currentUser, changeUserPassword, logout } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,14 +39,24 @@ export default function ForceChangePasswordModal() {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in font-body">
       <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-            <span className="material-symbols-outlined text-2xl">lock_reset</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <span className="material-symbols-outlined text-xl">lock_reset</span>
+            </div>
+            <div>
+              <h2 className="text-lg font-extrabold text-on-surface font-headline">Password Update Required</h2>
+              <p className="text-xs text-on-surface-variant font-label">Set a new password to continue.</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-extrabold text-on-surface font-headline">Password Update Required</h2>
-            <p className="text-xs text-on-surface-variant font-label">Please set a new password before continuing.</p>
-          </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="p-2 text-outline hover:text-on-surface hover:bg-surface-container-high rounded-xl transition-colors cursor-pointer"
+            title="Logout & Exit"
+          >
+            <span className="material-symbols-outlined text-xl">logout</span>
+          </button>
         </div>
 
         {error && (
@@ -110,23 +120,33 @@ export default function ForceChangePasswordModal() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3.5 bg-primary hover:bg-primary-container text-on-primary font-bold text-sm rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
-          >
-            {isSubmitting ? (
-              <>
-                <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-                <span>Saving Password...</span>
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-lg">check_circle</span>
-                <span>Save New Password</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={logout}
+              className="px-4 py-3 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors min-h-[44px]"
+            >
+              <span className="material-symbols-outlined text-lg">logout</span>
+              <span>Logout</span>
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-3 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-lg">check_circle</span>
+                  <span>Save New Password</span>
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>

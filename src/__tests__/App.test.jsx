@@ -13,7 +13,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
   it('renders landing login page when unauthenticated', () => {
     render(<App />);
     expect(screen.getByText('UKC Learning Portal')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('minji.kim')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sign In to Portal/i })).toBeInTheDocument();
   });
 
