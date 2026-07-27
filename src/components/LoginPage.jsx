@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Pending active session confirm modal state
   const [pendingLogin, setPendingLogin] = useState(null);
 
@@ -108,7 +108,6 @@ export default function LoginPage() {
                     clearError();
                     setUsername(e.target.value);
                   }}
-                  placeholder="minji.kim"
                   className="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
@@ -130,7 +129,6 @@ export default function LoginPage() {
                     clearError();
                     setPassword(e.target.value);
                   }}
-                  placeholder="••••••••••••"
                   className="w-full pl-10 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 <button
