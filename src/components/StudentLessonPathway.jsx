@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getStudentPathwayNodes } from '../services/lessonRegistry';
 
@@ -14,6 +14,20 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   const totalLessons = pathwayNodes.length;
   const completedCount = pathwayNodes.filter(n => completedLessonIds.includes(n.id)).length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  // Track progress increase animation on completion
+  const prevCompletedCountRef = useRef(completedCount);
+  const [isAnimatingProgress, setIsAnimatingProgress] = useState(false);
+
+  useEffect(() => {
+    if (completedCount > prevCompletedCountRef.current) {
+      setIsAnimatingProgress(true);
+      const timer = setTimeout(() => setIsAnimatingProgress(false), 3000);
+      prevCompletedCountRef.current = completedCount;
+      return () => clearTimeout(timer);
+    }
+    prevCompletedCountRef.current = completedCount;
+  }, [completedCount]);
 
   // Topmost incomplete lesson
   const topmostIncompleteLesson = pathwayNodes.find(n => !completedLessonIds.includes(n.id));
@@ -35,54 +49,58 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     onStartVocabLesson(lesson.id);
   };
 
-  const strokeDasharray = 138.23;
+  // SVG Ring dimensions for 100px (r=32, viewBox 0 0 80 80)
+  const strokeDasharray = 201.06;
   const strokeDashoffset = strokeDasharray - (progressPercentage / 100) * strokeDasharray;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 font-body relative">
-      {/* Floating Circular Progress Bar Widget (Fixed at bottom-right) */}
+      {/* Large Floating Green Circular Progress Bar Widget (Fixed at bottom-right) */}
       <div
         onClick={handleProgressBarClick}
-        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/80 rounded-full p-2 shadow-2xl flex items-center justify-center transition-all duration-300 ${progressPercentage < 100
-            ? 'cursor-pointer hover:scale-110 hover:shadow-primary/20 hover:border-primary/50'
-            : 'cursor-default'
-          }`}
+        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest text-on-surface border-2 border-emerald-500/70 rounded-full p-3 shadow-2xl backdrop-blur-md flex items-center justify-center transition-all duration-500 ${
+          isAnimatingProgress
+            ? 'scale-125 ring-8 ring-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.6)] animate-bounce'
+            : progressPercentage < 100
+            ? 'cursor-pointer hover:scale-110 hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/30'
+            : 'cursor-default border-emerald-500'
+        }`}
         role="progressbar"
         aria-valuenow={progressPercentage}
         aria-valuemin={0}
         aria-valuemax={100}
-        title={progressPercentage < 100 ? "Click to scroll to topmost unfinished lesson" : "100% Completed!"}
+        title={progressPercentage < 100 ? "Click to scroll to topmost unfinished lesson" : "100% Course Completed!"}
       >
-        <div className="relative w-14 h-14 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 52 52">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
             {/* Background Track Circle */}
             <circle
-              cx="26"
-              cy="26"
-              r="22"
+              cx="40"
+              cy="40"
+              r="32"
               className="text-surface-container-high stroke-current"
-              strokeWidth="4"
+              strokeWidth="6"
               fill="transparent"
             />
-            {/* Animated Progress Ring */}
+            {/* Vibrant Green Progress Ring */}
             <circle
-              cx="26"
-              cy="26"
-              r="22"
-              className="text-primary stroke-current transition-all duration-700 ease-out"
-              strokeWidth="4"
+              cx="40"
+              cy="40"
+              r="32"
+              className="text-emerald-500 stroke-current transition-all duration-1200 ease-out"
+              strokeWidth="6"
               strokeDasharray={strokeDasharray}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
               fill="transparent"
             />
           </svg>
-          {/* Center Content */}
+          {/* Center Content with Large Font */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
             {progressPercentage >= 100 ? (
-              <span className="material-symbols-outlined text-emerald-600 text-xl font-bold">check_circle</span>
+              <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-3xl font-extrabold">workspace_premium</span>
             ) : (
-              <span className="text-[11px] font-extrabold text-on-surface font-headline leading-none">
+              <span className="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-headline leading-none">
                 {progressPercentage}%
               </span>
             )}
@@ -112,8 +130,9 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
               <div
                 key={lesson.id}
                 ref={(el) => (nodeRefs.current[lesson.id] = el)}
-                className={`relative z-10 flex flex-col items-center space-y-3 group ${isTopLesson ? 'pb-6' : 'py-6'
-                  } transition-all duration-300`}
+                className={`relative z-10 flex flex-col items-center space-y-3 group ${
+                  isTopLesson ? 'pb-6' : 'py-6'
+                } transition-all duration-300`}
               >
                 {/* Node Icon */}
                 {isCompleted ? (
@@ -122,10 +141,11 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                   </div>
                 ) : (
                   <div
-                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${isCurrentTopIncomplete
+                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${
+                      isCurrentTopIncomplete
                         ? 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
                         : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
-                      }`}
+                    }`}
                   >
                     <span className="material-symbols-outlined text-3xl">
                       {lesson.type === 'custom' ? 'menu_book' : lesson.type === 'vocab quiz' ? 'quiz' : 'style'}
@@ -135,12 +155,13 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                 {/* Node Card Box */}
                 <div
-                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${isHighlighted
-                      ? 'border-2 border-amber-500 ring-4 ring-amber-500/20 scale-105'
+                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${
+                    isHighlighted
+                      ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105'
                       : isCurrentTopIncomplete
-                        ? 'border-2 border-primary shadow-lg'
-                        : 'border-outline-variant'
-                    }`}
+                      ? 'border-2 border-primary shadow-lg'
+                      : 'border-outline-variant'
+                  }`}
                 >
                   <div>
                     {isCompleted && (
@@ -159,10 +180,11 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                   <button
                     onClick={() => handleLaunchLesson(lesson)}
-                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${isCompleted
+                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                      isCompleted
                         ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
                         : 'bg-primary hover:bg-primary-container text-on-primary'
-                      }`}
+                    }`}
                   >
                     <span className="material-symbols-outlined text-base">
                       {isCompleted ? 'replay' : 'play_circle'}
