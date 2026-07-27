@@ -315,7 +315,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
                       key={`left-${item.id}`}
                       disabled={isMatched}
                       onClick={() => handleLeftClick(item)}
-                      className={`w-full py-2 px-3 rounded-2xl border text-sm font-bold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
+                      className={`w-full py-2 px-3 rounded-2xl border text-md font-bold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
                         ? 'bg-emerald-100 border-emerald-300 text-emerald-800 cursor-not-allowed opacity-60'
                         : isSelected
                           ? 'bg-primary/20 border-2 border-primary text-primary shadow-md'
@@ -344,7 +344,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
                       key={`right-${item.id}`}
                       disabled={isMatched}
                       onClick={() => handleRightClick(item)}
-                      className={`w-full py-2 px-3 rounded-2xl border text-sm font-semibold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
+                      className={`w-full py-2 px-3 rounded-2xl border text-md font-semibold flex items-center justify-center transition-all cursor-pointer min-h-[88px] ${isMatched
                         ? 'bg-emerald-100 border-emerald-300 text-emerald-800 cursor-not-allowed opacity-60'
                         : selectedLeft
                           ? 'bg-surface-container-lowest border-primary/50 text-on-surface hover:bg-primary/10'
