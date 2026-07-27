@@ -36,9 +36,9 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 font-body">
-      {/* Top Header Card with Visual Progress Bar */}
-      <div className="bg-surface-container-lowest p-5 sm:p-6 rounded-3xl border border-outline-variant/80 shadow-xs space-y-3">
+    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 space-y-6 font-body">
+      {/* Top Sticky Header Card with Visual Progress Bar */}
+      <div className="sticky top-2 sm:top-4 z-40 bg-surface-container-lowest/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-outline-variant/80 shadow-md space-y-2.5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-xl">insights</span>
