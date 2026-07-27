@@ -33,7 +33,7 @@ export const DEFAULT_LESSONS = [
       { id: 'v-15', korean: 'ㅘ', romanization: 'wa', english: 'wa', category: 'Vowels' },
       { id: 'v-16', korean: 'ㅝ', romanization: 'wo', english: 'wo', category: 'Vowels' },
       { id: 'v-17', korean: 'ㅟ', romanization: 'wi', english: 'wi', category: 'Vowels' },
-      { id: 'v-18', korean: 'ㅚ', romanization: 'oe', english: 'oe', category: 'Vowels' },
+      { id: 'v-18', korean: 'ㅚ', romanization: 'we', english: 'we', category: 'Vowels' },
       { id: 'v-19', korean: 'ㅞ', romanization: 'we', english: 'we', category: 'Vowels' },
       { id: 'v-20', korean: 'ㅙ', romanization: 'wae', english: 'wae', category: 'Vowels' },
       { id: 'v-21', korean: 'ㅢ', romanization: 'ui', english: 'ui', category: 'Vowels' }
