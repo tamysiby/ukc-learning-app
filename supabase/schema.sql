@@ -1,227 +1,132 @@
 -- ==========================================
--- UKC Learning App - Complete Supabase Schema
--- Project Reference: znmtrfujrebzrurwubly
+-- UKC Learning App - Supabase Database Schema & Migration
 -- ==========================================
 
--- Enable UUID extension
+-- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ------------------------------------------
--- 1. PROFILES TABLE (Linked to auth.users)
+-- 2. USERS TABLE
 -- ------------------------------------------
-CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS public.users (
+    id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
     email TEXT UNIQUE NOT NULL,
-    role TEXT NOT NULL CHECK (role IN ('Admin', 'Student')) DEFAULT 'Student',
+    name TEXT NOT NULL,
+    password TEXT NOT NULL DEFAULT 'StudentPass123!',
+    role TEXT NOT NULL CHECK (role IN ('Student', 'Admin')) DEFAULT 'Student',
     status TEXT NOT NULL CHECK (status IN ('Active', 'Inactive')) DEFAULT 'Active',
     level TEXT NOT NULL DEFAULT 'Beginner (Level 1)',
     progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
     streak INTEGER DEFAULT 0 CHECK (streak >= 0),
-    avatar TEXT DEFAULT 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    is_online BOOLEAN DEFAULT false,
+    active_session_id TEXT,
     last_active TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Index for fast lookup by email & role
-CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
-CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
-
--- Enable RLS on profiles
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- Profiles RLS Policies:
--- Allow authenticated users to read their own profile OR allow Admins to read all profiles
-CREATE POLICY "Admins can view all profiles" ON public.profiles
-    FOR SELECT TO authenticated
-    USING (
-        (auth.jwt() ->> 'role' = 'service_role') OR
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE id = auth.uid() AND role = 'Admin'
-        ) OR
-        id = auth.uid()
-    );
-
--- Allow Admins to insert new profiles
-CREATE POLICY "Admins can insert profiles" ON public.profiles
-    FOR INSERT TO authenticated
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE id = auth.uid() AND role = 'Admin'
-        ) OR id = auth.uid()
-    );
-
--- Allow users to update their own profile OR Admins to update any profile
-CREATE POLICY "Users and Admins can update profiles" ON public.profiles
-    FOR UPDATE TO authenticated
-    USING (
-        id = auth.uid() OR
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE id = auth.uid() AND role = 'Admin'
-        )
-    );
-
--- Allow Admins to delete profiles
-CREATE POLICY "Admins can delete profiles" ON public.profiles
-    FOR DELETE TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE id = auth.uid() AND role = 'Admin'
-        )
-    );
-
--- ------------------------------------------
--- 2. AUTOMATIC USER PROFILE TRIGGER
--- ------------------------------------------
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.profiles (id, name, email, role, level, status)
-    VALUES (
-        NEW.id,
-        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
-        NEW.email,
-        COALESCE(NEW.raw_user_meta_data->>'role', 'Student'),
-        COALESCE(NEW.raw_user_meta_data->>'level', 'Beginner (Level 1)'),
-        'Active'
-    )
-    ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
-        email = EXCLUDED.email,
-        updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Trigger execution
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- ------------------------------------------
--- 3. CURRICULUM UNITS & LESSONS TABLES
--- ------------------------------------------
-CREATE TABLE IF NOT EXISTS public.units (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    level TEXT NOT NULL,
-    description TEXT,
-    order_num INTEGER NOT NULL DEFAULT 1,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Index for lookup
+CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
+
+-- Enable RLS
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access to users" ON public.users FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated full access to users" ON public.users FOR ALL USING (true);
+
+-- ------------------------------------------
+-- 3. LESSONS TABLE
+-- ------------------------------------------
 CREATE TABLE IF NOT EXISTS public.lessons (
     id TEXT PRIMARY KEY,
-    unit_id TEXT REFERENCES public.units(id) ON DELETE CASCADE,
+    order_index NUMERIC NOT NULL,
+    unit TEXT NOT NULL,
     title TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('hangul_interactive', 'vocab_flashcard', 'quiz')),
-    order_num INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'ready_for_build',
-    content_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+    description TEXT,
+    type TEXT NOT NULL CHECK (type IN ('vocab', 'vocab quiz', 'custom')),
+    paired_vocab_id TEXT,
+    paired_quiz_id TEXT,
+    status TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active', 'Draft')),
+    words JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE public.units ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anyone can view units" ON public.units FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Anyone can view lessons" ON public.lessons FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow public read access to lessons" ON public.lessons FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated full access to lessons" ON public.lessons FOR ALL USING (true);
 
 -- ------------------------------------------
--- 4. STUDENT LESSON PROGRESS TABLE
+-- 4. STUDENT LESSON ACCESS TABLE (Batch Assignment)
 -- ------------------------------------------
-CREATE TABLE IF NOT EXISTS public.student_progress (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.student_lesson_access (
+    id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
+    student_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     lesson_id TEXT NOT NULL REFERENCES public.lessons(id) ON DELETE CASCADE,
-    completed BOOLEAN DEFAULT false,
-    score INTEGER DEFAULT 0,
-    mastered_cards JSONB DEFAULT '[]'::jsonb,
-    completed_at TIMESTAMPTZ DEFAULT NOW(),
+    assigned_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(student_id, lesson_id)
 );
 
-ALTER TABLE public.student_progress ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Students can view and manage their own progress" ON public.student_progress
-    FOR ALL TO authenticated
-    USING (student_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'Admin'));
+ALTER TABLE public.student_lesson_access ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated access to access table" ON public.student_lesson_access FOR ALL USING (true);
 
 -- ------------------------------------------
--- 5. INITIAL SEED DATA FOR UNITS & LESSONS
+-- 5. STUDENT LESSON PROGRESS TABLE
 -- ------------------------------------------
-INSERT INTO public.units (id, title, level, description, order_num) VALUES
-('unit-1', 'Korean Foundations', 'Beginner (Level 1)', 'Master core alphabet, daily nouns, verbs, and etiquette phrases.', 1)
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS public.student_lesson_progress (
+    id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
+    student_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    lesson_id TEXT NOT NULL REFERENCES public.lessons(id) ON DELETE CASCADE,
+    completed_at TIMESTAMPTZ DEFAULT NOW(),
+    score INTEGER DEFAULT 0,
+    UNIQUE(student_id, lesson_id)
+);
 
-INSERT INTO public.lessons (id, unit_id, title, type, order_num, status, content_json) VALUES
-('les-u1-00', 'unit-1', 'Introduction to Hangul (Korean Alphabet)', 'hangul_interactive', 0, 'ready_for_build', '{
-  "consonants": [
-    {"char": "ㄱ", "name": "Giyeok", "sound": "g/k"},
-    {"char": "ㄴ", "name": "Nieun", "sound": "n"},
-    {"char": "ㄷ", "name": "Digeut", "sound": "d/t"},
-    {"char": "ㄹ", "name": "Rieul", "sound": "r/l"},
-    {"char": "ㅁ", "name": "Mieum", "sound": "m"},
-    {"char": "ㅂ", "name": "Bieup", "sound": "b/p"},
-    {"char": "ㅅ", "name": "Siot", "sound": "s"},
-    {"char": "ㅇ", "name": "Ieung", "sound": "silent / ng"},
-    {"char": "ㅈ", "name": "Jieut", "sound": "j"},
-    {"char": "ㅎ", "name": "Hieut", "sound": "h"}
-  ],
-  "vowels": [
-    {"char": "ㅏ", "sound": "a"},
-    {"char": "ㅓ", "sound": "eo"},
-    {"char": "ㅗ", "sound": "o"},
-    {"char": "ㅜ", "sound": "u"},
-    {"char": "ㅡ", "sound": "eu"},
-    {"char": "ㅣ", "sound": "i"}
-  ],
-  "practiceBlocks": [
-    {"hangul": "가", "romanization": "ga", "components": ["ㄱ", "ㅏ"]},
-    {"hangul": "나", "romanization": "na", "components": ["ㄴ", "ㅏ"]},
-    {"hangul": "다", "romanization": "da", "components": ["ㄷ", "ㅏ"]},
-    {"hangul": "아", "romanization": "a", "components": ["ㅇ", "ㅏ"]},
-    {"hangul": "한국", "romanization": "Han-guk", "meaning": "Korea", "components": ["한", "국"]}
-  ]
-}'::jsonb),
-('les-u1-01', 'unit-1', 'Greetings & Manners', 'vocab_flashcard', 1, 'completed', '{
-  "flashcards": [
-    {"id": "fc-g1", "korean": "안녕하세요", "romanization": "An-nyeong-ha-se-yo", "english": "Hello / Good day (Formal)", "category": "Greetings", "exampleSentence": "안녕하세요! 반갑습니다.", "exampleTranslation": "Hello! Nice to meet you."},
-    {"id": "fc-g2", "korean": "안녕히 가세요", "romanization": "An-nyeong-hi ga-se-yo", "english": "Goodbye (to someone leaving)", "category": "Etiquette", "exampleSentence": "안녕히 가세요, 조심히 들어가세요.", "exampleTranslation": "Goodbye, get home safely."}
-  ]
-}'::jsonb),
-('les-u1-02', 'unit-1', 'Essential Daily Vocabulary', 'vocab_flashcard', 2, 'active', '{
-  "flashcards": [
-    {"id": "fc-1", "korean": "안녕하세요", "romanization": "An-nyeong-ha-se-yo", "english": "Hello / Good day (Formal)", "category": "Greetings", "exampleSentence": "안녕하세요! 만나서 반갑습니다.", "exampleTranslation": "Hello! Nice to meet you."},
-    {"id": "fc-2", "korean": "감사합니다", "romanization": "Gam-sa-ham-ni-da", "english": "Thank you (Formal)", "category": "Etiquette", "exampleSentence": "도와주셔서 감사합니다.", "exampleTranslation": "Thank you for helping me."},
-    {"id": "fc-3", "korean": "학교", "romanization": "Hak-gyo", "english": "School", "category": "Places & Education", "exampleSentence": "저는 아침 일찍 학교에 갑니다.", "exampleTranslation": "I go to school early in the morning."},
-    {"id": "fc-4", "korean": "학생", "romanization": "Hak-saeng", "english": "Student", "category": "People", "exampleSentence": "민지 씨는 열심히 공부하는 학생입니다.", "exampleTranslation": "Minji is a student who studies hard."},
-    {"id": "fc-5", "korean": "선생님", "romanization": "Seon-saeng-nim", "english": "Teacher / Instructor", "category": "People", "exampleSentence": "선생님께 질문을 드렸습니다.", "exampleTranslation": "I asked the teacher a question."}
-  ]
-}'::jsonb),
-('les-u1-03', 'unit-1', 'School & Education Words', 'vocab_flashcard', 3, 'ready_for_build', '{
-  "flashcards": [
-    {"id": "fc-se1", "korean": "책상", "romanization": "Chaek-sang", "english": "Desk", "category": "Classroom", "exampleSentence": "책상 위에 책이 있습니다.", "exampleTranslation": "There is a book on the desk."},
-    {"id": "fc-se2", "korean": "의자", "romanization": "Ui-ja", "english": "Chair", "category": "Classroom", "exampleSentence": "의자에 앉으세요.", "exampleTranslation": "Please sit on the chair."},
-    {"id": "fc-se3", "korean": "연필", "romanization": "Yeon-pil", "english": "Pencil", "category": "Supplies", "exampleSentence": "연필로 글씨를 씁니다.", "exampleTranslation": "I write with a pencil."},
-    {"id": "fc-se4", "korean": "교실", "romanization": "Gyo-sil", "english": "Classroom", "category": "Campus", "exampleSentence": "학생들이 교실에 있습니다.", "exampleTranslation": "Students are in the classroom."},
-    {"id": "fc-se5", "korean": "공부하다", "romanization": "Gong-bu-ha-da", "english": "To study", "category": "Verbs", "exampleSentence": "도서관에서 공부합니다.", "exampleTranslation": "I study in the library."}
-  ]
-}'::jsonb),
-('quiz-u1', 'unit-1', 'Unit 1 Master Quiz', 'quiz', 4, 'ready_for_build', '{
-  "passingScore": 80,
-  "questions": [
-    {"id": "u1-q1", "type": "multiple_choice", "prompt": "What is the correct formal phrase for ''Thank you''?", "options": ["감사합니다", "학교", "교실", "의자"], "correctIndex": 0},
-    {"id": "u1-q2", "type": "multiple_choice", "prompt": "What is the English meaning of ''선생님''?", "options": ["Student", "Teacher", "Pencil", "Desk"], "correctIndex": 1},
-    {"id": "u1-q3", "type": "multiple_choice", "prompt": "Complete: ''저는 _____에 갑니다.'' (I go to school.)", "options": ["학교", "안녕하세요", "반갑습니다", "연필"], "correctIndex": 0},
-    {"id": "u1-q4", "type": "multiple_choice", "prompt": "Which phrase do you use when YOU leave while the host stays?", "options": ["안녕히 계세요", "안녕히 가세요", "감사합니다", "공부하다"], "correctIndex": 0},
-    {"id": "u1-q5", "type": "multiple_choice", "prompt": "Complete: ''도서관에서 _____.'' (I study in the library.)", "options": ["공부합니다", "선생님", "학생", "책상"], "correctIndex": 0}
-  ]
-}'::jsonb)
+ALTER TABLE public.student_lesson_progress ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated access to progress table" ON public.student_lesson_progress FOR ALL USING (true);
+
+-- ------------------------------------------
+-- 6. SEED DATA FOR LESSONS
+-- ------------------------------------------
+INSERT INTO public.lessons (id, order_index, unit, title, description, type, paired_quiz_id, paired_vocab_id, status, words) VALUES
+('les-vowels-1', 1, 'Unit 1: Hangul & Korean Basics', '한글 모음', 'Learn fundamental Korean vowel characters and sound pronunciations.', 'vocab', 'les-vowels-quiz-1', NULL, 'Active', '[
+  {"id": "v-1", "korean": "ㅏ", "romanization": "a", "english": "a", "category": "Vowels"},
+  {"id": "v-2", "korean": "ㅓ", "romanization": "eo", "english": "eo", "category": "Vowels"},
+  {"id": "v-3", "korean": "ㅗ", "romanization": "o", "english": "o", "category": "Vowels"},
+  {"id": "v-4", "korean": "ㅜ", "romanization": "u", "english": "u", "category": "Vowels"},
+  {"id": "v-5", "korean": "ㅡ", "romanization": "eu", "english": "eu", "category": "Vowels"},
+  {"id": "v-6", "korean": "ㅣ", "romanization": "i", "english": "i", "category": "Vowels"}
+]'::jsonb),
+('les-vowels-quiz-1', 2, 'Unit 1: Hangul & Korean Basics', '한글 모음 퀴즈', 'Test your knowledge on Korean vowels and vocabulary.', 'vocab quiz', NULL, 'les-vowels-1', 'Active', '[]'::jsonb),
+('les-consonants-1', 3, 'Unit 1: Hangul & Korean Basics', '한글 자음', 'Learn basic Korean consonants and consonant vocabulary.', 'vocab', 'les-consonants-quiz-1', NULL, 'Active', '[
+  {"id": "c-1", "korean": "ㄱ", "romanization": "g", "english": "g", "category": "Consonants"},
+  {"id": "c-2", "korean": "ㄴ", "romanization": "n", "english": "n", "category": "Consonants"},
+  {"id": "c-3", "korean": "ㄷ", "romanization": "d", "english": "d", "category": "Consonants"}
+]'::jsonb),
+('les-consonants-quiz-1', 4, 'Unit 1: Hangul & Korean Basics', '한글 자음 퀴즈', 'Test your knowledge on Korean consonants and vocabulary.', 'vocab quiz', NULL, 'les-consonants-1', 'Active', '[]'::jsonb),
+('les-batchim-1', 4.5, 'Unit 1: Hangul & Korean Basics', '자음 4: 받침', 'Learn the concept of 받침 (final consonants) and the 7 representative sound groups.', 'custom', NULL, NULL, 'Active', '[
+  {"id": "bat-1", "korean": "밥", "romanization": "bap", "english": "rice", "category": "ㅂ [p]"},
+  {"id": "bat-21", "korean": "당근", "romanization": "dang-geun", "english": "carrot", "category": "ㅇ / ㄴ"}
+]'::jsonb),
+('les-eyo-1', 4.6, 'Unit 1: Hangul & Korean Basics', '입니다 & 이에요/예요', 'Learn sentence endings: 받침 O + 이에요 / 받침 X + 예요 and formal 입니다/입니까?.', 'custom', NULL, NULL, 'Active', '[
+  {"id": "eyo-1", "korean": "가방이에요", "romanization": "ga-bang-i-e-yo", "english": "it''s a bag", "category": "받침 O"},
+  {"id": "eyo-2", "korean": "의자예요", "romanization": "ui-ja-ye-yo", "english": "it''s a chair", "category": "받침 X"}
+]'::jsonb),
+('les-vocab-practice-1', 5, 'Unit 1: Hangul & Korean Basics', '단어연습 1', 'Essential Korean vocabulary reading practice (No 받침).', 'vocab', 'les-vocab-practice-quiz-1', NULL, 'Active', '[]'::jsonb),
+('les-vocab-practice-quiz-1', 6, 'Unit 1: Hangul & Korean Basics', '단어연습 1 퀴즈', 'Test your vocabulary knowledge on 단어연습1.', 'vocab quiz', NULL, 'les-vocab-practice-1', 'Active', '[]'::jsonb),
+('les-vocab-practice-2', 7, 'Unit 1: Hangul & Korean Basics', '단어연습 2', 'Korean vocabulary reading practice with 받침.', 'vocab', 'les-vocab-practice-quiz-2', NULL, 'Active', '[]'::jsonb),
+('les-vocab-practice-quiz-2', 8, 'Unit 1: Hangul & Korean Basics', '단어연습 2 퀴즈', 'Test your vocabulary knowledge on 단어연습2.', 'vocab quiz', NULL, 'les-vocab-practice-2', 'Active', '[]'::jsonb)
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  type = EXCLUDED.type,
+  words = EXCLUDED.words;
+
+-- ------------------------------------------
+-- 7. SEED DATA FOR USERS
+-- ------------------------------------------
+INSERT INTO public.users (id, email, name, password, role, status, level, progress, streak) VALUES
+('usr-admin-1', 'admin@ukc.edu', 'Tae-hyun Choi (Admin)', 'AdminPass123!', 'Admin', 'Active', 'Staff Administrator', 100, 45),
+('usr-1', 'minji.kim@ukc.edu', 'Min-ji Kim', 'StudentPass123!', 'Student', 'Active', 'Intermediate (Level 3)', 78, 14),
+('usr-2', 'jihoon.park@ukc.edu', 'Ji-hoon Park', 'StudentPass123!', 'Student', 'Active', 'Beginner (Level 1)', 42, 5),
+('usr-3', 'soojin.lee@ukc.edu', 'Soo-jin Lee', 'StudentPass123!', 'Student', 'Inactive', 'Advanced (Level 5)', 95, 0),
+('usr-5', 'eunji.choi@ukc.edu', 'Eun-ji Choi', 'StudentPass123!', 'Student', 'Active', 'Elementary (Level 2)', 60, 9)
 ON CONFLICT (id) DO NOTHING;
