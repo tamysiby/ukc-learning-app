@@ -6,7 +6,7 @@
   </defs>
 
   <!-- background -->
-  <rect width="583" height="497" fill="#ffffff"/>
+  <!-- <rect width="583" height="497" fill="#ffffff"/> -->
 
   <!-- plate -->
   <circle cx="301" cy="248" r="206" fill="#d9eaf4"/>
