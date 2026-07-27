@@ -43,11 +43,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
       {/* Floating Circular Progress Bar Widget (Fixed at bottom-right) */}
       <div
         onClick={handleProgressBarClick}
-        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/80 rounded-full p-2 shadow-2xl flex items-center justify-center transition-all duration-300 ${
-          progressPercentage < 100
+        className={`fixed bottom-6 right-6 z-50 bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/80 rounded-full p-2 shadow-2xl flex items-center justify-center transition-all duration-300 ${progressPercentage < 100
             ? 'cursor-pointer hover:scale-110 hover:shadow-primary/20 hover:border-primary/50'
             : 'cursor-default'
-        }`}
+          }`}
         role="progressbar"
         aria-valuenow={progressPercentage}
         aria-valuemin={0}
@@ -113,9 +112,8 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
               <div
                 key={lesson.id}
                 ref={(el) => (nodeRefs.current[lesson.id] = el)}
-                className={`relative z-10 flex flex-col items-center space-y-3 group ${
-                  isTopLesson ? 'pb-6' : 'py-6'
-                } transition-all duration-300`}
+                className={`relative z-10 flex flex-col items-center space-y-3 group ${isTopLesson ? 'pb-6' : 'py-6'
+                  } transition-all duration-300`}
               >
                 {/* Node Icon */}
                 {isCompleted ? (
@@ -124,11 +122,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                   </div>
                 ) : (
                   <div
-                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${
-                      isCurrentTopIncomplete
+                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${isCurrentTopIncomplete
                         ? 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
                         : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-3xl">
                       {lesson.type === 'custom' ? 'menu_book' : lesson.type === 'vocab quiz' ? 'quiz' : 'style'}
@@ -138,13 +135,12 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                 {/* Node Card Box */}
                 <div
-                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${
-                    isHighlighted
+                  className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${isHighlighted
                       ? 'border-2 border-amber-500 ring-4 ring-amber-500/20 scale-105'
                       : isCurrentTopIncomplete
-                      ? 'border-2 border-primary shadow-lg'
-                      : 'border-outline-variant'
-                  }`}
+                        ? 'border-2 border-primary shadow-lg'
+                        : 'border-outline-variant'
+                    }`}
                 >
                   <div>
                     {isCompleted && (
@@ -163,11 +159,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                   <button
                     onClick={() => handleLaunchLesson(lesson)}
-                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                      isCompleted
+                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${isCompleted
                         ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
                         : 'bg-primary hover:bg-primary-container text-on-primary'
-                    }`}
+                      }`}
                   >
                     <span className="material-symbols-outlined text-base">
                       {isCompleted ? 'replay' : 'play_circle'}
