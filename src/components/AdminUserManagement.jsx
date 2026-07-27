@@ -596,7 +596,6 @@ export default function AdminUserManagement({ onSelectUser }) {
                   required
                   value={newUser.name}
                   onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  placeholder="e.g. Soo-jin Park"
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
@@ -607,7 +606,6 @@ export default function AdminUserManagement({ onSelectUser }) {
                   required
                   value={newUser.username}
                   onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  placeholder="e.g. soojin.park"
                   className="w-full px-3.5 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs sm:text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
