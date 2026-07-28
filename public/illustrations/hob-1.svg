@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FFF7ED"/>
+  <!-- Pot Body -->
+  <path d="M22 46H78V70C78 74.4183 74.4183 78 70 78H30C25.5817 78 22 74.4183 22 70V46Z" fill="#F97316"/>
+  <rect x="18" y="40" width="64" height="6" rx="3" fill="#EA580C"/>
+  <!-- Pot Handles -->
+  <rect x="12" y="48" width="10" height="6" rx="3" fill="#C2410C"/>
+  <rect x="78" y="48" width="10" height="6" rx="3" fill="#C2410C"/>
+  <!-- Lid Knob -->
+  <circle cx="50" cy="30" r="5" fill="#F59E0B"/>
+  <path d="M30 36C30 32.6863 38.9543 30 50 30C61.0457 30 70 32.6863 70 36H30Z" fill="#FBBF24"/>
+  <!-- Steam Curves -->
+  <path d="M38 24C36 20 40 18 38 14" stroke="#F97316" stroke-width="3" stroke-linecap="round"/>
+  <path d="M50 22C48 18 52 16 50 12" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M62 24C60 20 64 18 62 14" stroke="#F97316" stroke-width="3" stroke-linecap="round"/>
+</svg>

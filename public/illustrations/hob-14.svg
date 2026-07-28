@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FEF3C7"/>
+  <!-- Wooden Palette -->
+  <path d="M22 48C22 30 36 22 54 22C72 22 82 34 82 50C82 66 68 76 52 76C42 76 38 70 34 70C30 70 28 74 22 70C18 66 22 56 22 48Z" fill="#F59E0B"/>
+  <circle cx="34" cy="58" r="5" fill="#FEF3C7"/>
+  <!-- Paint Dab Swatches -->
+  <circle cx="38" cy="34" r="4" fill="#EF4444"/>
+  <circle cx="50" cy="30" r="4" fill="#3B82F6"/>
+  <circle cx="62" cy="34" r="4" fill="#10B981"/>
+  <circle cx="70" cy="44" r="4" fill="#EC4899"/>
+  <!-- Paintbrush -->
+  <path d="M26 78L62 38" stroke="#78350F" stroke-width="4" stroke-linecap="round"/>
+  <rect x="58" y="34" width="8" height="6" rx="2" fill="#94A3B8" transform="rotate(-45 58 34)"/>
+  <path d="M66 28C68 24 72 26 74 30C72 32 68 32 66 28Z" fill="#EC4899"/>
+</svg>

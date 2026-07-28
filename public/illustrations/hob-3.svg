@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#F3E8FF"/>
+  <!-- Gamepad Body -->
+  <path d="M22 36C18 36 14 48 16 64C17 72 26 76 34 70L44 62H56L66 70C74 76 83 72 84 64C86 48 82 36 78 36H22Z" fill="#8B5CF6"/>
+  <!-- D-Pad -->
+  <rect x="28" y="46" width="12" height="4" rx="2" fill="#3B82F6"/>
+  <rect x="32" y="42" width="4" height="12" rx="2" fill="#3B82F6"/>
+  <!-- Action Buttons -->
+  <circle cx="68" cy="45" r="3" fill="#EF4444"/>
+  <circle cx="74" cy="51" r="3" fill="#F59E0B"/>
+  <circle cx="68" cy="57" r="3" fill="#10B981"/>
+  <circle cx="62" cy="51" r="3" fill="#60A5FA"/>
+</svg>

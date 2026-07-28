@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FEF3C7"/>
+  <!-- Book Cover -->
+  <path d="M16 68V34C16 30 20 28 24 28H48V72H24C19 72 16 68 16 68Z" fill="#3B82F6"/>
+  <path d="M84 68V34C84 30 80 28 76 28H52V72H76C81 72 84 68 84 68Z" fill="#2563EB"/>
+  <!-- Book Pages -->
+  <path d="M20 34H46V68H24C21 68 20 66 20 64V34Z" fill="#FFFFFF"/>
+  <path d="M80 34H54V68H76C79 68 80 66 80 64V34Z" fill="#F8FAFC"/>
+  <!-- Bookmark -->
+  <path d="M46 28V52L50 48L54 52V28H46Z" fill="#EF4444"/>
+  <!-- Page Text Lines -->
+  <line x1="26" y1="42" x2="40" y2="42" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26" y1="50" x2="40" y2="50" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="60" y1="42" x2="74" y2="42" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="60" y1="50" x2="74" y2="50" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+</svg>

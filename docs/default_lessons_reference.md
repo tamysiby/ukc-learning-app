@@ -264,6 +264,44 @@ All lesson data is now fetched dynamically from the Supabase database table `les
     "type": "vocab quiz",
     "pairedVocabId": "les-vocab-practice-2",
     "status": "Active"
+  },
+  {
+    "id": "les-hobbies-1",
+    "order": 9,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Hobbies (취미)",
+    "description": "Essential Korean vocabulary for hobbies, sports, and leisure activities.",
+    "type": "vocab",
+    "pairedQuizId": "les-hobbies-quiz-1",
+    "status": "Active",
+    "words": [
+      { "id": "hob-1", "korean": "요리", "romanization": "yo-ri", "english": "cooking", "category": "Hobbies" },
+      { "id": "hob-2", "korean": "야구", "romanization": "ya-gu", "english": "baseball", "category": "Sports" },
+      { "id": "hob-3", "korean": "컴퓨터 게임", "romanization": "keom-pyu-teo ge-im", "english": "computer games", "category": "Hobbies" },
+      { "id": "hob-4", "korean": "음악 감상", "romanization": "eum-ag gam-sang", "english": "listening to music", "category": "Hobbies" },
+      { "id": "hob-5", "korean": "수영", "romanization": "su-yeong", "english": "swimming", "category": "Sports" },
+      { "id": "hob-6", "korean": "농구", "romanization": "nong-gu", "english": "basketball", "category": "Sports" },
+      { "id": "hob-7", "korean": "태권도", "romanization": "tae-gwon-do", "english": "taekwondo", "category": "Sports" },
+      { "id": "hob-8", "korean": "독서", "romanization": "dok-seo", "english": "reading", "category": "Hobbies" },
+      { "id": "hob-9", "korean": "영화 감상", "romanization": "yeong-hwa gam-sang", "english": "watching movies", "category": "Hobbies" },
+      { "id": "hob-10", "korean": "여행", "romanization": "yeo-haeng", "english": "traveling", "category": "Hobbies" },
+      { "id": "hob-11", "korean": "쇼핑", "romanization": "syo-ping", "english": "shopping", "category": "Hobbies" },
+      { "id": "hob-12", "korean": "축구", "romanization": "chuk-gu", "english": "soccer", "category": "Sports" },
+      { "id": "hob-13", "korean": "러닝", "romanization": "reo-ning", "english": "running", "category": "Sports" },
+      { "id": "hob-14", "korean": "그림 그리기", "romanization": "geu-rim geu-ri-gi", "english": "drawing", "category": "Hobbies" },
+      { "id": "hob-15", "korean": "필라테스", "romanization": "pil-ra-te-seu", "english": "pilates", "category": "Sports" },
+      { "id": "hob-16", "korean": "산책", "romanization": "san-chaek", "english": "walking", "category": "Hobbies" }
+    ]
+  },
+  {
+    "id": "les-hobbies-quiz-1",
+    "order": 10,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Hobbies Quiz (취미 퀴즈)",
+    "description": "Test your knowledge on Korean hobbies vocabulary.",
+    "type": "vocab quiz",
+    "pairedVocabId": "les-hobbies-1",
+    "status": "Active"
   }
 ]
 ```

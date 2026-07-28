@@ -9,7 +9,8 @@ export function hasVocabIllustration(word) {
     'vp1-11', 'vp1-12', 'vp1-13', 'vp1-14', 'vp1-15', 'vp1-16', 'vp1-17', 'vp1-18', 'vp1-19', 'vp1-20',
     'vp1-21', 'vp1-22', 'vp1-23', 'vp1-24', 'vp1-25', 'vp1-26', 'vp1-27', 'vp1-28', 'vp1-29', 'vp1-30', 'vp1-31',
     'vp2-1', 'vp2-2', 'vp2-3', 'vp2-4', 'vp2-5', 'vp2-6', 'vp2-7', 'vp2-8', 'vp2-9', 'vp2-10',
-    'vp2-11', 'vp2-12', 'vp2-13', 'vp2-14', 'vp2-15', 'vp2-16', 'vp2-17', 'vp2-18', 'vp2-19', 'vp2-20'
+    'vp2-11', 'vp2-12', 'vp2-13', 'vp2-14', 'vp2-15', 'vp2-16', 'vp2-17', 'vp2-18', 'vp2-19', 'vp2-20',
+    'hob-1', 'hob-2', 'hob-3', 'hob-4', 'hob-5', 'hob-6', 'hob-7', 'hob-8', 'hob-9', 'hob-10', 'hob-11', 'hob-12', 'hob-13', 'hob-14', 'hob-15', 'hob-16'
   ];
   return availableIds.includes(key);
 }

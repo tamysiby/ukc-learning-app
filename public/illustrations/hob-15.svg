@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FCE7F3"/>
+  <!-- Pilates Mat -->
+  <path d="M16 68L36 52H84L64 68H16Z" fill="#EC4899"/>
+  <path d="M16 68C14 68 12 66 12 64C12 62 14 60 16 60H22L16 68Z" fill="#BE185D"/>
+  <!-- Pilates Ball -->
+  <circle cx="48" cy="40" r="18" fill="#8B5CF6"/>
+  <path d="M34 34C40 42 56 42 62 34" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/>
+  <path d="M36 46C42 50 54 50 60 46" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/>
+</svg>

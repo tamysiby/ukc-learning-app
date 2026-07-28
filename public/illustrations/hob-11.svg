@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FDF2F8"/>
+  <!-- Rear Bag (Yellow) -->
+  <rect x="42" y="38" width="38" height="44" rx="6" fill="#FBBF24"/>
+  <path d="M53 38C53 32 69 32 69 38" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+  <!-- Front Bag (Pink) -->
+  <rect x="20" y="44" width="40" height="40" rx="6" fill="#EC4899"/>
+  <path d="M32 44C32 36 48 36 48 44" stroke="#BE185D" stroke-width="4" stroke-linecap="round"/>
+  <!-- Tag Accent -->
+  <circle cx="32" cy="56" r="3" fill="#FFFFFF"/>
+</svg>

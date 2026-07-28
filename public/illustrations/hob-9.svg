@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="20" fill="#FCE7F3"/>
+  <!-- Clapperboard Base -->
+  <rect x="20" y="44" width="60" height="40" rx="6" fill="#1E293B"/>
+  <!-- Top Clapper Bar -->
+  <g transform="rotate(-10 20 40)">
+    <rect x="20" y="32" width="60" height="12" rx="3" fill="#0F172A"/>
+    <path d="M25 32L33 44M41 32L49 44M57 32L65 44" stroke="#FFFFFF" stroke-width="3"/>
+  </g>
+  <!-- Play Icon on Clapper -->
+  <polygon points="46,54 60,64 46,74" fill="#F43F5E"/>
+</svg>
