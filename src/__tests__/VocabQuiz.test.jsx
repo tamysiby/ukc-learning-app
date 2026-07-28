@@ -15,6 +15,13 @@ describe('Dynamic Vocab Quiz Generator & Component', () => {
     { id: 'v-8', korean: 'ㅐ', romanization: 'ae', english: 'ae' }
   ];
 
+  it('generates empty array when given invalid or empty vocabulary lists', () => {
+    expect(generateRandomVocabQuiz([])).toEqual([]);
+    expect(generateRandomVocabQuiz(null)).toEqual([]);
+    expect(generateRandomVocabQuiz(undefined)).toEqual([]);
+    expect(generateRandomVocabQuiz([null, undefined, {}])).toEqual([]);
+  });
+
   it('generates exactly 10 questions with 2 matching questions and 8 question items in randomized order', () => {
     const questions = generateRandomVocabQuiz(sampleWords);
     expect(questions.length).toBe(10);
