@@ -104,12 +104,14 @@ function AppContent() {
         const pairedVocab = lessons.find(l => l.id === target?.pairedVocabId) || lessons[0];
         const poolWords = (pairedVocab?.words && pairedVocab.words.length > 0) ? pairedVocab.words : (target?.words || []);
 
-        setActiveQuizQuestions(prev => {
-          if (activeVocabLesson?.id && activeVocabLesson.id !== target.id) {
-            return generateRandomVocabQuiz(poolWords);
-          }
-          return prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords);
-        });
+        if (poolWords.length > 0) {
+          setActiveQuizQuestions(prev => {
+            if (activeVocabLesson?.id && activeVocabLesson.id !== target.id) {
+              return generateRandomVocabQuiz(poolWords);
+            }
+            return prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords);
+          });
+        }
         setActiveVocabLesson(target);
         setCurrentTab('vocab-quiz');
       } else if (route.tab === 'hangul') {
@@ -142,7 +144,7 @@ function AppContent() {
 
     window.addEventListener('hashchange', syncRouteFromHash);
     return () => window.removeEventListener('hashchange', syncRouteFromHash);
-  }, [isAuthenticated, userRole, currentUser?.id]);
+  }, [isAuthenticated, userRole, currentUser?.id, lessons]);
 
   // Focus Mode when student is active inside a lesson or quiz
   const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo');
