@@ -19,31 +19,14 @@ This document specifies the authentication rules, session management policies, r
   - Visible in DevTools under **Application $\rightarrow$ Session Storage** for explicit session inspection.
   - Mirrored in `localStorage` to ensure cross-tab and cross-window HTML5 `storage` events trigger instantly.
 
-### 2.2 Active Session Warning Confirmation Dialog
-- When a user attempts to sign in (via credentials or quick demo shortcuts), the portal checks if the account already has an active session (`isOnline: true` or active `sessionId`).
-- If an active session is detected, login is intercepted and an **Active Session Confirmation Dialog** appears:
-  - **Header**: *"Active Session Detected"*
-  - **Warning**: *"Logging in now will terminate the active session on your other device/tab, and any unsaved progress in ongoing lessons or interactive decks will be reset."*
-  - **Options**:
-    - `Cancel Login`: Aborts sign-in and preserves the existing session.
-    - `Log In & Disconnect Older Session`: Supersedes the older session with a new `sessionId`.
-
-### 2.3 Single-Session Enforcement (No Duplicate Sessions)
-- Every successful login generates a unique cryptographic `sessionId`.
-- A user account can have **only one active session** at a time.
-- When a new session is authorized, older active tabs detect the `sessionId` change via cross-tab storage listeners and periodic heartbeats (every 2s).
-- The older session is immediately terminated with notice:  
-  `"Your account was logged in from another session. You have been automatically signed out."`
-
-### 2.4 15-Minute Throttled Inactivity Auto-Logout
+### 2.2 15-Minute Throttled Inactivity Auto-Logout
 - **Inactivity Timeout**: 15 minutes (900,000 ms).
 - **Zero CPU / Quota Overhead**:
   - User interaction listeners (`mousemove`, `keydown`, `click`, `touchstart`, `scroll`) update `lastActiveTimestamp` at a **throttled interval of once every 10 seconds** (0 CPU lag).
   - The inactivity countdown runs **100% in-memory on the client side** without consuming database network calls.
-- **Auto-Logout Action**: When 15 minutes pass with no user interactions, the portal automatically signs out the user and displays:  
-  `"You were automatically logged out due to 15 minutes of inactivity."`
+- **Auto-Logout Action**: When 15 minutes pass with no user interactions, the portal automatically signs out the user.
 
-### 2.5 Real-Time Online Status Monitoring
+### 2.3 Real-Time Online Status Monitoring
 - The Admin User Management portal tracks `isOnline` status in real-time.
 - **🟢 Online** status badge with glowing indicator displays in user list tables, mobile cards, and student details headers when a student or admin is currently logged in.
 - **Status Filter**: Includes an `Online Now` filter option to quickly view all currently active students.

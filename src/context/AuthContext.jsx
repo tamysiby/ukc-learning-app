@@ -11,8 +11,7 @@ import {
   isDev,
   createStudentUserInDb,
   updateStudentUserInDb,
-  deleteStudentUserInDb,
-  validateSessionIntegrity as checkSessionIntegrity
+  deleteStudentUserInDb
 } from '../services/userSessionStore';
 import { hashPassword } from '../services/cryptoUtils';
 
@@ -26,11 +25,9 @@ export function AuthProvider({ children }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
-  const [sessionNotice, setSessionNotice] = useState('');
 
   const lastActivityTimeRef = useRef(Date.now());
   const inactivityTimerRef = useRef(null);
-  const sessionCheckTimerRef = useRef(null);
   const throttleTimerRef = useRef(0);
 
   // Load session & sync users list from Supabase DB on startup
@@ -83,8 +80,7 @@ export function AuthProvider({ children }) {
           const updatedSelf = {
             ...dbRecord,
             ...activeSession,
-            completedLessonIds: mergedCompleted,
-            activeSessionId: activeSession.activeSessionId
+            completedLessonIds: mergedCompleted
           };
           setCurrentUser(updatedSelf);
           saveStoredSession(updatedSelf);
@@ -93,25 +89,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Single-session enforcement: Validate if current session was superseded
-  const validateSessionIntegrity = (currentUsr) => {
-    if (!currentUsr || !currentUsr.activeSessionId) return true;
-
-    const allUsers = getStoredUsers();
-    const selfRecord = allUsers.find(u => u.id === currentUsr.id);
-
-    // If another session logged in with a different sessionId
-    if (selfRecord && selfRecord.activeSessionId && selfRecord.activeSessionId !== currentUsr.activeSessionId) {
-      setCurrentUser(null);
-      setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
-      saveStoredSession(null);
-      refreshUsersList();
-      return false;
-    }
-    return true;
-  };
-
-  // Cross-tab single-session enforcement & storage synchronization
+  // Cross-tab storage synchronization
   useEffect(() => {
     const handleStorageChange = (e) => {
       refreshUsersList();
@@ -124,37 +102,12 @@ export function AuthProvider({ children }) {
         if (!newSession) {
           // Explicit logout in another tab
           setCurrentUser(null);
-        } else if (newSession.id === currentUser.id && newSession.activeSessionId !== currentUser.activeSessionId) {
-          // Logged in with a new session in another tab
-          setCurrentUser(null);
-          setSessionNotice('Your account was logged in from another session. You have been automatically signed out.');
         }
-      }
-
-      // Check if users database updated
-      if (e.key === 'ukc_app_users_db_v1') {
-        validateSessionIntegrity(currentUser);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [currentUser]);
-
-  // Fast Periodic Session Heartbeat (Validates single-session integrity every 2 seconds)
-  useEffect(() => {
-    if (!currentUser) {
-      if (sessionCheckTimerRef.current) clearInterval(sessionCheckTimerRef.current);
-      return;
-    }
-
-    sessionCheckTimerRef.current = setInterval(() => {
-      validateSessionIntegrity(currentUser);
-    }, 2000);
-
-    return () => {
-      if (sessionCheckTimerRef.current) clearInterval(sessionCheckTimerRef.current);
-    };
   }, [currentUser]);
 
   // 15-Minute Throttled Inactivity Auto-Logout Tracker
@@ -185,7 +138,6 @@ export function AuthProvider({ children }) {
         authSignOut(currentUser.id);
         setCurrentUser(null);
         refreshUsersList();
-        setSessionNotice('You were automatically logged out due to 15 minutes of inactivity.');
       }
     }, 10000);
 
@@ -197,7 +149,6 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     setAuthError('');
-    setSessionNotice('');
     setLoading(true);
 
     const res = await authSignIn(username, password);
@@ -509,9 +460,7 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!currentUser,
         loading,
         authError,
-        sessionNotice,
         clearError: () => setAuthError(''),
-        clearSessionNotice: () => setSessionNotice(''),
         login,
         logout,
         users,

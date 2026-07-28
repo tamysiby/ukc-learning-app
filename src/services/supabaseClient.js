@@ -14,7 +14,6 @@ export {
   initialMockUsers,
   mockFlashcards,
   generateSessionId,
-  checkActiveSessionExists,
   getStoredUsers,
   saveStoredUsers,
   getStoredSession,
@@ -25,7 +24,6 @@ export {
   authSignOut,
   createStudentUserInDb,
   updateStudentUserInDb,
-  deleteStudentUserInDb,
-  validateSessionIntegrity
+  deleteStudentUserInDb
 } from './userSessionStore';
 

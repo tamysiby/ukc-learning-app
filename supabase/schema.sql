@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS public.users (
     progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
     streak INTEGER DEFAULT 0 CHECK (streak >= 0),
     is_online BOOLEAN DEFAULT false,
-    active_session_id TEXT,
     must_change_password BOOLEAN DEFAULT false,
     last_active TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()

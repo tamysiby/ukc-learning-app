@@ -91,7 +91,6 @@ CREATE POLICY "Allow authenticated access to progress" ON public.student_lesson_
 
 1. Update `src/services/supabaseClient.js` to query Supabase DB tables (`users`, `lessons`, `student_lesson_progress`) when `VITE_SUPABASE_URL` is set, falling back to `localStorage` when offline.
 2. Update `src/services/lessonRegistry.js` to fetch and sync dynamic lessons from `lessons` table.
-3. Ensure single session check heartbeat syncs with `active_session_id` in `public.users`.
 
 ---
 

@@ -34,7 +34,6 @@ export const initialMockUsers = [
     lastActive: 'Just now',
     joinedDate: '2025-08-01',
     isOnline: false,
-    activeSessionId: null,
     mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
@@ -52,7 +51,6 @@ export const initialMockUsers = [
     lastActive: '10 mins ago',
     joinedDate: '2026-01-15',
     isOnline: false,
-    activeSessionId: null,
     mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
     completedLessonIds: ['les-vowels-1']
@@ -70,7 +68,6 @@ export const initialMockUsers = [
     lastActive: '2 hours ago',
     joinedDate: '2026-03-01',
     isOnline: false,
-    activeSessionId: null,
     mustChangePassword: false,
     assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
     completedLessonIds: []
@@ -88,7 +85,6 @@ export const initialMockUsers = [
     lastActive: '4 days ago',
     joinedDate: '2025-11-10',
     isOnline: false,
-    activeSessionId: null,
     mustChangePassword: false,
     assignedLessonIds: ['les-hangul-1'],
     completedLessonIds: []
@@ -106,7 +102,6 @@ export const initialMockUsers = [
     lastActive: '1 hour ago',
     joinedDate: '2026-02-14',
     isOnline: false,
-    activeSessionId: null,
     mustChangePassword: false,
     assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
     completedLessonIds: []
@@ -155,20 +150,6 @@ export const mockFlashcards = [
     audioUrl: ''
   }
 ];
-
-// Helper to generate unique session token
-export const generateSessionId = () => {
-  return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-};
-
-// Check if an active session currently exists for a username
-export const checkActiveSessionExists = (username) => {
-  if (!username) return false;
-  const cleanUsername = username.trim().toLowerCase();
-  const users = getStoredUsers();
-  const user = users.find(u => u.username?.toLowerCase() === cleanUsername);
-  return !!(user && (user.isOnline || user.activeSessionId));
-};
 
 // User Storage Management
 export const getStoredUsers = () => {
@@ -237,15 +218,14 @@ export const saveStoredSession = (user) => {
 };
 
 // Update user online status
-export const setUserOnlineState = (userId, isOnline, sessionId = null) => {
+export const setUserOnlineState = (userId, isOnline) => {
   const users = getStoredUsers();
   const updatedList = users.map(u => {
     if (u.id === userId) {
       return {
         ...u,
         isOnline: isOnline,
-        lastActive: isOnline ? 'Just now' : u.lastActive,
-        activeSessionId: isOnline ? (sessionId || u.activeSessionId) : null
+        lastActive: isOnline ? 'Just now' : u.lastActive
       };
     }
     return u;
@@ -279,6 +259,30 @@ export const fetchUsersFromSupabase = async () => {
       };
     }
 
+    let progressMap = {};
+    let accessMap = {};
+    try {
+      const { data: progressData } = await supabase.from('student_lesson_progress').select('student_id, lesson_id');
+      if (Array.isArray(progressData)) {
+        progressData.forEach(row => {
+          if (!progressMap[row.student_id]) progressMap[row.student_id] = [];
+          progressMap[row.student_id].push(row.lesson_id);
+        });
+      }
+    } catch (e) {}
+
+    try {
+      const { data: accessData } = await supabase.from('student_lesson_access').select('student_id, lesson_id');
+      if (Array.isArray(accessData)) {
+        accessData.forEach(row => {
+          if (!accessMap[row.student_id]) accessMap[row.student_id] = [];
+          accessMap[row.student_id].push(row.lesson_id);
+        });
+      }
+    } catch (e) {}
+
+    const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'];
+
     if (Array.isArray(data)) {
       const mappedUsers = data.map(u => ({
         id: u.id,
@@ -295,8 +299,8 @@ export const fetchUsersFromSupabase = async () => {
         mustChangePassword: u.must_change_password ?? false,
         lastActive: u.last_active ? new Date(u.last_active).toLocaleString() : 'Never',
         joinedDate: u.created_at ? u.created_at.split('T')[0] : '2026-01-01',
-        assignedLessonIds: u.assigned_lesson_ids || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
-        completedLessonIds: u.completed_lesson_ids || []
+        assignedLessonIds: (accessMap[u.id] && accessMap[u.id].length > 0) ? accessMap[u.id] : defaultAssigned,
+        completedLessonIds: progressMap[u.id] || []
       }));
       if (isDev) {
         saveStoredUsers(mappedUsers);
@@ -320,7 +324,6 @@ export const fetchUsersFromSupabase = async () => {
 // Authentic Authentication Functions
 export const authSignIn = async (username, password) => {
   const cleanUsername = username?.trim().toLowerCase();
-  const newSessionId = generateSessionId();
 
   if (isSupabaseConfigured) {
     try {
@@ -347,8 +350,22 @@ export const authSignIn = async (username, password) => {
         const nowIso = new Date().toISOString();
         await supabase
           .from('users')
-          .update({ is_online: true, active_session_id: newSessionId, last_active: nowIso })
+          .update({ is_online: true, last_active: nowIso })
           .eq('id', dbUser.id);
+
+        let completedIds = [];
+        try {
+          const { data: pData } = await supabase.from('student_lesson_progress').select('lesson_id').eq('student_id', dbUser.id);
+          if (Array.isArray(pData)) completedIds = pData.map(p => p.lesson_id);
+        } catch (e) {}
+
+        let assignedIds = [];
+        try {
+          const { data: aData } = await supabase.from('student_lesson_access').select('lesson_id').eq('student_id', dbUser.id);
+          if (Array.isArray(aData)) assignedIds = aData.map(a => a.lesson_id);
+        } catch (e) {}
+
+        const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'];
 
         const userObj = {
           id: dbUser.id,
@@ -361,12 +378,11 @@ export const authSignIn = async (username, password) => {
           progress: dbUser.progress || 0,
           streak: dbUser.streak || 0,
           isOnline: true,
-          activeSessionId: newSessionId,
           mustChangePassword: dbUser.must_change_password ?? false,
           lastActive: 'Just now',
           joinedDate: dbUser.created_at ? dbUser.created_at.split('T')[0] : '2026-01-01',
-          assignedLessonIds: dbUser.assigned_lesson_ids || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'],
-          completedLessonIds: dbUser.completed_lesson_ids || []
+          assignedLessonIds: assignedIds.length > 0 ? assignedIds : defaultAssigned,
+          completedLessonIds: completedIds
         };
 
         saveStoredSession(userObj);
@@ -409,7 +425,6 @@ export const authSignIn = async (username, password) => {
   const updatedUser = {
     ...matchedUser,
     isOnline: true,
-    activeSessionId: newSessionId,
     lastActive: 'Just now'
   };
 
@@ -429,13 +444,13 @@ export const authSignOut = async (userId = null) => {
       try {
         await supabase
           .from('users')
-          .update({ is_online: false, active_session_id: null })
+          .update({ is_online: false })
           .eq('id', targetId);
       } catch (e) {
         // Suppress network errors on signout
       }
     }
-    setUserOnlineState(targetId, false, null);
+    setUserOnlineState(targetId, false);
   }
 
   try {
@@ -494,13 +509,42 @@ export const updateStudentUserInDb = async (userId, updates) => {
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
     if (updates.streak !== undefined) dbUpdates.streak = updates.streak;
     if (updates.mustChangePassword !== undefined) dbUpdates.must_change_password = updates.mustChangePassword;
-    if (updates.assignedLessonIds !== undefined) dbUpdates.assigned_lesson_ids = updates.assignedLessonIds;
-    if (updates.completedLessonIds !== undefined) dbUpdates.completed_lesson_ids = updates.completedLessonIds;
 
-    const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
-    if (error) {
-      return { success: false, error: `Database Update Failed: ${error.message}` };
+    if (Object.keys(dbUpdates).length > 0) {
+      const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
+      if (error) {
+        return { success: false, error: `Database Update Failed: ${error.message}` };
+      }
     }
+
+    if (updates.completedLessonIds !== undefined && Array.isArray(updates.completedLessonIds)) {
+      try {
+        if (updates.completedLessonIds.length > 0) {
+          const progressRows = updates.completedLessonIds.map(lessonId => ({
+            student_id: userId,
+            lesson_id: lessonId
+          }));
+          await supabase.from('student_lesson_progress').upsert(progressRows, { onConflict: 'student_id,lesson_id' });
+        }
+      } catch (err) {
+        console.warn('Could not persist student_lesson_progress in Supabase:', err);
+      }
+    }
+
+    if (updates.assignedLessonIds !== undefined && Array.isArray(updates.assignedLessonIds)) {
+      try {
+        if (updates.assignedLessonIds.length > 0) {
+          const accessRows = updates.assignedLessonIds.map(lessonId => ({
+            student_id: userId,
+            lesson_id: lessonId
+          }));
+          await supabase.from('student_lesson_access').upsert(accessRows, { onConflict: 'student_id,lesson_id' });
+        }
+      } catch (err) {
+        console.warn('Could not persist student_lesson_access in Supabase:', err);
+      }
+    }
+
     return { success: true };
   } catch (err) {
     return { success: false, error: `Database Connection Error: ${err.message}` };
@@ -524,17 +568,4 @@ export const deleteStudentUserInDb = async (userId) => {
   } catch (err) {
     return { success: false, error: `Database Connection Error: ${err.message}` };
   }
-};
-
-// Single-session validation helper
-export const validateSessionIntegrity = (currentUsr) => {
-  if (!currentUsr || !currentUsr.activeSessionId) return true;
-
-  const allUsers = getStoredUsers();
-  const selfRecord = allUsers.find(u => u.id === currentUsr.id);
-
-  if (selfRecord && selfRecord.activeSessionId && selfRecord.activeSessionId !== currentUsr.activeSessionId) {
-    return false;
-  }
-  return true;
 };

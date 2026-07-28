@@ -7,7 +7,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    saveStoredUsers(initialMockUsers.map(u => ({ ...u, isOnline: false, activeSessionId: null })));
+    saveStoredUsers(initialMockUsers.map(u => ({ ...u, isOnline: false })));
   });
 
   it('renders landing login page when unauthenticated', () => {
@@ -45,39 +45,6 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText(/한글 모음/i)[0]).toBeInTheDocument();
-    }, { timeout: 3000 });
-  });
-
-  it('detects when an active session is superseded by a new login and logs out older session', async () => {
-    render(<App />);
-
-    // Log in as student
-    const studentDemoBtn = screen.getByRole('button', { name: /Student Login/i });
-    fireEvent.click(studentDemoBtn);
-
-    await waitFor(() => {
-      expect(screen.getAllByText(/한글 모음/i)[0]).toBeInTheDocument();
-    }, { timeout: 3000 });
-
-    // Simulate a new login from another session updating the database/storage
-    const users = getStoredUsers();
-    const updatedUsers = users.map(u => {
-      if (u.id === 'usr-1') {
-        return { ...u, activeSessionId: 'sess_NEW_SESSION_999' };
-      }
-      return u;
-    });
-
-    act(() => {
-      saveStoredUsers(updatedUsers);
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'ukc_app_users_db_v1',
-        newValue: JSON.stringify(updatedUsers)
-      }));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/Your account was logged in from another session/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 });
