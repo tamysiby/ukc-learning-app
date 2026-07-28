@@ -1,5 +1,17 @@
 import { hasVocabIllustration } from '../components/VocabIllustration';
 
+const isDev = !!(import.meta.env?.DEV || import.meta.env?.MODE === 'development');
+
+function logQuizDebug(message, data) {
+  if (isDev) {
+    if (data !== undefined) {
+      console.log(`[QuizGenerator Debug] ${message}`, data);
+    } else {
+      console.log(`[QuizGenerator Debug] ${message}`);
+    }
+  }
+}
+
 /**
  * Dynamic Vocab Quiz Generator
  * Generates a 10-question randomized quiz from a lesson's vocabulary words.
@@ -12,6 +24,7 @@ import { hasVocabIllustration } from '../components/VocabIllustration';
 export function generateRandomVocabQuiz(vocabWords = []) {
   try {
     if (!Array.isArray(vocabWords) || vocabWords.length === 0) {
+      logQuizDebug('Received empty or invalid vocabulary words array:', vocabWords);
       return [];
     }
 
@@ -19,8 +32,11 @@ export function generateRandomVocabQuiz(vocabWords = []) {
     const validWords = vocabWords.filter(w => w && typeof w === 'object' && (w.korean || w.english || w.romanization));
 
     if (validWords.length === 0) {
+      logQuizDebug('No valid word items found in vocabulary list:', vocabWords);
       return [];
     }
+
+    logQuizDebug(`Generating quiz from ${validWords.length} valid words...`, validWords);
 
     const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
@@ -149,10 +165,13 @@ export function generateRandomVocabQuiz(vocabWords = []) {
       }
     }
 
-    // Shuffle the questions array so quiz question types appear in randomized order
-    return shuffle(questions);
+    const finalQuestions = shuffle(questions);
+    logQuizDebug(`Successfully generated ${finalQuestions.length} quiz questions.`, finalQuestions);
+    return finalQuestions;
   } catch (error) {
-    console.error('Failed to generate vocab quiz questions:', error);
+    if (isDev) {
+      console.error('[QuizGenerator Debug Error] Failed to generate vocab quiz questions:', error);
+    }
     return [];
   }
 }
