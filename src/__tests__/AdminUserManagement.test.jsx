@@ -49,4 +49,9 @@ describe('Admin User Management Screen', () => {
     expect(screen.getByText('Reset Account Password')).toBeInTheDocument();
     expect(screen.getByText(/User will be required to change this password/i)).toBeInTheDocument();
   });
+
+  it('renders user management header and interactive controls cleanly', () => {
+    renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
+    expect(screen.getByRole('button', { name: /Register Student/i })).toBeInTheDocument();
+  });
 });

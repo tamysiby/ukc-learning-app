@@ -279,8 +279,12 @@ export async function fetchLessonsFromSupabase() {
       .select('*')
       .order('order_index', { ascending: true });
 
-    if (error || !Array.isArray(data) || data.length === 0) {
-      return { lessons: getStoredLessons(), error: error?.message || null };
+    if (error) {
+      return { lessons: [], error: `Database Fetch Error: Unable to retrieve lessons (${error.message}).` };
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return { lessons: [], error: 'Database returned no lesson records.' };
     }
 
     const mappedLessons = data.map(l => ({
@@ -299,8 +303,7 @@ export async function fetchLessonsFromSupabase() {
     saveStoredLessons(mappedLessons);
     return { lessons: mappedLessons, error: null };
   } catch (err) {
-    console.warn('Failed to fetch lessons from Supabase DB, fallback to local storage:', err);
-    return { lessons: getStoredLessons(), error: err.message };
+    return { lessons: [], error: `Database Connection Error: ${err.message || 'Failed to communicate with Supabase database.'}` };
   }
 }
 

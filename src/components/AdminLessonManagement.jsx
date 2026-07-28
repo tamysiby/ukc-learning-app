@@ -25,12 +25,16 @@ export default function AdminLessonManagement() {
 
   // New word form state inside edit modal
   const [newWordInput, setNewWordInput] = useState({ korean: '', romanization: '', english: '' });
+  const [lessonDbError, setLessonDbError] = useState('');
 
   const studentUsers = users.filter(u => u.role === 'Student');
 
   const refreshLessons = () => {
     fetchLessonsFromSupabase().then(res => {
-      if (res.lessons) {
+      if (res.error) {
+        setLessonDbError(res.error);
+      } else if (res.lessons) {
+        setLessonDbError('');
         setLessons(res.lessons);
       } else {
         setLessons(getStoredLessons());
@@ -168,6 +172,26 @@ export default function AdminLessonManagement() {
           </p>
         </div>
       </div>
+
+      {/* Database Error Surface */}
+      {lessonDbError && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs sm:text-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-xl shrink-0">error</span>
+            <div>
+              <span className="font-bold">Database Error: </span>
+              <span>{lessonDbError}</span>
+            </div>
+          </div>
+          <button
+            onClick={refreshLessons}
+            className="px-3 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-base">refresh</span>
+            <span>Retry Connection</span>
+          </button>
+        </div>
+      )}
 
       {/* MOBILE CARD VIEW */}
       <div className="block md:hidden space-y-3">

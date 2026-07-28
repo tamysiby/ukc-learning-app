@@ -22,8 +22,8 @@ const THROTTLE_INTERVAL_MS = 10 * 1000; // Throttle activity updates every 10 se
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(() => getStoredUsers());
+  const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
   const lastActivityTimeRef = useRef(Date.now());
@@ -37,35 +37,26 @@ export function AuthProvider({ children }) {
       setCurrentUser(savedUser);
     }
 
-    if (isDev) {
-      const cachedUsers = getStoredUsers();
-      setUsers(cachedUsers);
-      setLoading(false);
-    }
-
-    // Asynchronous background live DB fetch on startup
+    // Live DB fetch on startup
     fetchUsersFromSupabase().then(res => {
-      if (res.error && !isDev) {
+      if (res.error) {
         setAuthError(res.error);
-        setUsers([]);
-      } else if (res.users) {
+      } else if (res.users && res.users.length > 0) {
+        setAuthError('');
         setUsers(res.users);
       }
-      setLoading(false);
     }).catch(err => {
-      if (!isDev) {
-        setAuthError(err.message || 'Database Connection Failed');
-      }
-      setLoading(false);
+      setAuthError(err.message || 'Database Connection Failed');
     });
   }, []);
 
   // Sync users list
   const refreshUsersList = async () => {
     const res = await fetchUsersFromSupabase();
-    if (res.error && !isDev) {
+    if (res.error) {
       setAuthError(res.error);
     } else if (res.users) {
+      setAuthError('');
       setUsers(res.users);
 
       // Check current active stored session to prevent stale closure re-login on logout

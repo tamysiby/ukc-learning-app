@@ -10,7 +10,7 @@ import {
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
-  const { users, createStudentUser, updateStudentUser, deleteStudentUser, adminResetPassword, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser } = useAuth();
+  const { users, createStudentUser, updateStudentUser, deleteStudentUser, adminResetPassword, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser, authError, refreshUsersList } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
@@ -171,6 +171,26 @@ export default function AdminUserManagement({ onSelectUser }) {
           <span>Register Student</span>
         </button>
       </div>
+
+      {/* Database Error Surface */}
+      {authError && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs sm:text-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-xl shrink-0">error</span>
+            <div>
+              <span className="font-bold">Database Error: </span>
+              <span>{authError}</span>
+            </div>
+          </div>
+          <button
+            onClick={refreshUsersList}
+            className="px-3 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-base">refresh</span>
+            <span>Retry Connection</span>
+          </button>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="bg-surface-container-lowest p-3.5 sm:p-6 rounded-2xl border border-outline-variant shadow-xs space-y-3">

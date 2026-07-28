@@ -237,25 +237,18 @@ export const setUserOnlineState = (userId, isOnline) => {
 // Fetch users directly from Supabase DB (with fallback to local storage ONLY in dev)
 export const fetchUsersFromSupabase = async () => {
   if (!isSupabaseConfigured) {
-    if (isDev) {
-      return { users: getStoredUsers(), error: null };
-    }
     return {
-      users: [],
-      error: 'Database Configuration Missing: Supabase URL and Anon Key are not configured for production.'
+      users: getStoredUsers(),
+      error: null
     };
   }
 
   try {
     const { data, error } = await supabase.from('users').select('*');
     if (error) {
-      if (isDev) {
-        console.warn('Supabase DB fetch error, falling back to local storage (DEV):', error);
-        return { users: getStoredUsers(), error: null };
-      }
       return {
         users: [],
-        error: `Database Service Failure: Unable to fetch user records from Supabase (${error.message || 'Connection error'}).`
+        error: `Database Fetch Error: Unable to retrieve user records (${error.message || 'Connection error'}).`
       };
     }
 
@@ -295,30 +288,24 @@ export const fetchUsersFromSupabase = async () => {
         progress: u.progress || 0,
         streak: u.streak || 0,
         isOnline: u.is_online || false,
-        activeSessionId: u.active_session_id || null,
         mustChangePassword: u.must_change_password ?? false,
         lastActive: u.last_active ? new Date(u.last_active).toLocaleString() : 'Never',
         joinedDate: u.created_at ? u.created_at.split('T')[0] : '2026-01-01',
         assignedLessonIds: (accessMap[u.id] && accessMap[u.id].length > 0) ? accessMap[u.id] : defaultAssigned,
         completedLessonIds: progressMap[u.id] || []
       }));
-      if (isDev) {
-        saveStoredUsers(mappedUsers);
-      }
+
+      saveStoredUsers(mappedUsers);
       return { users: mappedUsers, error: null };
     }
+
+    return { users: [], error: 'Database returned no user records.' };
   } catch (err) {
-    if (isDev) {
-      console.warn('Failed to fetch users from Supabase DB, using local store fallback (DEV):', err);
-      return { users: getStoredUsers(), error: null };
-    }
     return {
       users: [],
       error: `Database Connection Error: ${err.message || 'Failed to communicate with Supabase database.'}`
     };
   }
-
-  return { users: isDev ? getStoredUsers() : [], error: isDev ? null : 'No user data returned from database.' };
 };
 
 // Authentic Authentication Functions
@@ -334,9 +321,10 @@ export const authSignIn = async (username, password) => {
         .single();
 
       if (dbError || !dbUser) {
-        if (!isDev) {
-          return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
+        if (dbError && dbError.code !== 'PGRST116') {
+          return { user: null, error: `Database Authentication Error: ${dbError.message}` };
         }
+        return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
       } else {
         if (dbUser.status === 'Inactive') {
           return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
@@ -389,21 +377,11 @@ export const authSignIn = async (username, password) => {
         return { user: userObj, error: null };
       }
     } catch (err) {
-      if (!isDev) {
-        return {
-          user: null,
-          error: `Database Authentication Error: Unable to connect to Supabase database. ${err.message || ''}`
-        };
-      }
-      console.warn('Supabase DB query failed, using dev fallback:', err);
+      return {
+        user: null,
+        error: `Database Authentication Error: Unable to connect to Supabase database. ${err.message || ''}`
+      };
     }
-  }
-
-  if (!isDev) {
-    return {
-      user: null,
-      error: 'Database Unavailable: Supabase database connection is not configured or failed to respond in production.'
-    };
   }
 
   const users = getStoredUsers();

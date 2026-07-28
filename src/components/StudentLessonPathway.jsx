@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getStudentPathway } from '../services/lessonRegistry';
 
 export default function StudentLessonPathway({ onStartVocabLesson }) {
-  const { currentUser } = useAuth();
+  const { currentUser, authError, refreshUsersList } = useAuth();
   const nodeRefs = useRef({});
 
   const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-batchim-1'];
@@ -113,6 +113,26 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8 font-body relative">
+      {/* Database Error Surface */}
+      {authError && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs sm:text-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-xl shrink-0">error</span>
+            <div>
+              <span className="font-bold">Database Connection Error: </span>
+              <span>{authError}</span>
+            </div>
+          </div>
+          <button
+            onClick={refreshUsersList}
+            className="px-3 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-base">refresh</span>
+            <span>Retry Connection</span>
+          </button>
+        </div>
+      )}
+
       {/* Sleek Non-Overlapping Sticky Progress Header */}
       <div
         onClick={handleProgressBarClick}
