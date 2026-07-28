@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStoredLessons, saveStoredLessons, fetchLessonsFromSupabase, updateLessonInDb } from '../services/lessonRegistry';
+import { fetchLessonsFromSupabase, updateLessonInDb } from '../services/lessonRegistry';
 import { toggleStudentLessonAssignment } from '../services/studentAdmin';
 import UserAvatar from './UserAvatar';
 
 export default function AdminLessonManagement() {
-  const { users, updateStudentAssignedLessons } = useAuth();
-  const [lessons, setLessons] = useState(getStoredLessons());
-
-  useEffect(() => {
-    fetchLessonsFromSupabase().then(res => {
-      if (res.lessons) {
-        setLessons(res.lessons);
-      }
-    });
-  }, []);
+  const { users, lessons, lessonsError, refreshLessonsList, updateStudentAssignedLessons } = useAuth();
 
   // Drag & drop state
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -30,16 +21,7 @@ export default function AdminLessonManagement() {
   const studentUsers = users.filter(u => u.role === 'Student');
 
   const refreshLessons = () => {
-    fetchLessonsFromSupabase().then(res => {
-      if (res.error) {
-        setLessonDbError(res.error);
-      } else if (res.lessons) {
-        setLessonDbError('');
-        setLessons(res.lessons);
-      } else {
-        setLessons(getStoredLessons());
-      }
-    });
+    refreshLessonsList();
   };
 
   // Drag & Drop handlers

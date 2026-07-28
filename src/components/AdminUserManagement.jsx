@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStoredLessons } from '../services/lessonRegistry';
 import {
   filterUsers,
   getStudentProgressStats,
@@ -10,7 +9,7 @@ import {
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
-  const { users, createStudentUser, updateStudentUser, deleteStudentUser, adminResetPassword, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser, authError, refreshUsersList } = useAuth();
+  const { users, lessons, createStudentUser, updateStudentUser, deleteStudentUser, adminResetPassword, toggleUserStatus, updateStudentAssignedLessons, toggleStudentLessonCompletion, currentUser, authError, refreshUsersList } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
@@ -24,7 +23,7 @@ export default function AdminUserManagement({ onSelectUser }) {
   const [resetPasswordInput, setResetPasswordInput] = useState('StudentPass123!');
   const [userForLessonsModal, setUserForLessonsModal] = useState(null);
 
-  const availableLessons = getStoredLessons();
+  const availableLessons = lessons || [];
 
   const handleToggleSelectAllLessons = () => {
     if (!userForLessonsModal) return;

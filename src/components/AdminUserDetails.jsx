@@ -1,14 +1,12 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStoredLessons } from '../services/lessonRegistry';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserDetails({ user, onBack }) {
-  const { updateStudentAssignedLessons } = useAuth();
+  const { lessons, updateStudentAssignedLessons } = useAuth();
   if (!user) return null;
 
-  const lessons = getStoredLessons();
-  const assigned = user.assignedLessonIds || ['les-hangul-1', 'les-vocab-1'];
+  const assigned = user.assignedLessonIds || [];
 
   const handleToggleLesson = (lessonId) => {
     let updated;

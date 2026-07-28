@@ -2,7 +2,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import App from '../App';
 import { initialMockUsers, supabase } from '../services/supabaseClient';
-import { DEFAULT_LESSONS } from '../services/lessonRegistry';
+
+const sampleTestLessons = [
+  { id: 'les-vowels-1', order_index: 1, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음', type: 'vocab', paired_quiz_id: 'les-vowels-quiz-1', status: 'Active', words: [] },
+  { id: 'les-vowels-quiz-1', order_index: 2, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음 퀴즈', type: 'vocab quiz', paired_vocab_id: 'les-vowels-1', status: 'Active' },
+  { id: 'les-consonants-1', order_index: 3, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 자음', type: 'vocab', paired_quiz_id: 'les-consonants-quiz-1', status: 'Active', words: [] },
+  { id: 'les-consonants-quiz-1', order_index: 4, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 자음 퀴즈', type: 'vocab quiz', paired_vocab_id: 'les-consonants-1', status: 'Active' }
+];
 
 describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
   beforeEach(() => {
@@ -35,12 +41,7 @@ describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
         return {
           select: () => ({
             order: () => Promise.resolve({
-              data: DEFAULT_LESSONS.map(l => ({
-                ...l,
-                order_index: l.order,
-                paired_vocab_id: l.pairedVocabId,
-                paired_quiz_id: l.pairedQuizId
-              })),
+              data: sampleTestLessons,
               error: null
             })
           })

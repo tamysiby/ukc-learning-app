@@ -10,7 +10,6 @@ import VocabOverview from './components/VocabOverview';
 import StudentAccount from './components/StudentAccount';
 import ForceChangePasswordModal from './components/ForceChangePasswordModal';
 import UserAvatar from './components/UserAvatar';
-import { getStoredLessons, DEFAULT_LESSONS } from './services/lessonRegistry';
 import { generateRandomVocabQuiz } from './services/quizGenerator';
 import { getStoredUsers } from './services/supabaseClient';
 
@@ -63,7 +62,7 @@ const navigateTo = (hash) => {
 };
 
 function AppContent() {
-  const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted } = useAuth();
+  const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted, lessons, lessonsError } = useAuth();
 
   // Tabs: 'pathway' | 'hangul' | 'batchim' | 'vocab' | 'vocab-quiz' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
@@ -80,11 +79,10 @@ function AppContent() {
       const route = parseHash(window.location.hash, userRole);
 
       if (route.tab === 'vocab' && route.lessonId) {
-        const allLessons = getStoredLessons();
-        const target = allLessons.find(l => l.id === route.lessonId) || DEFAULT_LESSONS[0];
+        const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
         setActiveVocabLesson(target);
         setShowFlashcardDeck(false);
-        if (currentUser?.id) {
+        if (currentUser?.id && target) {
           markLessonCompleted(currentUser.id, target.id);
         }
         setCurrentTab('vocab');
@@ -99,10 +97,9 @@ function AppContent() {
         }
         setCurrentTab('eyo');
       } else if (route.tab === 'vocab-quiz' && route.lessonId) {
-        const allLessons = getStoredLessons();
-        const target = allLessons.find(l => l.id === route.lessonId) || DEFAULT_LESSONS[0];
-        const pairedVocab = allLessons.find(l => l.id === target.pairedVocabId) || DEFAULT_LESSONS[0];
-        const poolWords = pairedVocab.words && pairedVocab.words.length > 0 ? pairedVocab.words : DEFAULT_LESSONS[0].words;
+        const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
+        const pairedVocab = lessons.find(l => l.id === target?.pairedVocabId) || lessons[0];
+        const poolWords = (pairedVocab?.words && pairedVocab.words.length > 0) ? pairedVocab.words : (target?.words || []);
 
         setActiveVocabLesson(target);
         setActiveQuizQuestions(prev => (prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords)));
@@ -181,12 +178,11 @@ function AppContent() {
   };
 
   const handleStartVocabLesson = (lessonId = 'les-vowels-1') => {
-    const allLessons = getStoredLessons();
-    const target = allLessons.find(l => l.id === lessonId) || DEFAULT_LESSONS[0];
+    const target = lessons.find(l => l.id === lessonId) || lessons[0];
 
-    if (target.type === 'vocab') {
+    if (target?.type === 'vocab') {
       navigateTo(`lesson/${lessonId}`);
-    } else if (target.type === 'vocab quiz') {
+    } else if (target?.type === 'vocab quiz') {
       navigateTo(`quiz/${lessonId}`);
     } else {
       navigateTo(`lesson/${lessonId}`);
@@ -319,7 +315,7 @@ function AppContent() {
             {currentTab === 'vocab' && (
               showFlashcardDeck ? (
                 <VocabLesson
-                  words={activeVocabLesson?.words || DEFAULT_LESSONS[0].words}
+                  words={activeVocabLesson?.words || []}
                   title={activeVocabLesson?.title || 'Vocabulary Flashcards'}
                   onFinishLesson={() => setShowFlashcardDeck(false)}
                 />
@@ -327,7 +323,7 @@ function AppContent() {
                 <VocabOverview
                   title={activeVocabLesson?.title || 'Hangeul Vowels (한글 모음)'}
                   description={activeVocabLesson?.description || 'Learn fundamental Korean vowel characters.'}
-                  words={activeVocabLesson?.words || DEFAULT_LESSONS[0].words}
+                  words={activeVocabLesson?.words || []}
                   onStartFlashcards={() => setShowFlashcardDeck(true)}
                   onBackToPathway={handleFinishVocabLesson}
                 />

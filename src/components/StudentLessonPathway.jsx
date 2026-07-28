@@ -3,17 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import { getStudentPathway } from '../services/lessonRegistry';
 
 export default function StudentLessonPathway({ onStartVocabLesson }) {
-  const { currentUser, authError, refreshUsersList } = useAuth();
+  const { currentUser, authError, lessons, lessonsError, refreshUsersList } = useAuth();
   const nodeRefs = useRef({});
 
-  const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-batchim-1'];
+  const assignedLessonIds = currentUser?.assignedLessonIds || [];
   const completedLessonIds = currentUser?.completedLessonIds || [];
 
   const {
     nodes: pathwayNodes,
     progressPercentage,
     topmostIncompleteLesson
-  } = getStudentPathway(assignedLessonIds, completedLessonIds);
+  } = getStudentPathway(assignedLessonIds, completedLessonIds, lessons);
 
   // Track previous progress from sessionStorage to animate progress bar & number count-up on return
   const [displayedBarPercentage, setDisplayedBarPercentage] = useState(() => {
@@ -29,6 +29,7 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   });
 
   const [isAnimatingProgress, setIsAnimatingProgress] = useState(false);
+  const [highlightedId, setHighlightedId] = useState(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem('ukc_pathway_prev_percentage');
@@ -37,12 +38,10 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     if (startPct < progressPercentage) {
       setIsAnimatingProgress(true);
 
-      // Smooth transition for visual bar fill
-      const barTimer = setTimeout(() => {
+      const timer = setTimeout(() => {
         setDisplayedBarPercentage(progressPercentage);
       }, 100);
 
-      // Smooth count-up for percentage text badge
       const duration = 1200;
       const steps = Math.max(1, progressPercentage - startPct);
       const stepTime = Math.max(20, Math.floor(duration / steps));
@@ -64,7 +63,7 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
       }, duration + 500);
 
       return () => {
-        clearTimeout(barTimer);
+        clearTimeout(timer);
         clearInterval(countInterval);
         clearTimeout(endTimer);
       };
@@ -92,8 +91,19 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     }
   }, []);
 
-
-  const [highlightedId, setHighlightedId] = useState(null);
+  if (lessonsError || authError || !lessons || lessons.length === 0) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-6 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-4 shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+          <span className="material-symbols-outlined text-2xl">cloud_off</span>
+        </div>
+        <h3 className="text-lg font-bold text-rose-900">Database Connection Error</h3>
+        <p className="text-sm text-rose-700 font-medium">
+          {lessonsError || authError || 'Database Connection Error: Database is offline or non-configured.'}
+        </p>
+      </div>
+    );
+  }
 
   const handleProgressBarClick = () => {
     if (progressPercentage >= 100 || !topmostIncompleteLesson) return;

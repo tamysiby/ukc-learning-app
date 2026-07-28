@@ -13,6 +13,7 @@ import {
   updateStudentUserInDb,
   deleteStudentUserInDb
 } from '../services/userSessionStore';
+import { fetchLessonsFromSupabase } from '../services/lessonRegistry';
 import { hashPassword } from '../services/cryptoUtils';
 
 const AuthContext = createContext(null);
@@ -23,19 +24,34 @@ const THROTTLE_INTERVAL_MS = 10 * 1000; // Throttle activity updates every 10 se
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
+  const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [lessonsError, setLessonsError] = useState('');
 
   const lastActivityTimeRef = useRef(Date.now());
   const inactivityTimerRef = useRef(null);
   const throttleTimerRef = useRef(0);
 
-  // Load session & sync users list from Supabase DB on startup
+  const refreshLessonsList = async () => {
+    const res = await fetchLessonsFromSupabase();
+    if (res.error) {
+      setLessonsError(res.error);
+      setLessons([]);
+    } else if (res.lessons) {
+      setLessonsError('');
+      setLessons(res.lessons);
+    }
+  };
+
+  // Load session & sync users/lessons list from Supabase DB on startup
   useEffect(() => {
     const savedUser = getStoredSession();
     if (savedUser) {
       setCurrentUser(savedUser);
     }
+
+    refreshLessonsList();
 
     // Live DB fetch on startup
     fetchUsersFromSupabase().then(res => {
@@ -445,7 +461,10 @@ export function AuthProvider({ children }) {
         login,
         logout,
         users,
+        lessons,
+        lessonsError,
         refreshUsersList,
+        refreshLessonsList,
         createStudentUser,
         updateStudentUser,
         deleteStudentUser,

@@ -32,14 +32,25 @@ describe('Admin User Management Screen', () => {
       return promise;
     };
 
+    const sampleTestLessons = [
+      { id: 'les-vowels-1', order_index: 1, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음', type: 'vocab', paired_quiz_id: 'les-vowels-quiz-1', status: 'Active', words: [] },
+      { id: 'les-vowels-quiz-1', order_index: 2, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음 퀴즈', type: 'vocab quiz', paired_vocab_id: 'les-vowels-1', status: 'Active' },
+      { id: 'les-consonants-1', order_index: 3, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 자음', type: 'vocab', paired_quiz_id: 'les-consonants-quiz-1', status: 'Active', words: [] },
+      { id: 'les-consonants-quiz-1', order_index: 4, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 자음 퀴즈', type: 'vocab quiz', paired_vocab_id: 'les-consonants-1', status: 'Active' }
+    ];
+
     vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
       const defaultUserList = initialMockUsers.map(u => ({
         ...u,
         is_online: false,
         created_at: u.joinedDate ? `${u.joinedDate}T00:00:00Z` : '2026-01-01T00:00:00Z'
       }));
+      let dataToReturn = [];
+      if (tableName === 'users') dataToReturn = defaultUserList;
+      if (tableName === 'lessons') dataToReturn = sampleTestLessons;
+
       return {
-        select: () => createMockQuery(tableName === 'users' ? defaultUserList : []),
+        select: () => createMockQuery(dataToReturn),
         update: () => ({ eq: () => Promise.resolve({ error: null }) }),
         insert: () => Promise.resolve({ error: null }),
         delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
