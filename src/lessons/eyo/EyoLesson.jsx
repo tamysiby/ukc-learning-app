@@ -121,16 +121,6 @@ export default function EyoLesson({ onFinishLesson }) {
         <div className="flex items-center gap-2">
           <div className="bg-surface-container-low p-1 rounded-xl border border-outline-variant flex items-center gap-1">
             <button
-              onClick={() => setSpeechMode('polite')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                speechMode === 'polite'
-                  ? 'bg-primary text-on-primary shadow-xs'
-                  : 'text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              해요체 (이에요/예요)
-            </button>
-            <button
               onClick={() => setSpeechMode('casual')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 speechMode === 'casual'
@@ -138,7 +128,17 @@ export default function EyoLesson({ onFinishLesson }) {
                   : 'text-on-surface-variant hover:bg-surface-container'
               }`}
             >
-              해체 (이야/야)
+              Casual
+            </button>
+            <button
+              onClick={() => setSpeechMode('polite')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                speechMode === 'polite'
+                  ? 'bg-primary text-on-primary shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              Polite
             </button>
             <button
               onClick={() => setSpeechMode('formal')}
@@ -148,7 +148,7 @@ export default function EyoLesson({ onFinishLesson }) {
                   : 'text-on-surface-variant hover:bg-surface-container'
               }`}
             >
-              하십시오체 (입니다)
+              Formal
             </button>
           </div>
 
