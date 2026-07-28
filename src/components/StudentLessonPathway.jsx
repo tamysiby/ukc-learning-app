@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStudentPathwayNodes } from '../services/lessonRegistry';
+import { getStudentPathway } from '../services/lessonRegistry';
 
 export default function StudentLessonPathway({ onStartVocabLesson }) {
   const { currentUser } = useAuth();
@@ -9,11 +9,11 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
   const assignedLessonIds = currentUser?.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-batchim-1'];
   const completedLessonIds = currentUser?.completedLessonIds || [];
 
-  const pathwayNodes = getStudentPathwayNodes(assignedLessonIds, completedLessonIds);
-
-  const totalLessons = pathwayNodes.length;
-  const completedCount = pathwayNodes.filter(n => completedLessonIds.includes(n.id)).length;
-  const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const {
+    nodes: pathwayNodes,
+    progressPercentage,
+    topmostIncompleteLesson
+  } = getStudentPathway(assignedLessonIds, completedLessonIds);
 
   // Track previous progress from sessionStorage to animate progress bar & number count-up on return
   const [displayedBarPercentage, setDisplayedBarPercentage] = useState(() => {
@@ -92,8 +92,6 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     }
   }, []);
 
-  // Topmost incomplete lesson
-  const topmostIncompleteLesson = pathwayNodes.find(n => !completedLessonIds.includes(n.id));
 
   const [highlightedId, setHighlightedId] = useState(null);
 

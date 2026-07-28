@@ -11,8 +11,9 @@ import {
   isDev,
   createStudentUserInDb,
   updateStudentUserInDb,
-  deleteStudentUserInDb
-} from '../services/supabaseClient';
+  deleteStudentUserInDb,
+  validateSessionIntegrity as checkSessionIntegrity
+} from '../services/userSessionStore';
 import { hashPassword } from '../services/cryptoUtils';
 
 const AuthContext = createContext(null);

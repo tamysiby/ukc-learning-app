@@ -337,3 +337,33 @@ export function getStudentPathwayNodes(
     };
   });
 }
+
+/**
+ * Calculates complete student pathway domain model:
+ * Encapsulates pathway node graph, lock sequencing, completion count metrics,
+ * progress percentage calculation, and active node resolution.
+ */
+export function getStudentPathway(
+  assignedLessonIds = [
+    'les-vowels-1', 'les-vowels-quiz-1',
+    'les-consonants-1', 'les-consonants-quiz-1',
+    'les-batchim-1', 'les-eyo-1',
+    'les-vocab-practice-1', 'les-vocab-practice-quiz-1',
+    'les-vocab-practice-2', 'les-vocab-practice-quiz-2'
+  ],
+  completedLessonIds = []
+) {
+  const nodes = getStudentPathwayNodes(assignedLessonIds, completedLessonIds);
+  const totalLessons = nodes.length;
+  const completedCount = nodes.filter(n => completedLessonIds.includes(n.id)).length;
+  const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const topmostIncompleteLesson = nodes.find(n => !completedLessonIds.includes(n.id)) || null;
+
+  return {
+    nodes,
+    totalLessons,
+    completedCount,
+    progressPercentage,
+    topmostIncompleteLesson
+  };
+}

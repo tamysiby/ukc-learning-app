@@ -2,6 +2,80 @@ import React, { useState } from 'react';
 import KoreanKeypad from '../../components/KoreanKeypad';
 import VocabIllustration, { hasVocabIllustration } from '../../components/VocabIllustration';
 
+// Web Audio API Sound Effects Synthesizer for Quiz
+const playSoundEffect = (type) => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    if (type === 'correct') {
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+
+      osc1.frequency.setValueAtTime(659.25, now); // E5
+      osc2.frequency.setValueAtTime(880.00, now + 0.12); // A5
+
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.12);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.4);
+    } else if (type === 'wrong') {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
+
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+  } catch (e) {
+    // Ignore audio context errors if browser blocks autoplay before user interaction
+  }
+};
+
+// Speech synthesis helper for Korean vocabulary audio
+const playVocabSpeech = (text) => {
+  if (!text) return;
+  const koreanRegex = /[\u3131-\u318E\uAC00-\uD7A3]/;
+  if (!koreanRegex.test(text)) return;
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ko-KR';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
+const extractKoreanText = (item) => {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  return item.word || item.korean || item.text || '';
+};
+
 export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Quiz', onFinishQuiz, onExitQuiz }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -58,14 +132,18 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
   const handleLeftClick = (item) => {
     if (matchedPairs.includes(item.id)) return;
     setSelectedLeft(item);
+    playVocabSpeech(extractKoreanText(item));
   };
 
   const handleRightClick = (item) => {
     if (matchedPairs.includes(item.id)) return;
     if (!selectedLeft) return;
 
+    playVocabSpeech(extractKoreanText(item));
+
     if (selectedLeft.id === item.id) {
       // Correct Match!
+      playSoundEffect('correct');
       const newMatched = [...matchedPairs, item.id];
       setMatchedPairs(newMatched);
       setSelectedLeft(null);
@@ -76,6 +154,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
       }
     } else {
       // Incorrect Match - deduct a heart
+      playSoundEffect('wrong');
       deductLife();
       setSelectedLeft(null);
     }
@@ -85,10 +164,14 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
   const handleSelectOption = (option) => {
     if (answerFeedback) return;
     setSelectedOption(option.text);
+    playVocabSpeech(extractKoreanText(option));
+
     if (option.isCorrect) {
+      playSoundEffect('correct');
       setAnswerFeedback({ isCorrect: true });
       setScore(prev => prev + 1);
     } else {
+      playSoundEffect('wrong');
       setAnswerFeedback({ isCorrect: false });
       deductLife();
     }
@@ -98,6 +181,7 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
   const handleAddBlock = (block) => {
     if (answerFeedback) return;
     setSelectedBlocks(prev => [...prev, block]);
+    playVocabSpeech(block);
   };
 
   const handleClearBlocks = () => {
@@ -110,8 +194,10 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
     const isCorrect = userAns.trim().toLowerCase() === currentQ.correctAnswer.trim().toLowerCase();
     setAnswerFeedback({ isCorrect });
     if (isCorrect) {
+      playSoundEffect('correct');
       setScore(prev => prev + 1);
     } else {
+      playSoundEffect('wrong');
       deductLife();
     }
   };
@@ -124,8 +210,10 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
     const isCorrect = typedInput.trim().toLowerCase() === currentQ.correctAnswer.trim().toLowerCase();
     setAnswerFeedback({ isCorrect });
     if (isCorrect) {
+      playSoundEffect('correct');
       setScore(prev => prev + 1);
     } else {
+      playSoundEffect('wrong');
       deductLife();
     }
   };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getStoredLessons, saveStoredLessons } from '../services/lessonRegistry';
+import { toggleStudentLessonAssignment } from '../services/studentAdmin';
 import UserAvatar from './UserAvatar';
 
 export default function AdminLessonManagement() {
@@ -66,13 +67,7 @@ export default function AdminLessonManagement() {
 
   // Toggle student assignment for selected lesson
   const toggleStudentLesson = (student, lessonId) => {
-    const currentAssigned = student.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1'];
-    let updatedAssigned;
-    if (currentAssigned.includes(lessonId)) {
-      updatedAssigned = currentAssigned.filter(id => id !== lessonId);
-    } else {
-      updatedAssigned = [...currentAssigned, lessonId];
-    }
+    const updatedAssigned = toggleStudentLessonAssignment(student, lessonId);
     updateStudentAssignedLessons(student.id, updatedAssigned);
   };
 

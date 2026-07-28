@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getStoredLessons } from '../services/lessonRegistry';
+import {
+  filterUsers,
+  getStudentProgressStats,
+  toggleAllStudentLessons,
+  toggleStudentLessonAssignment
+} from '../services/studentAdmin';
 import UserAvatar from './UserAvatar';
 
 export default function AdminUserManagement({ onSelectUser }) {
@@ -22,15 +28,7 @@ export default function AdminUserManagement({ onSelectUser }) {
 
   const handleToggleSelectAllLessons = () => {
     if (!userForLessonsModal) return;
-    const currentAssigned = userForLessonsModal.assignedLessonIds || [];
-    const areAllAssigned = availableLessons.length > 0 && availableLessons.every(l => currentAssigned.includes(l.id));
-
-    let updatedAssignedIds;
-    if (areAllAssigned) {
-      updatedAssignedIds = [];
-    } else {
-      updatedAssignedIds = availableLessons.map(l => l.id);
-    }
+    const updatedAssignedIds = toggleAllStudentLessons(userForLessonsModal, availableLessons);
 
     updateStudentAssignedLessons(userForLessonsModal.id, updatedAssignedIds);
 
@@ -53,39 +51,15 @@ export default function AdminUserManagement({ onSelectUser }) {
   const [crudError, setCrudError] = useState('');
 
   // Filtering users
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesRole = roleFilter === 'All' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'All'
-      ? true
-      : statusFilter === 'Online'
-        ? !!user.isOnline
-        : user.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredUsers = filterUsers(users, { searchQuery, roleFilter, statusFilter });
 
   // Calculate student lesson progress stats
-  const getUserProgressStats = (user) => {
-    const assigned = user.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1'];
-    const completed = user.completedLessonIds || [];
-    const assignedCount = assigned.length;
-    const completedCount = completed.filter(id => assigned.includes(id)).length;
-    const percentage = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
-    return { assignedCount, completedCount, percentage };
-  };
+  const getUserProgressStats = (user) => getStudentProgressStats(user);
 
   // Toggle student lesson assignment
   const handleToggleStudentLesson = (user, lessonId) => {
-    const currentAssigned = user.assignedLessonIds || ['les-vowels-1', 'les-vowels-quiz-1'];
-    let updatedAssigned;
-    if (currentAssigned.includes(lessonId)) {
-      updatedAssigned = currentAssigned.filter(id => id !== lessonId);
-    } else {
-      updatedAssigned = [...currentAssigned, lessonId];
-    }
+    const updatedAssigned = toggleStudentLessonAssignment(user, lessonId);
     updateStudentAssignedLessons(user.id, updatedAssigned);
-    // Update local modal user state
     setUserForLessonsModal({
       ...user,
       assignedLessonIds: updatedAssigned
