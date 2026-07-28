@@ -71,19 +71,20 @@ export function AuthProvider({ children }) {
     } else if (res.users) {
       setUsers(res.users);
 
-      // Preserve completedLessonIds & assignedLessonIds from active local session if newer
-      if (currentUser?.id) {
-        const dbRecord = res.users.find(u => u.id === currentUser.id);
+      // Check current active stored session to prevent stale closure re-login on logout
+      const activeSession = getStoredSession();
+      if (activeSession?.id) {
+        const dbRecord = res.users.find(u => u.id === activeSession.id);
         if (dbRecord) {
           const mergedCompleted = Array.from(new Set([
-            ...(currentUser.completedLessonIds || []),
+            ...(activeSession.completedLessonIds || []),
             ...(dbRecord.completedLessonIds || [])
           ]));
           const updatedSelf = {
             ...dbRecord,
-            ...currentUser,
+            ...activeSession,
             completedLessonIds: mergedCompleted,
-            activeSessionId: currentUser.activeSessionId
+            activeSessionId: activeSession.activeSessionId
           };
           setCurrentUser(updatedSelf);
           saveStoredSession(updatedSelf);
@@ -214,13 +215,15 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    if (currentUser) {
-      await authSignOut(currentUser.id);
+    const targetId = currentUser?.id;
+    setCurrentUser(null);
+    setAuthError('');
+    saveStoredSession(null);
+    if (targetId) {
+      await authSignOut(targetId);
     } else {
       await authSignOut();
     }
-    setCurrentUser(null);
-    setAuthError('');
     refreshUsersList();
   };
 
