@@ -33,3 +33,10 @@ there are three ways to answer fill in the blank quizzes. multiple choice, sylla
 lessons are currently stored in localStorage. move this to DB if pattern is found, if not, then save it as data?? idk i guess we'll figure this out later.
 
 how do you suggest i effectively and efficiently store the lessons? consider future additional lessons. see if there are patterns in the lessons created so that code won't be redundant and data model is efficient.
+
+
+lesson:
+title: Hobbies (취미)
+type: Vocab
+words: 요리, 야구, 컴퓨터 게임, 음악 감상, 수영, 농구, 태권도, 독서, 영화 감상, 여행, 쇼핑, 축구, 러닝, 그림 그리기, 필라테스, 산책
+ 

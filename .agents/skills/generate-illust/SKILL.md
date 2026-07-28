@@ -19,7 +19,7 @@ Use this skill whenever generating pictures, illustrations, visual assets, or ve
    - Dark/Slate Outlines: `#1E293B`, `#0F172A`
    - Clean Highlights: `#F8FAFC`, `#FEF08A`
 4. **Strokes & Radii**: Use smooth rounded stroke caps (`stroke-linecap="round"`), clean joins (`stroke-linejoin="round"`), and soft corner radii (`rx="..."`).
-5. **No Noise / Distractions**: Keep backgrounds clean. Focus on a clear, recognizable representation of the subject without unnecessary text labels or visual clutter.
+5. **No Noise / Distractions**: Keep backgrounds transparent.
 6. **File Location**: Save SVG illustrations to `/public/illustrations/{vocabId}.svg` (e.g., `public/illustrations/vp2-1.svg`).
 
 ## Workflow for a Given Lesson ID:
