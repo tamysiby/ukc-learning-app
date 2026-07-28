@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getStoredLessons, saveStoredLessons } from '../services/lessonRegistry';
+import { getStoredLessons, saveStoredLessons, fetchLessonsFromSupabase, updateLessonInDb } from '../services/lessonRegistry';
 import { toggleStudentLessonAssignment } from '../services/studentAdmin';
 import UserAvatar from './UserAvatar';
 
 export default function AdminLessonManagement() {
   const { users, updateStudentAssignedLessons } = useAuth();
   const [lessons, setLessons] = useState(getStoredLessons());
+
+  useEffect(() => {
+    fetchLessonsFromSupabase().then(res => {
+      if (res.lessons) {
+        setLessons(res.lessons);
+      }
+    });
+  }, []);
 
   // Drag & drop state
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -21,7 +29,13 @@ export default function AdminLessonManagement() {
   const studentUsers = users.filter(u => u.role === 'Student');
 
   const refreshLessons = () => {
-    setLessons(getStoredLessons());
+    fetchLessonsFromSupabase().then(res => {
+      if (res.lessons) {
+        setLessons(res.lessons);
+      } else {
+        setLessons(getStoredLessons());
+      }
+    });
   };
 
   // Drag & Drop handlers
@@ -36,7 +50,7 @@ export default function AdminLessonManagement() {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e, targetIndex) => {
+  const handleDrop = async (e, targetIndex) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === targetIndex) return;
 
@@ -53,6 +67,11 @@ export default function AdminLessonManagement() {
     setLessons(reorderedLessons);
     saveStoredLessons(reorderedLessons);
     setDraggedIndex(null);
+
+    // Persist reordered lessons to Supabase DB
+    for (const l of reorderedLessons) {
+      await updateLessonInDb(l);
+    }
   };
 
   const handleDragEnd = () => {
@@ -83,26 +102,26 @@ export default function AdminLessonManagement() {
   };
 
   // Save Configured Lesson
-  const handleSaveLessonConfig = (e) => {
+  const handleSaveLessonConfig = async (e) => {
     e.preventDefault();
     if (!editingLesson) return;
 
+    const targetLesson = {
+      ...editingLesson,
+      title: editingLesson.title.trim(),
+      type: editingLesson.type,
+      words: (editingLesson.type === 'vocab' || editingLesson.type === 'vocab quiz') ? editingLesson.words : []
+    };
+
     const currentList = getStoredLessons();
-    const updatedList = currentList.map(l => {
-      if (l.id === editingLesson.id) {
-        return {
-          ...l,
-          title: editingLesson.title.trim(),
-          type: editingLesson.type,
-          words: (editingLesson.type === 'vocab' || editingLesson.type === 'vocab quiz') ? editingLesson.words : []
-        };
-      }
-      return l;
-    });
+    const updatedList = currentList.map(l => l.id === targetLesson.id ? targetLesson : l);
 
     saveStoredLessons(updatedList);
     setLessons(updatedList);
     setEditingLesson(null);
+
+    // Persist changes directly to Supabase DB
+    await updateLessonInDb(targetLesson);
   };
 
   // Add word to word list inside edit modal

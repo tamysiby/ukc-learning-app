@@ -1,7 +1,4 @@
-/**
- * Lesson Registry Service
- * Central registry and data access layer for all curriculum lessons, pathway state, and student completion logic.
- */
+import { supabase, isSupabaseConfigured } from './supabaseClient';
 
 const STORAGE_LESSONS_KEY = 'ukc_learning_lessons_db';
 
@@ -239,24 +236,7 @@ export function getStoredLessons() {
     const raw = localStorage.getItem(STORAGE_LESSONS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Clean stored lessons to ensure master words list and quiz pairings stay aligned
       const updated = parsed.map(l => {
-        if (l.id === 'les-vowels-1') {
-          return { ...l, words: DEFAULT_LESSONS[0].words };
-        }
-        if (l.id === 'les-consonants-1') {
-          return { ...l, words: DEFAULT_LESSONS[2].words };
-        }
-        if (l.id === 'les-batchim-1') {
-          const batchimDef = DEFAULT_LESSONS.find(d => d.id === 'les-batchim-1');
-          return { ...l, words: batchimDef?.words || l.words };
-        }
-        if (l.id === 'les-vocab-practice-1') {
-          return { ...l, words: DEFAULT_LESSONS[5].words };
-        }
-        if (l.id === 'les-vocab-practice-2') {
-          return { ...l, words: DEFAULT_LESSONS[7].words };
-        }
         if (l.type === 'vocab quiz') {
           const { words, ...quizLessonWithoutWords } = l;
           return quizLessonWithoutWords;
@@ -285,6 +265,72 @@ export function saveStoredLessons(lessons) {
     localStorage.setItem(STORAGE_LESSONS_KEY, JSON.stringify(lessons));
   } catch (e) {
     console.error('Error saving lessons database:', e);
+  }
+}
+
+export async function fetchLessonsFromSupabase() {
+  if (!isSupabaseConfigured) {
+    return { lessons: getStoredLessons(), error: null };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .order('order_index', { ascending: true });
+
+    if (error || !Array.isArray(data) || data.length === 0) {
+      return { lessons: getStoredLessons(), error: error?.message || null };
+    }
+
+    const mappedLessons = data.map(l => ({
+      id: l.id,
+      order: Number(l.order_index),
+      unit: l.unit,
+      title: l.title,
+      description: l.description,
+      type: l.type,
+      pairedVocabId: l.paired_vocab_id,
+      pairedQuizId: l.paired_quiz_id,
+      status: l.status,
+      words: Array.isArray(l.words) ? l.words : []
+    }));
+
+    saveStoredLessons(mappedLessons);
+    return { lessons: mappedLessons, error: null };
+  } catch (err) {
+    console.warn('Failed to fetch lessons from Supabase DB, fallback to local storage:', err);
+    return { lessons: getStoredLessons(), error: err.message };
+  }
+}
+
+export async function updateLessonInDb(lesson) {
+  if (!isSupabaseConfigured) {
+    return { success: true };
+  }
+
+  try {
+    const dbPayload = {
+      title: lesson.title,
+      type: lesson.type,
+      words: Array.isArray(lesson.words) ? lesson.words : [],
+      order_index: lesson.order || 1
+    };
+
+    const { error } = await supabase
+      .from('lessons')
+      .update(dbPayload)
+      .eq('id', lesson.id);
+
+    if (error) {
+      console.error('Database Lesson Update Error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Database Connection Error while updating lesson:', err);
+    return { success: false, error: err.message };
   }
 }
 
