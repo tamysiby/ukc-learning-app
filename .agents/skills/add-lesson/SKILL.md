@@ -14,7 +14,9 @@ This skill defines the step-by-step workflow for ingesting raw lesson notes from
 ### 1. Ingest & Sanitize Input
 1. **Title & Type**: Extract lesson title (e.g. `Classroom Vocab (교실용어)`) and type (`custom` or `vocab`).
 2. **Korean Typo & Spacing Fixes**: Fix common Korean spacing errors (e.g. `물어 보세요` $\rightarrow$ `물어보세요`).
-3. **Romanization Generation**: Generate accurate syllable-hyphenated Korean romanizations (e.g. `bo-se-yo`, `deul-eu-se-yo`, `han-gug-mal-ro mweo-ye-yo?`).
+3. **Romanization Generation (Rule #10 Resyllabification)**:
+   - Apply official Revised Romanization of Korean (연음 법칙: carry batchim to next vowel syllable).
+   - Examples: `들으세요` $\rightarrow$ `deu-reu-se-yo` (NOT `deul-eu-se-yo`), `읽으세요` $\rightarrow$ `il-geu-se-yo` (NOT `ilg-eu-se-yo`), `물어보세요` $\rightarrow$ `mu-reo-bo-se-yo`.
 4. **English Translation Casing (Rule #7 Compliance)**:
    - Format `english` translations in **all lowercase** (e.g., `please look`, `listen and repeat`, `do you understand?`).
    - Exception: Capitalize proper nouns (e.g., `how do you say it in Korean?`).

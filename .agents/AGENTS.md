@@ -37,3 +37,11 @@
    - **Sticky Top Bar**: `sticky top-0 z-40` with close button, pattern title, and Mode Switcher Pill (`Casual` | `Polite` | `Formal` with `Polite` active on mount).
    - **Visual Equation Cards**: High contrast math equation cards (`[Noun] + [Ending] = [Result]`) using `bg-primary/10` for `받침 O` and `bg-emerald-500/10` for `받침 X`.
    - **2-Column Example Grid**: Clean cards with `w-24 h-24` illustration container, batchim status pill, and icon-only TTS audio buttons for `Q:` bubble (`bg-surface-container-low`) and `A:` bubble (`bg-primary-fixed/30`).
+
+10. **Korean Phonological Romanization & Resyllabification (연음 법칙)**:
+    - Follow the official Revised Romanization of Korean (국어의 로마자 표기법). When a final consonant (받침) is followed by a syllable starting with a vowel (`ㅇ`), romanize according to its resyllabified pronunciation.
+    - Examples:
+      - `들으세요` $\rightarrow$ `deu-reu-se-yo` (NOT `deul-eu-se-yo`)
+      - `읽으세요` $\rightarrow$ `il-geu-se-yo` (NOT `ilg-eu-se-yo`)
+      - `물어보세요` $\rightarrow$ `mu-reo-bo-se-yo` (NOT `mul-eo-bo-se-yo`)
+      - `할아버지` $\rightarrow$ `ha-ra-beo-ji` (NOT `hal-a-beo-ji`)
