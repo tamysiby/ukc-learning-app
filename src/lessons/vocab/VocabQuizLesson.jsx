@@ -549,39 +549,45 @@ export default function VocabQuizLesson({ quizQuestions = [], title = 'Vocab Qui
         )}
 
         {/* ---------------- TYPE 4: KEYBOARD INPUT / TYPING ---------------- */}
-        {currentQ.type === 'keyboard_input' && (
-          <div className="space-y-4">
-            {renderQuestionPrompt()}
+        {currentQ.type === 'keyboard_input' && (() => {
+          const requiresKoreanKeypad = currentQ.isReverse || (currentQ.correctAnswer && /[\u3131-\u318E\uAC00-\uD7A3]/.test(currentQ.correctAnswer));
 
-            <form onSubmit={handleCheckTypingAnswer} className="space-y-3">
-              <input
-                type="text"
-                value={typedInput}
-                disabled={!!answerFeedback}
-                onChange={(e) => setTypedInput(e.target.value)}
-                placeholder="Type using keyboard or keypad below..."
-                className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-2xl text-sm font-semibold text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
+          return (
+            <div className="space-y-4">
+              {renderQuestionPrompt()}
 
-              {!answerFeedback && (
-                <>
-                  <KoreanKeypad
-                    value={typedInput}
-                    onChange={(newVal) => setTypedInput(newVal)}
-                  />
+              <form onSubmit={handleCheckTypingAnswer} className="space-y-3">
+                <input
+                  type="text"
+                  value={typedInput}
+                  disabled={!!answerFeedback}
+                  onChange={(e) => setTypedInput(e.target.value)}
+                  placeholder={requiresKoreanKeypad ? "Type using keyboard or keypad below..." : "Type the English answer..."}
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-2xl text-sm font-semibold text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
 
-                  <button
-                    type="submit"
-                    disabled={!typedInput.trim()}
-                    className="w-full py-3 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    Submit Answer
-                  </button>
-                </>
-              )}
-            </form>
-          </div>
-        )}
+                {!answerFeedback && (
+                  <>
+                    {requiresKoreanKeypad && (
+                      <KoreanKeypad
+                        value={typedInput}
+                        onChange={(newVal) => setTypedInput(newVal)}
+                      />
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={!typedInput.trim()}
+                      className="w-full py-3 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      Submit Answer
+                    </button>
+                  </>
+                )}
+              </form>
+            </div>
+          );
+        })()}
 
         {/* ANSWER FEEDBACK BANNER */}
         {answerFeedback && (

@@ -74,4 +74,52 @@ describe('Dynamic Vocab Quiz Generator & Component', () => {
     expect(screen.getByText('Hangeul Vowels Quiz')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
+
+  it('hides KoreanKeypad when prompt is Korean and expected answer is English', () => {
+    const englishAnswerQuestion = [{
+      id: 'q-key-eng',
+      type: 'keyboard_input',
+      targetWord: { id: 'vp1-1', korean: '시소', english: 'seesaw' },
+      isReverse: false,
+      correctAnswer: 'seesaw'
+    }];
+
+    render(
+      <VocabQuizLesson
+        title="English Typing Test"
+        quizQuestions={englishAnswerQuestion}
+        onFinishQuiz={vi.fn()}
+        onExitQuiz={vi.fn()}
+      />
+    );
+
+    // Input placeholder should ask for English answer
+    expect(screen.getByPlaceholderText('Type the English answer...')).toBeInTheDocument();
+    // Keypad buttons (e.g. Korean consonants like ㄱ, ㄴ, ㄷ) should NOT be rendered
+    expect(screen.queryByText('ㄱ')).toBeNull();
+  });
+
+  it('shows KoreanKeypad when prompt is English and expected answer is Korean', () => {
+    const koreanAnswerQuestion = [{
+      id: 'q-key-kor',
+      type: 'keyboard_input',
+      targetWord: { id: 'vp1-1', korean: '시소', english: 'seesaw' },
+      isReverse: true,
+      correctAnswer: '시소'
+    }];
+
+    render(
+      <VocabQuizLesson
+        title="Korean Typing Test"
+        quizQuestions={koreanAnswerQuestion}
+        onFinishQuiz={vi.fn()}
+        onExitQuiz={vi.fn()}
+      />
+    );
+
+    // Input placeholder should indicate keypad usage
+    expect(screen.getByPlaceholderText('Type using keyboard or keypad below...')).toBeInTheDocument();
+    // Keypad buttons (e.g. Korean consonant ㄱ) SHOULD be rendered
+    expect(screen.getByText('ㄱ')).toBeInTheDocument();
+  });
 });
