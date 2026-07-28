@@ -82,6 +82,7 @@ function AppContent() {
         const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
         setActiveVocabLesson(target);
         setShowFlashcardDeck(false);
+        setActiveQuizQuestions([]);
         if (currentUser?.id && target) {
           markLessonCompleted(currentUser.id, target.id);
         }
@@ -90,21 +91,29 @@ function AppContent() {
         if (currentUser?.id) {
           markLessonCompleted(currentUser.id, 'les-batchim-1');
         }
+        setActiveQuizQuestions([]);
         setCurrentTab('batchim');
       } else if (route.tab === 'eyo') {
         if (currentUser?.id) {
           markLessonCompleted(currentUser.id, 'les-eyo-1');
         }
+        setActiveQuizQuestions([]);
         setCurrentTab('eyo');
       } else if (route.tab === 'vocab-quiz' && route.lessonId) {
         const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
         const pairedVocab = lessons.find(l => l.id === target?.pairedVocabId) || lessons[0];
         const poolWords = (pairedVocab?.words && pairedVocab.words.length > 0) ? pairedVocab.words : (target?.words || []);
 
+        setActiveQuizQuestions(prev => {
+          if (activeVocabLesson?.id && activeVocabLesson.id !== target.id) {
+            return generateRandomVocabQuiz(poolWords);
+          }
+          return prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords);
+        });
         setActiveVocabLesson(target);
-        setActiveQuizQuestions(prev => (prev.length > 0 ? prev : generateRandomVocabQuiz(poolWords)));
         setCurrentTab('vocab-quiz');
       } else if (route.tab === 'hangul') {
+        setActiveQuizQuestions([]);
         setCurrentTab('hangul');
       } else if (route.tab === 'admin-details' && route.userId) {
         const users = getStoredUsers();
@@ -112,8 +121,10 @@ function AppContent() {
         if (user) {
           setSelectedUser(user);
         }
+        setActiveQuizQuestions([]);
         setCurrentTab('admin-details');
       } else {
+        setActiveQuizQuestions([]);
         setCurrentTab(route.tab);
       }
     };
