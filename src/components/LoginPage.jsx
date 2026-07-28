@@ -212,9 +212,6 @@ export default function LoginPage() {
 
             <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 leading-relaxed space-y-1.5">
               <p className="font-bold text-amber-800 dark:text-amber-300">⚠️ Continuing will log out the older session</p>
-              <p>
-                Logging in now will terminate the active session on your other device/tab, and any unsaved progress in ongoing lessons or interactive decks will be reset.
-              </p>
             </div>
 
             <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-end">
