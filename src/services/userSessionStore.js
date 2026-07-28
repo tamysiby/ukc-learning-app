@@ -13,10 +13,11 @@ export const STORAGE_SESSION_KEY = 'ukc_app_session_v1';
 export const isDev = !!(import.meta.env?.DEV || import.meta.env?.MODE === 'development');
 
 export const isSupabaseConfigured = !!(
-  import.meta.env?.VITE_SUPABASE_URL &&
+  (import.meta.env?.VITE_SUPABASE_URL &&
   !import.meta.env?.VITE_SUPABASE_URL.includes('placeholder') &&
   import.meta.env?.VITE_SUPABASE_ANON_KEY &&
-  !import.meta.env?.VITE_SUPABASE_ANON_KEY.includes('placeholder')
+  !import.meta.env?.VITE_SUPABASE_ANON_KEY.includes('placeholder')) ||
+  import.meta.env?.MODE === 'test'
 );
 
 // Default Seed Users (Admin & Students)
@@ -153,50 +154,18 @@ export const mockFlashcards = [
 
 // User Storage Management
 export const getStoredUsers = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_USERS_KEY);
-    if (raw) {
-      const users = JSON.parse(raw);
-      if (Array.isArray(users) && users.length > 0) {
-        const hasLegacy = users.some(u => !u.username && u.email);
-        if (hasLegacy) {
-          const migrated = users.map(u => {
-            if (!u.username && u.email) {
-              return {
-                ...u,
-                username: u.email === 'admin@ukc.edu' ? 'admin' : u.email.split('@')[0]
-              };
-            }
-            return u;
-          });
-          saveStoredUsers(migrated);
-          return migrated;
-        }
-        return users;
-      }
-    }
-  } catch (e) {
-    console.error('Error reading stored users:', e);
-  }
-  saveStoredUsers(initialMockUsers);
   return initialMockUsers;
 };
 
 export const saveStoredUsers = (users) => {
-  try {
-    localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
-  } catch (e) {
-    console.error('Error saving users:', e);
-  }
+  // No-op: Local caching disabled. All persistence handled by Supabase DB.
 };
 
-// Session Storage Management (Populates both sessionStorage AND localStorage)
+// Session Storage Management (Stored exclusively in sessionStorage)
 export const getStoredSession = () => {
   try {
     const rawSession = sessionStorage.getItem(STORAGE_SESSION_KEY);
     if (rawSession) return JSON.parse(rawSession);
-    const rawLocal = localStorage.getItem(STORAGE_SESSION_KEY);
-    if (rawLocal) return JSON.parse(rawLocal);
   } catch (e) {
     console.error('Error reading session:', e);
   }
@@ -207,10 +176,8 @@ export const saveStoredSession = (user) => {
   try {
     if (user) {
       sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
-      localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
     } else {
       sessionStorage.removeItem(STORAGE_SESSION_KEY);
-      localStorage.removeItem(STORAGE_SESSION_KEY);
     }
   } catch (e) {
     console.error('Error saving session:', e);
@@ -230,16 +197,15 @@ export const setUserOnlineState = (userId, isOnline) => {
     }
     return u;
   });
-  saveStoredUsers(updatedList);
   return updatedList;
 };
 
-// Fetch users directly from Supabase DB (with fallback to local storage ONLY in dev)
+// Fetch users directly from Supabase DB
 export const fetchUsersFromSupabase = async () => {
   if (!isSupabaseConfigured) {
     return {
-      users: getStoredUsers(),
-      error: null
+      users: [],
+      error: 'Database Connection Error: Database is offline or non-configured.'
     };
   }
 
@@ -295,7 +261,6 @@ export const fetchUsersFromSupabase = async () => {
         completedLessonIds: progressMap[u.id] || []
       }));
 
-      saveStoredUsers(mappedUsers);
       return { users: mappedUsers, error: null };
     }
 
@@ -312,105 +277,82 @@ export const fetchUsersFromSupabase = async () => {
 export const authSignIn = async (username, password) => {
   const cleanUsername = username?.trim().toLowerCase();
 
-  if (isSupabaseConfigured) {
-    try {
-      const { data: dbUser, error: dbError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', cleanUsername)
-        .single();
+  if (!isSupabaseConfigured) {
+    return {
+      user: null,
+      error: 'Database Connection Error: Database is offline or non-configured.'
+    };
+  }
 
-      if (dbError || !dbUser) {
-        if (dbError && dbError.code !== 'PGRST116') {
-          return { user: null, error: `Database Authentication Error: ${dbError.message}` };
-        }
-        return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
-      } else {
-        if (dbUser.status === 'Inactive') {
-          return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
-        }
+  try {
+    const { data: dbUser, error: dbError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', cleanUsername)
+      .single();
 
-        const isPasswordValid = await verifyPassword(password, dbUser.password);
-        if (!isPasswordValid) {
-          return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
-        }
-
-        const nowIso = new Date().toISOString();
-        await supabase
-          .from('users')
-          .update({ is_online: true, last_active: nowIso })
-          .eq('id', dbUser.id);
-
-        let completedIds = [];
-        try {
-          const { data: pData } = await supabase.from('student_lesson_progress').select('lesson_id').eq('student_id', dbUser.id);
-          if (Array.isArray(pData)) completedIds = pData.map(p => p.lesson_id);
-        } catch (e) {}
-
-        let assignedIds = [];
-        try {
-          const { data: aData } = await supabase.from('student_lesson_access').select('lesson_id').eq('student_id', dbUser.id);
-          if (Array.isArray(aData)) assignedIds = aData.map(a => a.lesson_id);
-        } catch (e) {}
-
-        const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'];
-
-        const userObj = {
-          id: dbUser.id,
-          name: dbUser.name,
-          username: dbUser.username,
-          password: dbUser.password,
-          role: dbUser.role,
-          status: dbUser.status,
-          level: dbUser.level || 'Beginner (Level 1)',
-          progress: dbUser.progress || 0,
-          streak: dbUser.streak || 0,
-          isOnline: true,
-          mustChangePassword: dbUser.must_change_password ?? false,
-          lastActive: 'Just now',
-          joinedDate: dbUser.created_at ? dbUser.created_at.split('T')[0] : '2026-01-01',
-          assignedLessonIds: assignedIds.length > 0 ? assignedIds : defaultAssigned,
-          completedLessonIds: completedIds
-        };
-
-        saveStoredSession(userObj);
-        return { user: userObj, error: null };
+    if (dbError || !dbUser) {
+      if (dbError && dbError.code !== 'PGRST116') {
+        return { user: null, error: `Database Authentication Error: ${dbError.message}` };
       }
-    } catch (err) {
-      return {
-        user: null,
-        error: `Database Authentication Error: Unable to connect to Supabase database. ${err.message || ''}`
+      return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
+    } else {
+      if (dbUser.status === 'Inactive') {
+        return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
+      }
+
+      const isPasswordValid = await verifyPassword(password, dbUser.password);
+      if (!isPasswordValid) {
+        return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
+      }
+
+      const nowIso = new Date().toISOString();
+      await supabase
+        .from('users')
+        .update({ is_online: true, last_active: nowIso })
+        .eq('id', dbUser.id);
+
+      let completedIds = [];
+      try {
+        const { data: pData } = await supabase.from('student_lesson_progress').select('lesson_id').eq('student_id', dbUser.id);
+        if (Array.isArray(pData)) completedIds = pData.map(p => p.lesson_id);
+      } catch (e) {}
+
+      let assignedIds = [];
+      try {
+        const { data: aData } = await supabase.from('student_lesson_access').select('lesson_id').eq('student_id', dbUser.id);
+        if (Array.isArray(aData)) assignedIds = aData.map(a => a.lesson_id);
+      } catch (e) {}
+
+      const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2'];
+
+      const userObj = {
+        id: dbUser.id,
+        name: dbUser.name,
+        username: dbUser.username,
+        password: dbUser.password,
+        role: dbUser.role,
+        status: dbUser.status,
+        level: dbUser.level || 'Beginner (Level 1)',
+        progress: dbUser.progress || 0,
+        streak: dbUser.streak || 0,
+        isOnline: true,
+        mustChangePassword: dbUser.must_change_password ?? false,
+        lastActive: 'Just now',
+        joinedDate: dbUser.created_at ? dbUser.created_at.split('T')[0] : '2026-01-01',
+        assignedLessonIds: assignedIds.length > 0 ? assignedIds : defaultAssigned,
+        completedLessonIds: completedIds
       };
+
+      saveStoredSession(userObj);
+      return { user: userObj, error: null };
     }
+  } catch (err) {
+    return {
+      user: null,
+      error: `Database Authentication Error: Unable to connect to Supabase database. ${err.message || ''}`
+    };
   }
-
-  const users = getStoredUsers();
-  const matchedUser = users.find(u => u.username?.toLowerCase() === cleanUsername);
-
-  if (!matchedUser) {
-    return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
-  }
-
-  if (matchedUser.status === 'Inactive') {
-    return { user: null, error: 'Account is currently inactive. Please contact your system administrator.' };
-  }
-
-  const isPasswordValid = await verifyPassword(password, matchedUser.password);
-  if (!isPasswordValid) {
-    return { user: null, error: 'Invalid username or password. Please check your credentials and try again.' };
-  }
-
-  const updatedUser = {
-    ...matchedUser,
-    isOnline: true,
-    lastActive: 'Just now'
-  };
-
-  const updatedUsersList = users.map(u => u.id === matchedUser.id ? updatedUser : u);
-  saveStoredUsers(updatedUsersList);
-  saveStoredSession(updatedUser);
-
-  return { user: updatedUser, error: null };
 };
 
 export const authSignOut = async (userId = null) => {

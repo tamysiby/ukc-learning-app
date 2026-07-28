@@ -22,7 +22,7 @@ const THROTTLE_INTERVAL_MS = 10 * 1000; // Throttle activity updates every 10 se
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [users, setUsers] = useState(() => getStoredUsers());
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
@@ -41,12 +41,14 @@ export function AuthProvider({ children }) {
     fetchUsersFromSupabase().then(res => {
       if (res.error) {
         setAuthError(res.error);
-      } else if (res.users && res.users.length > 0) {
+        setUsers([]);
+      } else if (res.users) {
         setAuthError('');
         setUsers(res.users);
       }
     }).catch(err => {
       setAuthError(err.message || 'Database Connection Failed');
+      setUsers([]);
     });
   }, []);
 
@@ -174,8 +176,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Only Administrators can create new student accounts.' };
     }
 
-    const currentUsers = getStoredUsers();
-    const existing = currentUsers.find(u => u.username?.toLowerCase() === newStudentData.username.trim().toLowerCase());
+    const existing = users.find(u => u.username?.toLowerCase() === newStudentData.username.trim().toLowerCase());
 
     if (existing) {
       return { success: false, error: `An account with username '${newStudentData.username}' already exists.` };
@@ -215,7 +216,6 @@ export function AuthProvider({ children }) {
     };
 
     const updatedList = [createdUser, ...users];
-    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
     return { success: true, user: createdUser };
   };
@@ -225,13 +225,14 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Only Administrators can reset account passwords.' };
     }
 
+    const hashedPassword = await hashPassword(newPassword);
+
     const dbRes = await updateStudentUserInDb(userId, { password: hashedPassword, mustChangePassword: true });
     if (!dbRes.success && !isDev) {
       return { success: false, error: dbRes.error };
     }
 
-    const currentUsers = users.length > 0 ? users : getStoredUsers();
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === userId) {
         return {
           ...u,
@@ -242,7 +243,6 @@ export function AuthProvider({ children }) {
       return u;
     });
 
-    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     if (currentUser.id === userId) {
@@ -259,13 +259,14 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'You must be signed in to change your password.' };
     }
 
+    const hashedPassword = await hashPassword(newPassword);
+
     const dbRes = await updateStudentUserInDb(currentUser.id, { password: hashedPassword, mustChangePassword: false });
     if (!dbRes.success && !isDev) {
       return { success: false, error: dbRes.error };
     }
 
-    const currentUsers = users.length > 0 ? users : getStoredUsers();
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === currentUser.id) {
         return {
           ...u,
@@ -276,7 +277,6 @@ export function AuthProvider({ children }) {
       return u;
     });
 
-    if (isDev) saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: false };
@@ -291,15 +291,13 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Only Administrators can edit student accounts.' };
     }
 
-    const currentUsers = getStoredUsers();
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === userId) {
         return { ...u, ...updates };
       }
       return u;
     });
 
-    saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     if (currentUser.id === userId) {
@@ -320,9 +318,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'You cannot delete your own active Admin account.' };
     }
 
-    const currentUsers = getStoredUsers();
-    const updatedList = currentUsers.filter(u => u.id !== userId);
-    saveStoredUsers(updatedList);
+    const updatedList = users.filter(u => u.id !== userId);
     setUsers(updatedList);
     return { success: true };
   };
@@ -336,15 +332,13 @@ export function AuthProvider({ children }) {
   };
 
   const updateStudentAssignedLessons = (userId, lessonIds) => {
-    const currentUsers = getStoredUsers();
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === userId) {
         return { ...u, assignedLessonIds: lessonIds };
       }
       return u;
     });
 
-    saveStoredUsers(updatedList);
     setUsers(updatedList);
     updateStudentUserInDb(userId, { assignedLessonIds: lessonIds });
 
@@ -365,8 +359,7 @@ export function AuthProvider({ children }) {
     if (lessonId === 'les-consonants-quiz-1') extraLessonId = 'les-consonants-1';
 
     let updatedCompleted = [];
-    const currentUsers = getStoredUsers();
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === targetUserId) {
         let completed = u.completedLessonIds || [];
         if (!completed.includes(lessonId)) {
@@ -381,7 +374,6 @@ export function AuthProvider({ children }) {
       return u;
     });
 
-    saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     if (currentUser?.id === targetUserId) {
@@ -406,8 +398,7 @@ export function AuthProvider({ children }) {
   };
 
   const toggleStudentLessonCompletion = (userId, lessonId) => {
-    const currentUsers = getStoredUsers();
-    const target = currentUsers.find(u => u.id === userId);
+    const target = users.find(u => u.id === userId);
     if (!target) return;
 
     const completed = target.completedLessonIds || [];
@@ -424,14 +415,13 @@ export function AuthProvider({ children }) {
       }
     }
 
-    const updatedList = currentUsers.map(u => {
+    const updatedList = users.map(u => {
       if (u.id === userId) {
         return { ...u, completedLessonIds: updatedCompleted };
       }
       return u;
     });
 
-    saveStoredUsers(updatedList);
     setUsers(updatedList);
 
     if (currentUser?.id === userId) {

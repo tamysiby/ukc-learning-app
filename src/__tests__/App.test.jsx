@@ -1,13 +1,56 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import App from '../App';
-import { saveStoredUsers, getStoredUsers, initialMockUsers } from '../services/supabaseClient';
+import { initialMockUsers, supabase } from '../services/supabaseClient';
+import { DEFAULT_LESSONS } from '../services/lessonRegistry';
 
 describe('UKC Learning App Authentic Auth & Protected Navigation', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    saveStoredUsers(initialMockUsers.map(u => ({ ...u, isOnline: false })));
+    vi.restoreAllMocks();
+
+    vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
+      if (tableName === 'users') {
+        const mockUserList = initialMockUsers.map(u => ({
+          ...u,
+          is_online: false,
+          created_at: u.joinedDate ? `${u.joinedDate}T00:00:00Z` : '2026-01-01T00:00:00Z'
+        }));
+        const queryObj = {
+          then: (resolve, reject) => Promise.resolve({ data: mockUserList, error: null }).then(resolve, reject),
+          eq: (field, val) => ({
+            single: () => {
+              const user = mockUserList.find(u => u[field]?.toLowerCase() === String(val).toLowerCase());
+              return Promise.resolve({ data: user || null, error: user ? null : { code: 'PGRST116', message: 'Not found' } });
+            }
+          })
+        };
+        return {
+          select: () => queryObj,
+          update: () => ({ eq: () => Promise.resolve({ error: null }) })
+        };
+      }
+      if (tableName === 'lessons') {
+        return {
+          select: () => ({
+            order: () => Promise.resolve({
+              data: DEFAULT_LESSONS.map(l => ({
+                ...l,
+                order_index: l.order,
+                paired_vocab_id: l.pairedVocabId,
+                paired_quiz_id: l.pairedQuizId
+              })),
+              error: null
+            })
+          })
+        };
+      }
+      return {
+        select: () => Promise.resolve({ data: [], error: null }),
+        update: () => ({ eq: () => Promise.resolve({ error: null }) })
+      };
+    });
   });
 
   it('renders landing login page when unauthenticated', () => {

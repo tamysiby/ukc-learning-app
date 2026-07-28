@@ -232,45 +232,16 @@ export const DEFAULT_LESSONS = [
 ];
 
 export function getStoredLessons() {
-  try {
-    const raw = localStorage.getItem(STORAGE_LESSONS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      const updated = parsed.map(l => {
-        if (l.type === 'vocab quiz') {
-          const { words, ...quizLessonWithoutWords } = l;
-          return quizLessonWithoutWords;
-        }
-        return l;
-      });
-
-      // Ensure newly added default lessons exist in stored list
-      DEFAULT_LESSONS.forEach(dl => {
-        if (!updated.some(ul => ul.id === dl.id)) {
-          updated.push(dl);
-        }
-      });
-
-      return updated;
-    }
-  } catch (e) {
-    console.error('Error reading lessons database:', e);
-  }
-  saveStoredLessons(DEFAULT_LESSONS);
   return DEFAULT_LESSONS;
 }
 
 export function saveStoredLessons(lessons) {
-  try {
-    localStorage.setItem(STORAGE_LESSONS_KEY, JSON.stringify(lessons));
-  } catch (e) {
-    console.error('Error saving lessons database:', e);
-  }
+  // No-op: Local caching disabled. All persistence handled by Supabase DB.
 }
 
 export async function fetchLessonsFromSupabase() {
   if (!isSupabaseConfigured) {
-    return { lessons: getStoredLessons(), error: null };
+    return { lessons: [], error: 'Database Connection Error: Database is offline or non-configured.' };
   }
 
   try {
@@ -300,7 +271,6 @@ export async function fetchLessonsFromSupabase() {
       words: Array.isArray(l.words) ? l.words : []
     }));
 
-    saveStoredLessons(mappedLessons);
     return { lessons: mappedLessons, error: null };
   } catch (err) {
     return { lessons: [], error: `Database Connection Error: ${err.message || 'Failed to communicate with Supabase database.'}` };
