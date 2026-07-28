@@ -31,3 +31,9 @@
 8. **Minimal English in Lessons**:
    - When creating or updating lessons, stick to as little English explanation as possible. The target audience may not be fluent in English.
    - Keep lessons intuitive using visual graphics, clean simple Korean, or minimal English only when strictly necessary.
+
+9. **Grammar Lesson UI & Layout Consistency**:
+   - All grammar and syntax lessons MUST follow the standard component structure established in [`EyoLesson.jsx`](file:///home/tamy/p/ukc-learning-app/src/lessons/eyo/EyoLesson.jsx) (documented in [`grammar-lesson-guidelines.md`](file:///home/tamy/p/ukc-learning-app/docs/guidelines/grammar-lesson-guidelines.md)).
+   - **Sticky Top Bar**: `sticky top-0 z-40` with close button, pattern title, and Mode Switcher Pill (`Casual` | `Polite` | `Formal` with `Polite` active on mount).
+   - **Visual Equation Cards**: High contrast math equation cards (`[Noun] + [Ending] = [Result]`) using `bg-primary/10` for `받침 O` and `bg-emerald-500/10` for `받침 X`.
+   - **2-Column Example Grid**: Clean cards with `w-24 h-24` illustration container, batchim status pill, and icon-only TTS audio buttons for `Q:` bubble (`bg-surface-container-low`) and `A:` bubble (`bg-primary-fixed/30`).
