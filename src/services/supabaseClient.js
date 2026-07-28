@@ -13,7 +13,6 @@ export {
   isSupabaseConfigured,
   initialMockUsers,
   mockFlashcards,
-  generateSessionId,
   getStoredUsers,
   saveStoredUsers,
   getStoredSession,
