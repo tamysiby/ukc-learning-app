@@ -383,6 +383,15 @@ All lesson data is now fetched dynamically from the Supabase database table `les
       { "id": "kor-num-1000", "korean": "천", "romanization": "cheon", "english": "1000", "category": "Numbers" },
       { "id": "kor-num-10000", "korean": "만", "romanization": "man", "english": "10000", "category": "Numbers" }
     ]
+  },
+  {
+    "id": "les-number-usage-1",
+    "order": 15,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Sino vs. Native Numbers (숫자 사용법)",
+    "description": "Learn when to use Sino-Korean numbers vs. Native Korean numbers with interactive Q&A examples.",
+    "type": "custom",
+    "status": "Active"
   }
 ]
 ```

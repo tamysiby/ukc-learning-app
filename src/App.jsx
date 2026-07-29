@@ -5,7 +5,7 @@ import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
 import AdminLessonManagement from './components/AdminLessonManagement';
 import StudentLessonPathway from './components/StudentLessonPathway';
-import { BatchimLesson, EyoLesson, VocabLesson, VocabQuizLesson } from './lessons';
+import { BatchimLesson, EyoLesson, NumberUsageLesson, VocabLesson, VocabQuizLesson } from './lessons';
 import VocabOverview from './components/VocabOverview';
 import StudentAccount from './components/StudentAccount';
 import ForceChangePasswordModal from './components/ForceChangePasswordModal';
@@ -27,6 +27,9 @@ const parseHash = (hashStr, userRole) => {
   if (cleanHash === 'eyo') {
     return { tab: 'eyo', lessonId: 'les-eyo-1' };
   }
+  if (cleanHash === 'number-usage') {
+    return { tab: 'number-usage', lessonId: 'les-number-usage-1' };
+  }
   if (cleanHash.startsWith('lesson/')) {
     const lessonId = cleanHash.replace('lesson/', '');
     if (lessonId === 'les-batchim-1') {
@@ -34,6 +37,9 @@ const parseHash = (hashStr, userRole) => {
     }
     if (lessonId === 'les-eyo-1') {
       return { tab: 'eyo', lessonId };
+    }
+    if (lessonId === 'les-number-usage-1') {
+      return { tab: 'number-usage', lessonId };
     }
     return { tab: 'vocab', lessonId };
   }
@@ -99,6 +105,12 @@ function AppContent() {
         }
         setActiveQuizQuestions([]);
         setCurrentTab('eyo');
+      } else if (route.tab === 'number-usage') {
+        if (currentUser?.id) {
+          markLessonCompleted(currentUser.id, 'les-number-usage-1');
+        }
+        setActiveQuizQuestions([]);
+        setCurrentTab('number-usage');
       } else if (route.tab === 'vocab-quiz' && route.lessonId) {
         const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
         const pairedVocab = lessons.find(l => l.id === target?.pairedVocabId) || lessons[0];
@@ -134,7 +146,7 @@ function AppContent() {
     // Prepare history stack when refreshed inside a lesson so browser back button returns to pathway
     const initialHash = window.location.hash;
     const initialRoute = parseHash(initialHash, userRole);
-    if (['vocab', 'vocab-quiz', 'batchim', 'eyo'].includes(initialRoute.tab)) {
+    if (['vocab', 'vocab-quiz', 'batchim', 'eyo', 'number-usage'].includes(initialRoute.tab)) {
       const defaultHash = userRole === 'Admin' ? '#admin-list' : '#pathway';
       window.history.replaceState(null, '', defaultHash);
       window.history.pushState(null, '', initialHash);
@@ -147,7 +159,7 @@ function AppContent() {
   }, [isAuthenticated, userRole, currentUser?.id, lessons]);
 
   // Focus Mode when student is active inside a lesson or quiz
-  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo');
+  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo' || currentTab === 'number-usage');
 
   // If loading session check
   if (loading) {
@@ -186,6 +198,13 @@ function AppContent() {
   const handleFinishEyoLesson = () => {
     if (currentUser?.id) {
       markLessonCompleted(currentUser.id, 'les-eyo-1');
+    }
+    navigateTo('pathway');
+  };
+
+  const handleFinishNumberUsageLesson = () => {
+    if (currentUser?.id) {
+      markLessonCompleted(currentUser.id, 'les-number-usage-1');
     }
     navigateTo('pathway');
   };
@@ -324,6 +343,9 @@ function AppContent() {
             )}
             {currentTab === 'eyo' && (
               <EyoLesson onFinishLesson={handleFinishEyoLesson} />
+            )}
+            {currentTab === 'number-usage' && (
+              <NumberUsageLesson onFinishLesson={handleFinishNumberUsageLesson} />
             )}
             {currentTab === 'vocab' && (
               showFlashcardDeck ? (
