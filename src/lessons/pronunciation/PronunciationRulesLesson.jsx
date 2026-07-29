@@ -22,7 +22,7 @@ const PRONUNCIATION_RULES = {
     equationResult: '받침소리 연결',
     examples: [
       { word: '이것은', pronunciation: '이거슨', note: 'ㅅ + 은 → 거슨', english: 'this' },
-      { word: '선생님이고', pronunciation: '선생님이고', note: 'ㅁ + 이 → 미고', english: 'is a teacher' },
+      { word: '선생님이고', pronunciation: '선생니미고', note: 'ㅁ + 이 → 미고', english: 'is a teacher' },
       { word: '읽으세요', pronunciation: '일그세요', note: 'ㄺ + 으 → 일그', english: 'please read' },
       { word: '밥을', pronunciation: '바블', note: 'ㅂ + 을 → 바블', english: 'rice (obj)' },
       { word: '꽃이', pronunciation: '꼬치', note: 'ㅊ + 이 → 꼬치', english: 'flower (subj)' },
@@ -99,7 +99,7 @@ const PRONUNCIATION_RULES = {
     equationMid: 'ㄱ,ㄷ,ㅂ,ㅅ,ㅈ',
     equationResult: 'ㄲ, ㄸ, ㅃ, ㅆ, ㅉ',
     examples: [
-      { word: '학교', pronunciation: '학교 → [학꾜]', note: 'ㄱ + ㄱ → 꾜', english: 'school' },
+      { word: '학교', pronunciation: '학꾜', note: 'ㄱ + ㄱ → 꾜', english: 'school' },
       { word: '있다', pronunciation: '있따', note: 'ㅆ(ㄷ) + 다 → 따', english: 'exist / have' },
       { word: '떡볶이', pronunciation: '떡뽀끼', note: 'ㄱ + ㅂ → 뽀, ㄲ + 이 → 끼', english: 'tteokbokki' },
       { word: '첫사랑', pronunciation: '첫싸랑', note: 'ㅅ(ㄷ) + 사 → 싸', english: 'first love' },
@@ -141,55 +141,50 @@ export default function PronunciationRulesLesson({ onFinishLesson }) {
       <div className="bg-surface-container-lowest p-2 rounded-2xl border border-outline-variant/80 shadow-xs flex items-center gap-1.5 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveRuleKey('liaison')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-            activeRuleKey === 'liaison'
-              ? 'bg-primary text-on-primary shadow-xs'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeRuleKey === 'liaison'
+            ? 'bg-primary text-on-primary shadow-xs'
+            : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
         >
           1. 연음 (Liaison)
         </button>
 
         <button
           onClick={() => setActiveRuleKey('aspiration')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-            activeRuleKey === 'aspiration'
-              ? 'bg-primary text-on-primary shadow-xs'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeRuleKey === 'aspiration'
+            ? 'bg-primary text-on-primary shadow-xs'
+            : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
         >
           2. 격음화 (Aspiration)
         </button>
 
         <button
           onClick={() => setActiveRuleKey('nasalization')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-            activeRuleKey === 'nasalization'
-              ? 'bg-primary text-on-primary shadow-xs'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeRuleKey === 'nasalization'
+            ? 'bg-primary text-on-primary shadow-xs'
+            : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
         >
           3. 비음화 (Nasalization)
         </button>
 
         <button
           onClick={() => setActiveRuleKey('palatalization')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-            activeRuleKey === 'palatalization'
-              ? 'bg-primary text-on-primary shadow-xs'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeRuleKey === 'palatalization'
+            ? 'bg-primary text-on-primary shadow-xs'
+            : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
         >
           4. 구개음화 (Palatalization)
         </button>
 
         <button
           onClick={() => setActiveRuleKey('glottalization')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-            activeRuleKey === 'glottalization'
-              ? 'bg-primary text-on-primary shadow-xs'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${activeRuleKey === 'glottalization'
+            ? 'bg-primary text-on-primary shadow-xs'
+            : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
         >
           5. 된소리화 (Glottalization)
         </button>
