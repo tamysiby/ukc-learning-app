@@ -45,11 +45,12 @@ For every word item in the lesson:
 3. **Register in `VocabIllustration.jsx`**:
    - Add all new word IDs (e.g., `'hob-1'`, `'hob-2'`, ...) to the `availableIds` array inside [`src/components/VocabIllustration.jsx`](file:///home/tamy/p/ukc-learning-app/src/components/VocabIllustration.jsx).
 
-### 4. Determine Order Indexes (End of Pathway)
-1. Inspect existing lessons in [`supabase/schema.sql`](file:///home/tamy/p/ukc-learning-app/supabase/schema.sql) and [`src/services/userSessionStore.js`](file:///home/tamy/p/ukc-learning-app/src/services/userSessionStore.js).
-2. Find current maximum `order_index` (e.g. `8`).
-3. Set main vocab lesson `order_index = max + 1` (e.g. `9`).
-4. Set associated quiz lesson `order_index = max + 2` (e.g. `10`).
+### 4. Determine Order Indexes (Live DB Check: End of Pathway)
+1. **Query Live Supabase DB**: Query table `public.lessons` for all existing `order_index` values.
+2. **Calculate Next Order Indexes**:
+   - Find maximum `order_index` currently in DB (`maxOrder`).
+   - Set main vocab lesson `order_index = maxOrder + 1`.
+   - Set associated quiz lesson `order_index = maxOrder + 2`.
 
 ### 5. Database & Workspace Synchronization
 1. **Live Supabase Upsert**: Upsert BOTH lesson records to table `public.lessons` using [add_lesson_to_db.js](file:///home/tamy/p/ukc-learning-app/.agents/skills/add-lesson/scripts/add_lesson_to_db.js).

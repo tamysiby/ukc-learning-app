@@ -20,15 +20,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function upsertLessonToDb(lessonPayload) {
-  // Determine highest order_index if not provided
-  if (lessonPayload.order_index === undefined) {
-    const { data: existingLessons } = await supabase.from('lessons').select('order_index');
-    if (Array.isArray(existingLessons) && existingLessons.length > 0) {
-      const maxOrder = Math.max(...existingLessons.map(l => Number(l.order_index) || 0));
+  // Live query Supabase DB for all existing order_index values and existing IDs
+  const { data: existingLessons } = await supabase.from('lessons').select('id, order_index');
+  
+  let maxOrder = 0;
+  if (Array.isArray(existingLessons) && existingLessons.length > 0) {
+    maxOrder = Math.max(...existingLessons.map(l => Number(l.order_index) || 0));
+  }
+
+  // Check if this lesson ID already exists in DB
+  const existingRecord = Array.isArray(existingLessons) ? existingLessons.find(l => l.id === lessonPayload.id) : null;
+
+  if (!existingRecord) {
+    // New lesson being added: automatically set order_index to highest existing number + 1
+    if (lessonPayload.order_index === undefined || Number(lessonPayload.order_index) <= maxOrder) {
       lessonPayload.order_index = maxOrder + 1;
-    } else {
-      lessonPayload.order_index = 1;
     }
+  } else if (lessonPayload.order_index === undefined) {
+    lessonPayload.order_index = Number(existingRecord.order_index);
   }
 
   const { data, error } = await supabase
@@ -63,5 +72,11 @@ const payloadFilePath = process.argv[2];
 if (payloadFilePath) {
   const rawPayload = fs.readFileSync(payloadFilePath, 'utf-8');
   const parsedLesson = JSON.parse(rawPayload);
-  upsertLessonToDb(parsedLesson);
+  if (Array.isArray(parsedLesson)) {
+    for (const item of parsedLesson) {
+      await upsertLessonToDb(item);
+    }
+  } else {
+    upsertLessonToDb(parsedLesson);
+  }
 }

@@ -24,10 +24,10 @@ This skill defines the step-by-step workflow for ingesting raw lesson notes from
    - Assign clean IDs (`cr-1`, `cr-2`, etc. or prefixed for the lesson).
    - Group items into intuitive categories (`Commands`, `Questions`, `Answers`, `Expressions`, `Feedback`, `Vocab`).
 
-### 2. Determine Order Index (Position as the Very Last Lesson)
-1. Inspect existing lessons in [`supabase/schema.sql`](file:///home/tamy/p/ukc-learning-app/supabase/schema.sql) and [`src/services/userSessionStore.js`](file:///home/tamy/p/ukc-learning-app/src/services/userSessionStore.js).
-2. Find the highest `order_index` currently in the system (e.g., `8`).
-3. Assign the new lesson an `order_index` greater than the maximum (e.g., `9` or `order_index = max + 1`).
+### 2. Determine Order Index (Live DB Check: Biggest `order_index` + 1)
+1. **Query Live Supabase DB**: Query table `public.lessons` for all `order_index` values.
+2. **Calculate Next Order Index**: Find the maximum `order_index` currently in the database (`maxOrder`) and assign `order_index = maxOrder + 1` for the new lesson.
+3. **Helper Script Auto-Assignment**: `add_lesson_to_db.js` automatically inspects `public.lessons` in Supabase DB and assigns `maxOrder + 1` whenever a new lesson is added.
 
 ### 3. Database & Workspace Synchronization
 1. **Live Supabase Upsert**: Run the helper script [add_lesson_to_db.js](file:///home/tamy/p/ukc-learning-app/.agents/skills/add-lesson/scripts/add_lesson_to_db.js) or execute Supabase client upsert to add the record to table `public.lessons`.
