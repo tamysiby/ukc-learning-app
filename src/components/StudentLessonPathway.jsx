@@ -194,6 +194,7 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
             const isCurrentTopIncomplete = topmostIncompleteLesson?.id === lesson.id;
             const isTopLesson = index === 0;
             const isHighlighted = highlightedId === lesson.id;
+            const isQuiz = lesson.type === 'vocab quiz';
 
             return (
               <div
@@ -202,20 +203,33 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                 className={`relative z-10 flex flex-col items-center space-y-3 group ${isTopLesson ? 'pb-6' : 'py-6'
                   } transition-all duration-300`}
               >
-                {/* Node Icon */}
+                {/* Node Icon Container: Diamond/Square shape for Quizzes, Round Circles for Study Lessons */}
                 {isCompleted ? (
-                  <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md ring-4 ring-emerald-100 dark:ring-emerald-900/40 transition-transform group-hover:scale-105">
-                    <span className="material-symbols-outlined text-3xl font-bold">check</span>
+                  <div
+                    className={`w-16 h-16 bg-emerald-600 text-white flex items-center justify-center shadow-md ring-4 ring-emerald-100 dark:ring-emerald-900/40 transition-transform group-hover:scale-105 ${
+                      isQuiz ? 'rounded-2xl rotate-45' : 'rounded-full'
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-3xl font-bold ${isQuiz ? '-rotate-45' : ''}`}>
+                      check
+                    </span>
                   </div>
                 ) : (
                   <div
-                    className={`rounded-full flex items-center justify-center transition-all group-hover:scale-105 ${isCurrentTopIncomplete
-                      ? 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
-                      : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
-                      }`}
+                    className={`flex items-center justify-center transition-all group-hover:scale-105 ${
+                      isQuiz ? 'rounded-2xl rotate-45' : 'rounded-full'
+                    } ${
+                      isCurrentTopIncomplete
+                        ? isQuiz
+                          ? 'w-20 h-20 bg-amber-500 text-white shadow-lg ring-8 ring-amber-500/25 animate-pulse'
+                          : 'w-20 h-20 bg-primary text-on-primary shadow-lg ring-8 ring-primary/20 animate-pulse'
+                        : isQuiz
+                          ? 'w-16 h-16 bg-amber-500/15 text-amber-600 dark:text-amber-400 border-2 border-amber-500/40'
+                          : 'w-16 h-16 bg-surface-container-highest text-on-surface border border-outline-variant'
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-3xl">
-                      {lesson.type === 'custom' ? 'menu_book' : lesson.type === 'vocab quiz' ? 'quiz' : 'style'}
+                    <span className={`material-symbols-outlined text-3xl ${isQuiz ? '-rotate-45 font-bold' : ''}`}>
+                      {isQuiz ? 'quiz' : lesson.type === 'custom' ? 'menu_book' : 'style'}
                     </span>
                   </div>
                 )}
@@ -225,9 +239,13 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                   className={`text-center bg-surface-container-lowest px-6 py-4 rounded-2xl border shadow-md space-y-3 min-w-[260px] max-w-sm transition-all duration-300 ${isHighlighted
                     ? isCompleted
                       ? 'border-2 border-emerald-500 ring-4 ring-emerald-500/20 scale-105 shadow-xl'
-                      : 'border-2 border-primary ring-4 ring-primary/20 scale-105 shadow-xl'
+                      : isQuiz
+                        ? 'border-2 border-amber-500 ring-4 ring-amber-500/20 scale-105 shadow-xl'
+                        : 'border-2 border-primary ring-4 ring-primary/20 scale-105 shadow-xl'
                     : isCurrentTopIncomplete
-                      ? 'border-2 border-primary shadow-lg'
+                      ? isQuiz
+                        ? 'border-2 border-amber-500 shadow-lg'
+                        : 'border-2 border-primary shadow-lg'
                       : 'border-outline-variant'
                     }`}
                 >
@@ -238,8 +256,14 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
                       </span>
                     )}
                     {!isCompleted && isCurrentTopIncomplete && (
-                      <span className="px-2 py-0.5 bg-primary-fixed/60 text-primary text-[10px] font-bold rounded-md uppercase">
-                        Current Lesson ▶
+                      <span
+                        className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md uppercase ${
+                          isQuiz
+                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
+                            : 'bg-primary-fixed/60 text-primary'
+                        }`}
+                      >
+                        {isQuiz ? 'Current Quiz Challenge ▶' : 'Current Lesson ▶'}
                       </span>
                     )}
 
@@ -248,15 +272,22 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
 
                   <button
                     onClick={() => handleLaunchLesson(lesson)}
-                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${isCompleted
-                      ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
-                      : 'bg-primary hover:bg-primary-container text-on-primary'
-                      }`}
+                    className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                      isCompleted
+                        ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-outline-variant'
+                        : isQuiz
+                          ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                          : 'bg-primary hover:bg-primary-container text-on-primary'
+                    }`}
                   >
                     <span className="material-symbols-outlined text-base">
-                      {isCompleted ? 'replay' : 'play_circle'}
+                      {isCompleted ? 'replay' : isQuiz ? 'quiz' : 'play_circle'}
                     </span>
-                    <span>{isCompleted ? 'Review Lesson' : 'Start Lesson'}</span>
+                    <span>
+                      {isCompleted
+                        ? isQuiz ? 'Review Quiz' : 'Review Lesson'
+                        : isQuiz ? 'Take Quiz' : 'Study Lesson'}
+                    </span>
                   </button>
                 </div>
               </div>

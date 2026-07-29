@@ -56,7 +56,7 @@ describe('Student Lesson Pathway Screen', () => {
   it('triggers lesson launch handler when Start Lesson button is clicked', async () => {
     renderWithAuth(<StudentLessonPathway onStartHangulLesson={mockHangul} onStartVocabLesson={mockVocab} />);
     await waitFor(() => expect(screen.getAllByText(/한글 모음/i)[0]).toBeInTheDocument(), { timeout: 3000 });
-    const startBtns = screen.getAllByRole('button', { name: /Start Lesson/i });
+    const startBtns = screen.getAllByRole('button', { name: /Study Lesson|Take Quiz/i });
     expect(startBtns.length).toBeGreaterThan(0);
     fireEvent.click(startBtns[0]);
     expect(mockVocab.mock.calls.length + mockHangul.mock.calls.length).toBeGreaterThan(0);
