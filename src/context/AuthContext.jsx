@@ -53,23 +53,31 @@ export function AuthProvider({ children }) {
 
     refreshLessonsList();
 
-    // Live DB fetch on startup
-    fetchUsersFromSupabase().then(res => {
-      if (res.error) {
-        setAuthError(res.error);
+    // Live DB user roster fetch on startup (only required for Admin accounts or unauthenticated state)
+    if (!savedUser || savedUser.role === 'Admin') {
+      fetchUsersFromSupabase().then(res => {
+        if (res.error) {
+          setAuthError(res.error);
+          setUsers([]);
+        } else if (res.users) {
+          setAuthError('');
+          setUsers(res.users);
+        }
+      }).catch(err => {
+        setAuthError(err.message || 'Database Connection Failed');
         setUsers([]);
-      } else if (res.users) {
-        setAuthError('');
-        setUsers(res.users);
-      }
-    }).catch(err => {
-      setAuthError(err.message || 'Database Connection Failed');
-      setUsers([]);
-    });
+      });
+    }
   }, []);
 
-  // Sync users list
+  // Sync users list (Admin only)
   const refreshUsersList = async () => {
+    const activeSession = getStoredSession();
+    // Optimization: Skip full user directory scan if current user is a Student
+    if (activeSession && activeSession.role !== 'Admin') {
+      return;
+    }
+
     const res = await fetchUsersFromSupabase();
     if (res.error) {
       setAuthError(res.error);
@@ -78,7 +86,6 @@ export function AuthProvider({ children }) {
       setUsers(res.users);
 
       // Check current active stored session to prevent stale closure re-login on logout
-      const activeSession = getStoredSession();
       if (activeSession?.id) {
         const dbRecord = res.users.find(u => u.id === activeSession.id);
         if (dbRecord) {
@@ -170,7 +177,10 @@ export function AuthProvider({ children }) {
 
     setCurrentUser(res.user);
     lastActivityTimeRef.current = Date.now();
-    refreshUsersList();
+    saveStoredSession(res.user);
+    if (res.user?.role === 'Admin') {
+      refreshUsersList();
+    }
     return { success: true, user: res.user };
   };
 
@@ -388,47 +398,31 @@ export function AuthProvider({ children }) {
     if (lessonId === 'les-vowels-quiz-1') extraLessonId = 'les-vowels-1';
     if (lessonId === 'les-consonants-quiz-1') extraLessonId = 'les-consonants-1';
 
-    let updatedCompleted = [];
-    const updatedList = users.map(u => {
-      if (u.id === targetUserId) {
-        let completed = u.completedLessonIds || [];
-        if (!completed.includes(lessonId)) {
-          completed = [...completed, lessonId];
-        }
-        if (extraLessonId && !completed.includes(extraLessonId)) {
-          completed = [...completed, extraLessonId];
-        }
-        updatedCompleted = completed;
-        return { ...u, completedLessonIds: completed };
-      }
-      return u;
-    });
+    const targetUser = (currentUser?.id === targetUserId) ? currentUser : users.find(u => u.id === targetUserId);
+    let completed = targetUser?.completedLessonIds ? [...targetUser.completedLessonIds] : [];
 
-    setUsers(updatedList);
-
-    if (currentUser?.id === targetUserId) {
-      let completed = currentUser.completedLessonIds || [];
-      let updated = false;
-      if (!completed.includes(lessonId)) {
-        completed = [...completed, lessonId];
-        updated = true;
-      }
-      if (extraLessonId && !completed.includes(extraLessonId)) {
-        completed = [...completed, extraLessonId];
-        updated = true;
-      }
-      if (updated) {
-        const updatedSelf = { ...currentUser, completedLessonIds: completed };
-        setCurrentUser(updatedSelf);
-        saveStoredSession(updatedSelf);
-      }
+    if (!completed.includes(lessonId)) {
+      completed.push(lessonId);
+    }
+    if (extraLessonId && !completed.includes(extraLessonId)) {
+      completed.push(extraLessonId);
     }
 
-    updateStudentUserInDb(targetUserId, { completedLessonIds: updatedCompleted });
+    if (users.length > 0) {
+      setUsers(prev => prev.map(u => u.id === targetUserId ? { ...u, completedLessonIds: completed } : u));
+    }
+
+    if (currentUser?.id === targetUserId) {
+      const updatedSelf = { ...currentUser, completedLessonIds: completed };
+      setCurrentUser(updatedSelf);
+      saveStoredSession(updatedSelf);
+    }
+
+    updateStudentUserInDb(targetUserId, { completedLessonIds: completed });
   };
 
   const toggleStudentLessonCompletion = (userId, lessonId) => {
-    const target = users.find(u => u.id === userId);
+    const target = (currentUser?.id === userId) ? currentUser : users.find(u => u.id === userId);
     if (!target) return;
 
     const completed = target.completedLessonIds || [];
@@ -445,14 +439,9 @@ export function AuthProvider({ children }) {
       }
     }
 
-    const updatedList = users.map(u => {
-      if (u.id === userId) {
-        return { ...u, completedLessonIds: updatedCompleted };
-      }
-      return u;
-    });
-
-    setUsers(updatedList);
+    if (users.length > 0) {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, completedLessonIds: updatedCompleted } : u));
+    }
 
     if (currentUser?.id === userId) {
       const updatedSelf = { ...currentUser, completedLessonIds: updatedCompleted };

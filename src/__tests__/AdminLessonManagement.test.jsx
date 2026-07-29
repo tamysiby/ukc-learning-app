@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AdminLessonManagement from '../components/AdminLessonManagement';
 import { AuthProvider } from '../context/AuthContext';
+import { initialMockUsers, supabase, saveStoredSession } from '../services/supabaseClient';
 
 function renderWithAuth(ui) {
   return render(
@@ -11,7 +12,39 @@ function renderWithAuth(ui) {
   );
 }
 
+const sampleTestLessons = [
+  { id: 'les-vowels-1', order_index: 1, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음', type: 'vocab', paired_quiz_id: 'les-vowels-quiz-1', status: 'Active', words: [] },
+  { id: 'les-vowels-quiz-1', order_index: 2, unit: 'Unit 1: Hangul & Korean Basics', title: '한글 모음 퀴즈', type: 'vocab quiz', paired_vocab_id: 'les-vowels-1', status: 'Active' }
+];
+
 describe('Admin Lesson Management Portal Component', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    saveStoredSession({ id: 'usr-admin-1', username: 'admin', role: 'Admin' });
+    vi.restoreAllMocks();
+
+    const createMockQuery = (data) => {
+      const promise = Promise.resolve({ data, error: null });
+      promise.eq = () => createMockQuery(data);
+      promise.order = () => createMockQuery(data);
+      promise.single = () => Promise.resolve({ data: Array.isArray(data) ? data[0] : data, error: null });
+      return promise;
+    };
+
+    vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
+      let dataToReturn = [];
+      if (tableName === 'users') dataToReturn = initialMockUsers;
+      if (tableName === 'lessons') dataToReturn = sampleTestLessons;
+
+      return {
+        select: () => createMockQuery(dataToReturn),
+        update: () => ({ eq: () => Promise.resolve({ error: null }) }),
+        upsert: () => createMockQuery(dataToReturn)
+      };
+    });
+  });
+
   it('renders lesson management header and default platform lessons', async () => {
     renderWithAuth(<AdminLessonManagement />);
     expect(screen.getByText('Lesson Management')).toBeInTheDocument();
