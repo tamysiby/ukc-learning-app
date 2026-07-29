@@ -21,14 +21,14 @@ const PRONUNCIATION_RULES = {
     equationMid: 'ㅇ',
     equationResult: '받침소리 연결',
     examples: [
-      { word: '이것은', pronunciation: '이거슨', note: 'ㅅ + 은 → 거슨', svg: '/illustrations/vp2-4.svg', english: 'this' },
-      { word: '선생님이고', pronunciation: '선생님이고', note: 'ㅁ + 이 → 미고', svg: '/illustrations/vp2-16.svg', english: 'is a teacher' },
-      { word: '읽으세요', pronunciation: '일그세요', note: 'ㄺ + 으 → 일그', svg: '/illustrations/cr-3.svg', english: 'please read' },
-      { word: '밥을', pronunciation: '바블', note: 'ㅂ + 을 → 바블', svg: '/illustrations/bat-1.svg', english: 'rice (obj)' },
-      { word: '꽃이', pronunciation: '꼬치', note: 'ㅊ + 이 → 꼬치', svg: '/illustrations/vp1-20.svg', english: 'flower (subj)' },
-      { word: '먹어요', pronunciation: '머거요', note: 'ㄱ + 어 → 머거', svg: '/illustrations/vp2-12.svg', english: 'eat' },
-      { word: '있어요', pronunciation: '이써요', note: 'ㅆ + 어 → 이써', svg: '/illustrations/eyo-1.svg', english: 'there is' },
-      { word: '같아요', pronunciation: '가타요', note: 'ㅌ + 아 → 가타', svg: '/illustrations/cr-16.svg', english: 'same' }
+      { word: '이것은', pronunciation: '이거슨', note: 'ㅅ + 은 → 거슨', english: 'this' },
+      { word: '선생님이고', pronunciation: '선생님이고', note: 'ㅁ + 이 → 미고', english: 'is a teacher' },
+      { word: '읽으세요', pronunciation: '일그세요', note: 'ㄺ + 으 → 일그', english: 'please read' },
+      { word: '밥을', pronunciation: '바블', note: 'ㅂ + 을 → 바블', english: 'rice (obj)' },
+      { word: '꽃이', pronunciation: '꼬치', note: 'ㅊ + 이 → 꼬치', english: 'flower (subj)' },
+      { word: '먹어요', pronunciation: '머거요', note: 'ㄱ + 어 → 머거', english: 'eat' },
+      { word: '있어요', pronunciation: '이써요', note: 'ㅆ + 어 → 이써', english: 'there is' },
+      { word: '같아요', pronunciation: '가타요', note: 'ㅌ + 아 → 가타', english: 'same' }
     ]
   },
   aspiration: {
@@ -41,14 +41,14 @@ const PRONUNCIATION_RULES = {
     equationMid: 'ㅎ',
     equationResult: 'ㅋ, ㅌ, ㅍ, ㅊ',
     examples: [
-      { word: '축하', pronunciation: '추카', note: 'ㄱ + 하 → 카', svg: '/illustrations/cr-20.svg', english: 'congratulations' },
-      { word: '백화점', pronunciation: '배콰점', note: 'ㄱ + 화 → 콰', svg: '/illustrations/vp2-19.svg', english: 'department store' },
-      { word: '못해요', pronunciation: '모태요', note: 'ㅅ(ㄷ) + 해 → 태', svg: '/illustrations/cr-15.svg', english: 'cannot do' },
-      { word: '입하면', pronunciation: '이파면', note: 'ㅂ + 하면 → 파', svg: '/illustrations/vp2-1.svg', english: 'if entered' },
-      { word: '맞히다', pronunciation: '마치다', note: 'ㅈ + 히 → 치', svg: '/illustrations/cr-8.svg', english: 'guess right' },
-      { word: '좋고', pronunciation: '조코', note: 'ㅎ + 고 → 코', svg: '/illustrations/cr-19.svg', english: 'good and' },
-      { word: '좋다', pronunciation: '조타', note: 'ㅎ + 다 → 타', svg: '/illustrations/cr-19.svg', english: 'is good' },
-      { word: '많지', pronunciation: '만치', note: 'ㅎ + 지 → 치', svg: '/illustrations/eyo-1.svg', english: 'many right' }
+      { word: '축하', pronunciation: '추카', note: 'ㄱ + 하 → 카', english: 'congratulations' },
+      { word: '백화점', pronunciation: '배콰점', note: 'ㄱ + 화 → 콰', english: 'department store' },
+      { word: '못해요', pronunciation: '모태요', note: 'ㅅ(ㄷ) + 해 → 태', english: 'cannot do' },
+      { word: '입하면', pronunciation: '이파면', note: 'ㅂ + 하면 → 파', english: 'if entered' },
+      { word: '맞히다', pronunciation: '마치다', note: 'ㅈ + 히 → 치', english: 'guess right' },
+      { word: '좋고', pronunciation: '조코', note: 'ㅎ + 고 → 코', english: 'good and' },
+      { word: '좋다', pronunciation: '조타', note: 'ㅎ + 다 → 타', english: 'is good' },
+      { word: '많지', pronunciation: '만치', note: 'ㅎ + 지 → 치', english: 'many right' }
     ]
   },
   nasalization: {
@@ -61,14 +61,14 @@ const PRONUNCIATION_RULES = {
     equationMid: 'ㄴ, ㅁ',
     equationResult: 'ㅇ, ㄴ, ㅁ',
     examples: [
-      { word: '국물', pronunciation: '궁물', note: 'ㄱ + ㅁ → 궁', svg: '/illustrations/vp2-8.svg', english: 'soup broth' },
-      { word: '백 명', pronunciation: '뱅 명', note: 'ㄱ + ㅁ → 뱅', svg: '/illustrations/vp2-16.svg', english: '100 people' },
-      { word: '듣는', pronunciation: '든는', note: 'ㄷ + ㄴ → 든', svg: '/illustrations/cr-2.svg', english: 'listening' },
-      { word: '옷만', pronunciation: '온만', note: 'ㅅ(ㄷ) + ㅁ → 온', svg: '/illustrations/vp1-28.svg', english: 'only clothes' },
-      { word: '감사합니다', pronunciation: '감사함니다', note: 'ㅂ + 니 → 함', svg: '/illustrations/cr-21.svg', english: 'thank you' },
-      { word: '앞마당', pronunciation: '암마당', note: 'ㅍ(ㅂ) + ㅁ → 암', svg: '/illustrations/vp2-19.svg', english: 'front yard' },
-      { word: '독립', pronunciation: '동닙', note: 'ㄱ + ㄹ → 동닙', svg: '/illustrations/vp2-19.svg', english: 'independence' },
-      { word: '십 리', pronunciation: '심니', note: 'ㅂ + ㄹ → 심니', svg: '/illustrations/vp1-5.svg', english: '10 ri (distance)' }
+      { word: '국물', pronunciation: '궁물', note: 'ㄱ + ㅁ → 궁', english: 'soup broth' },
+      { word: '백 명', pronunciation: '뱅 명', note: 'ㄱ + ㅁ → 뱅', english: '100 people' },
+      { word: '듣는', pronunciation: '든는', note: 'ㄷ + ㄴ → 든', english: 'listening' },
+      { word: '옷만', pronunciation: '온만', note: 'ㅅ(ㄷ) + ㅁ → 온', english: 'only clothes' },
+      { word: '감사합니다', pronunciation: '감사함니다', note: 'ㅂ + 니 → 함', english: 'thank you' },
+      { word: '앞마당', pronunciation: '암마당', note: 'ㅍ(ㅂ) + ㅁ → 암', english: 'front yard' },
+      { word: '독립', pronunciation: '동닙', note: 'ㄱ + ㄹ → 동닙', english: 'independence' },
+      { word: '십 리', pronunciation: '심니', note: 'ㅂ + ㄹ → 심니', english: '10 ri (distance)' }
     ]
   },
   palatalization: {
@@ -81,12 +81,12 @@ const PRONUNCIATION_RULES = {
     equationMid: '이 / 히',
     equationResult: '지 / 치',
     examples: [
-      { word: '같이', pronunciation: '가치', note: 'ㅌ + 이 → 치', svg: '/illustrations/cr-16.svg', english: 'together' },
-      { word: '굳이', pronunciation: '구지', note: 'ㄷ + 이 → 지', svg: '/illustrations/eyo-1.svg', english: 'persistently' },
-      { word: '미닫이', pronunciation: '미다지', note: 'ㄷ + 이 → 지', svg: '/illustrations/ui-ja.svg', english: 'sliding door' },
-      { word: '밭이', pronunciation: '바치', note: 'ㅌ + 이 → 치', svg: '/illustrations/dang-geun.svg', english: 'field (subj)' },
-      { word: '붙이다', pronunciation: '부치다', note: 'ㅌ + 이 → 치', svg: '/illustrations/ri-bon.svg', english: 'to stick/attach' },
-      { word: '닫히다', pronunciation: '다치다', note: 'ㄷ + 히 → 치', svg: '/illustrations/gyo-sil.svg', english: 'to be closed' }
+      { word: '같이', pronunciation: '가치', note: 'ㅌ + 이 → 치', english: 'together' },
+      { word: '굳이', pronunciation: '구지', note: 'ㄷ + 이 → 지', english: 'persistently' },
+      { word: '미닫이', pronunciation: '미다지', note: 'ㄷ + 이 → 지', english: 'sliding door' },
+      { word: '밭이', pronunciation: '바치', note: 'ㅌ + 이 → 치', english: 'field (subj)' },
+      { word: '붙이다', pronunciation: '부치다', note: 'ㅌ + 이 → 치', english: 'to stick/attach' },
+      { word: '닫히다', pronunciation: '다치다', note: 'ㄷ + 히 → 치', english: 'to be closed' }
     ]
   },
   glottalization: {
@@ -99,11 +99,11 @@ const PRONUNCIATION_RULES = {
     equationMid: 'ㄱ,ㄷ,ㅂ,ㅅ,ㅈ',
     equationResult: 'ㄲ, ㄸ, ㅃ, ㅆ, ㅉ',
     examples: [
-      { word: '학교', pronunciation: '학교 → [학꾜]', note: 'ㄱ + ㄱ → 꾜', svg: '/illustrations/vp2-19.svg', english: 'school' },
-      { word: '있다', pronunciation: '있따', note: 'ㅆ(ㄷ) + 다 → 따', svg: '/illustrations/cr-9.svg', english: 'exist / have' },
-      { word: '떡볶이', pronunciation: '떡뽀끼', note: 'ㄱ + ㅂ → 뽀, ㄲ + 이 → 끼', svg: '/illustrations/gim-bap.svg', english: 'tteokbokki' },
-      { word: '첫사랑', pronunciation: '첫싸랑', note: 'ㅅ(ㄷ) + 사 → 싸', svg: '/illustrations/na-bi.svg', english: 'first love' },
-      { word: '갑자기', pronunciation: '갑짜기', note: 'ㅂ + 자 → 짜', svg: '/illustrations/ju-sa-wi.svg', english: 'suddenly' }
+      { word: '학교', pronunciation: '학교 → [학꾜]', note: 'ㄱ + ㄱ → 꾜', english: 'school' },
+      { word: '있다', pronunciation: '있따', note: 'ㅆ(ㄷ) + 다 → 따', english: 'exist / have' },
+      { word: '떡볶이', pronunciation: '떡뽀끼', note: 'ㄱ + ㅂ → 뽀, ㄲ + 이 → 끼', english: 'tteokbokki' },
+      { word: '첫사랑', pronunciation: '첫싸랑', note: 'ㅅ(ㄷ) + 사 → 싸', english: 'first love' },
+      { word: '갑자기', pronunciation: '갑짜기', note: 'ㅂ + 자 → 짜', english: 'suddenly' }
     ]
   }
 };
@@ -221,66 +221,53 @@ export default function PronunciationRulesLesson({ onFinishLesson }) {
         </div>
       </div>
 
-      {/* Interactive Example Cards Grid */}
+      {/* Clean Example Cards Grid (Noise-Free, No Illustrations) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {activeRule.examples.map((item, idx) => (
           <div
             key={idx}
-            className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant shadow-xs flex items-center gap-4 hover:border-primary/40 transition-colors"
+            className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant shadow-xs flex flex-col justify-between space-y-3 hover:border-primary/40 transition-colors"
           >
-            {/* Illustration SVG */}
-            <div className="w-24 h-24 rounded-2xl bg-surface-container-low p-2 border border-outline-variant/60 flex items-center justify-center shrink-0">
-              <img
-                src={item.svg}
-                alt={item.word}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
+            {/* Badge & Note */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                {item.note}
+              </span>
+              <span className="text-[11px] font-semibold text-outline font-headline truncate">
+                {item.english}
+              </span>
             </div>
 
-            {/* Word & Pronunciation Details */}
-            <div className="flex-1 space-y-2.5 min-w-0">
-              {/* Badge & Note */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                  {item.note}
-                </span>
-                <span className="text-[11px] font-semibold text-outline font-headline truncate">
-                  {item.english}
-                </span>
+            {/* Written Word Bubble (글자) */}
+            <div className="flex items-center justify-between bg-surface-container-low px-3 py-2 rounded-xl border border-outline-variant/40">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-outline uppercase font-headline">글자:</span>
+                <span className="text-base font-bold text-on-surface font-headline">{item.word}</span>
               </div>
+              <button
+                onClick={() => playSound(item.word)}
+                className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer shrink-0"
+                title="Listen Written Word"
+              >
+                <span className="material-symbols-outlined text-xs">volume_up</span>
+              </button>
+            </div>
 
-              {/* Written Word Bubble (글자) */}
-              <div className="flex items-center justify-between bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/40">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-outline uppercase font-headline">글자:</span>
-                  <span className="text-base font-bold text-on-surface font-headline">{item.word}</span>
-                </div>
-                <button
-                  onClick={() => playSound(item.word)}
-                  className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer shrink-0"
-                  title="Listen Written Word"
-                >
-                  <span className="material-symbols-outlined text-xs">volume_up</span>
-                </button>
+            {/* Spoken Pronunciation Bubble [발음] */}
+            <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/30">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 uppercase font-headline">발음:</span>
+                <span className="text-base font-black text-emerald-800 dark:text-emerald-300 font-headline">
+                  [{item.pronunciation}]
+                </span>
               </div>
-
-              {/* Spoken Pronunciation Bubble [발음] */}
-              <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 uppercase font-headline">발음:</span>
-                  <span className="text-base font-black text-emerald-800 dark:text-emerald-300 font-headline">
-                    [{item.pronunciation}]
-                  </span>
-                </div>
-                <button
-                  onClick={() => playSound(item.pronunciation)}
-                  className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer shrink-0"
-                  title="Listen Pronunciation"
-                >
-                  <span className="material-symbols-outlined text-xs">volume_up</span>
-                </button>
-              </div>
+              <button
+                onClick={() => playSound(item.pronunciation)}
+                className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer shrink-0"
+                title="Listen Pronunciation"
+              >
+                <span className="material-symbols-outlined text-xs">volume_up</span>
+              </button>
             </div>
           </div>
         ))}
