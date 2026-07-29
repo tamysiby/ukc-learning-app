@@ -401,6 +401,46 @@ All lesson data is now fetched dynamically from the Supabase database table `les
     "description": "Master essential Korean pronunciation rules: 연음(liaison), 격음화(aspiration), 비음화(nasalization), 구개음화(palatalization), and 된소리화(glottalization).",
     "type": "custom",
     "status": "Active"
+  },
+  {
+    "id": "les-occupations-1",
+    "order": 17,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Occupations (직업)",
+    "description": "Learn 18 essential Korean occupation and career vocabulary words with illustrated flashcards.",
+    "type": "vocab",
+    "paired_quiz_id": "les-occupations-quiz-1",
+    "status": "Active",
+    "words": [
+      { "id": "occ-1", "korean": "선생님", "romanization": "seon-saeng-nim", "english": "teacher", "category": "Occupations" },
+      { "id": "occ-2", "korean": "교수님", "romanization": "gyo-su-nim", "english": "professor", "category": "Occupations" },
+      { "id": "occ-3", "korean": "학생", "romanization": "hak-saeng", "english": "student", "category": "Occupations" },
+      { "id": "occ-4", "korean": "의사", "romanization": "ui-sa", "english": "doctor", "category": "Occupations" },
+      { "id": "occ-5", "korean": "회사원", "romanization": "hoe-sa-won", "english": "office worker", "category": "Occupations" },
+      { "id": "occ-6", "korean": "사업가", "romanization": "sa-eop-ga", "english": "businessperson", "category": "Occupations" },
+      { "id": "occ-7", "korean": "가수", "romanization": "ga-su", "english": "singer", "category": "Occupations" },
+      { "id": "occ-8", "korean": "배우", "romanization": "bae-u", "english": "actor", "category": "Occupations" },
+      { "id": "occ-9", "korean": "경찰관", "romanization": "gyeong-chal-gwan", "english": "police officer", "category": "Occupations" },
+      { "id": "occ-10", "korean": "요리사", "romanization": "yo-ri-sa", "english": "chef", "category": "Occupations" },
+      { "id": "occ-11", "korean": "화가", "romanization": "hwa-ga", "english": "painter", "category": "Occupations" },
+      { "id": "occ-12", "korean": "엔지니어", "romanization": "en-ji-ni-eo", "english": "engineer", "category": "Occupations" },
+      { "id": "occ-13", "korean": "공무원", "romanization": "gong-mu-won", "english": "civil servant", "category": "Occupations" },
+      { "id": "occ-14", "korean": "주부", "romanization": "ju-bu", "english": "homemaker", "category": "Occupations" },
+      { "id": "occ-15", "korean": "개발자", "romanization": "gae-bal-ja", "english": "developer", "category": "Occupations" },
+      { "id": "occ-16", "korean": "목사님", "romanization": "mok-sa-nim", "english": "pastor", "category": "Occupations" },
+      { "id": "occ-17", "korean": "간호사", "romanization": "gan-ho-sa", "english": "nurse", "category": "Occupations" },
+      { "id": "occ-18", "korean": "회계사", "romanization": "hoe-gye-sa", "english": "accountant", "category": "Occupations" }
+    ]
+  },
+  {
+    "id": "les-occupations-quiz-1",
+    "order": 18,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Occupations Quiz (직업 퀴즈)",
+    "description": "Test your knowledge on Korean occupation and career vocabulary.",
+    "type": "vocab quiz",
+    "paired_vocab_id": "les-occupations-1",
+    "status": "Active"
   }
 ]
 ```

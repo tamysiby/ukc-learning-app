@@ -36,7 +36,7 @@ export const initialMockUsers = [
     joinedDate: '2025-08-01',
     isOnline: false,
     mustChangePassword: false,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1'],
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1', 'les-occupations-1', 'les-occupations-quiz-1'],
     completedLessonIds: ['les-vowels-1']
   },
   {
@@ -240,7 +240,7 @@ export const fetchUsersFromSupabase = async () => {
       }
     } catch (e) {}
 
-    const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1'];
+    const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1', 'les-occupations-1', 'les-occupations-quiz-1'];
 
     if (Array.isArray(data)) {
       const mappedUsers = data.map(u => ({
@@ -324,7 +324,7 @@ export const authSignIn = async (username, password) => {
         if (Array.isArray(aData)) assignedIds = aData.map(a => a.lesson_id);
       } catch (e) {}
 
-      const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1'];
+      const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1', 'les-occupations-1', 'les-occupations-quiz-1'];
 
       const userObj = {
         id: dbUser.id,
