@@ -439,12 +439,13 @@ export const updateStudentUserInDb = async (userId, updates) => {
 
     if (updates.completedLessonIds !== undefined && Array.isArray(updates.completedLessonIds)) {
       try {
+        await supabase.from('student_lesson_progress').delete().eq('student_id', userId);
         if (updates.completedLessonIds.length > 0) {
           const progressRows = updates.completedLessonIds.map(lessonId => ({
             student_id: userId,
             lesson_id: lessonId
           }));
-          await supabase.from('student_lesson_progress').upsert(progressRows, { onConflict: 'student_id,lesson_id' });
+          await supabase.from('student_lesson_progress').insert(progressRows);
         }
       } catch (err) {
         console.warn('Could not persist student_lesson_progress in Supabase:', err);
@@ -453,12 +454,13 @@ export const updateStudentUserInDb = async (userId, updates) => {
 
     if (updates.assignedLessonIds !== undefined && Array.isArray(updates.assignedLessonIds)) {
       try {
+        await supabase.from('student_lesson_access').delete().eq('student_id', userId);
         if (updates.assignedLessonIds.length > 0) {
           const accessRows = updates.assignedLessonIds.map(lessonId => ({
             student_id: userId,
             lesson_id: lessonId
           }));
-          await supabase.from('student_lesson_access').upsert(accessRows, { onConflict: 'student_id,lesson_id' });
+          await supabase.from('student_lesson_access').insert(accessRows);
         }
       } catch (err) {
         console.warn('Could not persist student_lesson_access in Supabase:', err);
@@ -480,6 +482,8 @@ export const deleteStudentUserInDb = async (userId) => {
   }
 
   try {
+    await supabase.from('student_lesson_progress').delete().eq('student_id', userId);
+    await supabase.from('student_lesson_access').delete().eq('student_id', userId);
     const { error } = await supabase.from('users').delete().eq('id', userId);
     if (error) {
       return { success: false, error: `Database Delete Failed: ${error.message}` };

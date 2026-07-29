@@ -302,9 +302,14 @@ export function AuthProvider({ children }) {
     return { success: true };
   };
 
-  const updateStudentUser = (userId, updates) => {
+  const updateStudentUser = async (userId, updates) => {
     if (!currentUser || currentUser.role !== 'Admin') {
       return { success: false, error: 'Only Administrators can edit student accounts.' };
+    }
+
+    const dbRes = await updateStudentUserInDb(userId, updates);
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
     }
 
     const updatedList = users.map(u => {
@@ -325,7 +330,7 @@ export function AuthProvider({ children }) {
     return { success: true };
   };
 
-  const deleteStudentUser = (userId) => {
+  const deleteStudentUser = async (userId) => {
     if (!currentUser || currentUser.role !== 'Admin') {
       return { success: false, error: 'Only Administrators can delete student accounts.' };
     }
@@ -334,20 +339,30 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'You cannot delete your own active Admin account.' };
     }
 
+    const dbRes = await deleteStudentUserInDb(userId);
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
+    }
+
     const updatedList = users.filter(u => u.id !== userId);
     setUsers(updatedList);
     return { success: true };
   };
 
-  const toggleUserStatus = (userId) => {
+  const toggleUserStatus = async (userId) => {
     if (!currentUser || currentUser.role !== 'Admin') return;
     const target = users.find(u => u.id === userId);
     if (!target) return;
     const newStatus = target.status === 'Active' ? 'Inactive' : 'Active';
-    updateStudentUser(userId, { status: newStatus });
+    return await updateStudentUser(userId, { status: newStatus });
   };
 
-  const updateStudentAssignedLessons = (userId, lessonIds) => {
+  const updateStudentAssignedLessons = async (userId, lessonIds) => {
+    const dbRes = await updateStudentUserInDb(userId, { assignedLessonIds: lessonIds });
+    if (!dbRes.success && !isDev) {
+      return { success: false, error: dbRes.error };
+    }
+
     const updatedList = users.map(u => {
       if (u.id === userId) {
         return { ...u, assignedLessonIds: lessonIds };
@@ -356,7 +371,6 @@ export function AuthProvider({ children }) {
     });
 
     setUsers(updatedList);
-    updateStudentUserInDb(userId, { assignedLessonIds: lessonIds });
 
     if (currentUser?.id === userId) {
       const updatedSelf = { ...currentUser, assignedLessonIds: lessonIds };

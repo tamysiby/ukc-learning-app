@@ -90,10 +90,10 @@ export default function AdminUserManagement({ onSelectUser }) {
   };
 
   // Handle Edit Submit
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editingUser) return;
-    const res = updateStudentUser(editingUser.id, {
+    const res = await updateStudentUser(editingUser.id, {
       name: editingUser.name,
       username: editingUser.username,
       role: editingUser.role,
@@ -118,9 +118,9 @@ export default function AdminUserManagement({ onSelectUser }) {
   };
 
   // Handle Confirm Delete
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deletingUser) return;
-    const res = deleteStudentUser(deletingUser.id);
+    const res = await deleteStudentUser(deletingUser.id);
     if (!res.success) {
       setCrudError(res.error);
       return;

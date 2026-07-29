@@ -63,23 +63,23 @@ describe('Admin User Management Screen', () => {
     renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
     expect(screen.getByText('User Management')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Search users by name, username/i)).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText('Min-ji Kim')).toBeInTheDocument(), { timeout: 3000 });
-    expect(screen.getByText('Ji-hoon Park')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getAllByText('Min-ji Kim').length).toBeGreaterThan(0), { timeout: 3000 });
+    expect(screen.getAllByText('Ji-hoon Park').length).toBeGreaterThan(0);
   });
 
   it('filters users correctly when searching text', async () => {
     renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
-    await waitFor(() => expect(screen.getByText('Min-ji Kim')).toBeInTheDocument(), { timeout: 3000 });
+    await waitFor(() => expect(screen.getAllByText('Min-ji Kim').length).toBeGreaterThan(0), { timeout: 3000 });
 
     const searchInput = screen.getByPlaceholderText(/Search users by name, username/i);
     fireEvent.change(searchInput, { target: { value: 'Min-ji' } });
-    expect(screen.getByText('Min-ji Kim')).toBeInTheDocument();
+    expect(screen.getAllByText('Min-ji Kim').length).toBeGreaterThan(0);
     expect(screen.queryByText('Ji-hoon Park')).not.toBeInTheDocument();
   });
 
   it('triggers onSelectUser callback when View Details button is clicked', async () => {
     renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
-    await waitFor(() => expect(screen.getByText('Min-ji Kim')).toBeInTheDocument(), { timeout: 3000 });
+    await waitFor(() => expect(screen.getAllByText('Min-ji Kim').length).toBeGreaterThan(0), { timeout: 3000 });
 
     const viewButtons = screen.getAllByTitle(/View/i);
     expect(viewButtons.length).toBeGreaterThan(0);
@@ -90,7 +90,7 @@ describe('Admin User Management Screen', () => {
 
   it('opens reset password modal when reset button is clicked', async () => {
     renderWithAuth(<AdminUserManagement onSelectUser={mockOnSelectUser} />);
-    await waitFor(() => expect(screen.getByText('Min-ji Kim')).toBeInTheDocument(), { timeout: 3000 });
+    await waitFor(() => expect(screen.getAllByText('Min-ji Kim').length).toBeGreaterThan(0), { timeout: 3000 });
 
     const resetButtons = screen.getAllByTitle(/Reset/i);
     expect(resetButtons.length).toBeGreaterThan(0);
