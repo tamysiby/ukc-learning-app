@@ -392,6 +392,15 @@ All lesson data is now fetched dynamically from the Supabase database table `les
     "description": "Learn when to use Sino-Korean numbers vs. Native Korean numbers with interactive Q&A examples.",
     "type": "custom",
     "status": "Active"
+  },
+  {
+    "id": "les-pronunciation-1",
+    "order": 16,
+    "unit": "Unit 1: Hangul & Korean Basics",
+    "title": "Korean Pronunciation Rules (한국어 발음 규칙)",
+    "description": "Master essential Korean pronunciation rules: 연음(liaison), 격음화(aspiration), 비음화(nasalization), 구개음화(palatalization), and 된소리화(glottalization).",
+    "type": "custom",
+    "status": "Active"
   }
 ]
 ```

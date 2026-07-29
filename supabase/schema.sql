@@ -273,7 +273,8 @@ INSERT INTO public.lessons (id, order_index, unit, title, description, type, pai
   {"id": "kor-num-1000", "korean": "천", "romanization": "cheon", "english": "1000", "category": "Numbers"},
   {"id": "kor-num-10000", "korean": "만", "romanization": "man", "english": "10000", "category": "Numbers"}
 ]'::jsonb),
-('les-number-usage-1', 15, 'Unit 1: Hangul & Korean Basics', 'Sino vs. Native Numbers (숫자 사용법)', 'Learn when to use Sino-Korean numbers vs. Native Korean numbers with interactive Q&A examples.', 'custom', NULL, NULL, 'Active', '[]'::jsonb)
+('les-number-usage-1', 15, 'Unit 1: Hangul & Korean Basics', 'Sino vs. Native Numbers (숫자 사용법)', 'Learn when to use Sino-Korean numbers vs. Native Korean numbers with interactive Q&A examples.', 'custom', NULL, NULL, 'Active', '[]'::jsonb),
+('les-pronunciation-1', 16, 'Unit 1: Hangul & Korean Basics', 'Korean Pronunciation Rules (한국어 발음 규칙)', 'Master essential Korean pronunciation rules: 연음(liaison), 격음화(aspiration), 비음화(nasalization), 구개음화(palatalization), and 된소리화(glottalization).', 'custom', NULL, NULL, 'Active', '[]'::jsonb)
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
   type = EXCLUDED.type,

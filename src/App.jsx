@@ -5,7 +5,7 @@ import AdminUserManagement from './components/AdminUserManagement';
 import AdminUserDetails from './components/AdminUserDetails';
 import AdminLessonManagement from './components/AdminLessonManagement';
 import StudentLessonPathway from './components/StudentLessonPathway';
-import { BatchimLesson, EyoLesson, NumberUsageLesson, VocabLesson, VocabQuizLesson } from './lessons';
+import { BatchimLesson, EyoLesson, NumberUsageLesson, PronunciationRulesLesson, VocabLesson, VocabQuizLesson } from './lessons';
 import VocabOverview from './components/VocabOverview';
 import StudentAccount from './components/StudentAccount';
 import ForceChangePasswordModal from './components/ForceChangePasswordModal';
@@ -30,6 +30,9 @@ const parseHash = (hashStr, userRole) => {
   if (cleanHash === 'number-usage') {
     return { tab: 'number-usage', lessonId: 'les-number-usage-1' };
   }
+  if (cleanHash === 'pronunciation') {
+    return { tab: 'pronunciation', lessonId: 'les-pronunciation-1' };
+  }
   if (cleanHash.startsWith('lesson/')) {
     const lessonId = cleanHash.replace('lesson/', '');
     if (lessonId === 'les-batchim-1') {
@@ -40,6 +43,9 @@ const parseHash = (hashStr, userRole) => {
     }
     if (lessonId === 'les-number-usage-1') {
       return { tab: 'number-usage', lessonId };
+    }
+    if (lessonId === 'les-pronunciation-1') {
+      return { tab: 'pronunciation', lessonId };
     }
     return { tab: 'vocab', lessonId };
   }
@@ -111,6 +117,12 @@ function AppContent() {
         }
         setActiveQuizQuestions([]);
         setCurrentTab('number-usage');
+      } else if (route.tab === 'pronunciation') {
+        if (currentUser?.id) {
+          markLessonCompleted(currentUser.id, 'les-pronunciation-1');
+        }
+        setActiveQuizQuestions([]);
+        setCurrentTab('pronunciation');
       } else if (route.tab === 'vocab-quiz' && route.lessonId) {
         const target = lessons.find(l => l.id === route.lessonId) || lessons[0];
         const pairedVocab = lessons.find(l => l.id === target?.pairedVocabId) || lessons[0];
@@ -146,7 +158,7 @@ function AppContent() {
     // Prepare history stack when refreshed inside a lesson so browser back button returns to pathway
     const initialHash = window.location.hash;
     const initialRoute = parseHash(initialHash, userRole);
-    if (['vocab', 'vocab-quiz', 'batchim', 'eyo', 'number-usage'].includes(initialRoute.tab)) {
+    if (['vocab', 'vocab-quiz', 'batchim', 'eyo', 'number-usage', 'pronunciation'].includes(initialRoute.tab)) {
       const defaultHash = userRole === 'Admin' ? '#admin-list' : '#pathway';
       window.history.replaceState(null, '', defaultHash);
       window.history.pushState(null, '', initialHash);
@@ -159,7 +171,7 @@ function AppContent() {
   }, [isAuthenticated, userRole, currentUser?.id, lessons]);
 
   // Focus Mode when student is active inside a lesson or quiz
-  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo' || currentTab === 'number-usage');
+  const isLessonActive = userRole === 'Student' && (currentTab === 'vocab' || currentTab === 'vocab-quiz' || currentTab === 'batchim' || currentTab === 'eyo' || currentTab === 'number-usage' || currentTab === 'pronunciation');
 
   // If loading session check
   if (loading) {
@@ -205,6 +217,13 @@ function AppContent() {
   const handleFinishNumberUsageLesson = () => {
     if (currentUser?.id) {
       markLessonCompleted(currentUser.id, 'les-number-usage-1');
+    }
+    navigateTo('pathway');
+  };
+
+  const handleFinishPronunciationLesson = () => {
+    if (currentUser?.id) {
+      markLessonCompleted(currentUser.id, 'les-pronunciation-1');
     }
     navigateTo('pathway');
   };
@@ -346,6 +365,9 @@ function AppContent() {
             )}
             {currentTab === 'number-usage' && (
               <NumberUsageLesson onFinishLesson={handleFinishNumberUsageLesson} />
+            )}
+            {currentTab === 'pronunciation' && (
+              <PronunciationRulesLesson onFinishLesson={handleFinishPronunciationLesson} />
             )}
             {currentTab === 'vocab' && (
               showFlashcardDeck ? (
