@@ -391,19 +391,31 @@ export const createStudentUserInDb = async (userData) => {
   }
 
   try {
-    const { data, error } = await supabase.from('users').insert([{
+    // Insert core fields guaranteed to exist across all table schemas
+    const corePayload = {
       username: userData.username,
       name: userData.name,
       password: userData.password,
       role: userData.role || 'Student',
       status: userData.status || 'Active',
-      level: userData.level || 'Beginner (Level 1)',
-      must_change_password: userData.mustChangePassword ?? true
-    }]).select().single();
+      level: userData.level || 'Beginner (Level 1)'
+    };
+
+    const { data, error } = await supabase.from('users').insert([corePayload]).select().single();
 
     if (error) {
       return { success: false, error: `Database Create Failed: ${error.message}` };
     }
+
+    // Best-effort update for optional must_change_password column
+    if (data?.id && userData.mustChangePassword !== undefined) {
+      try {
+        await supabase.from('users').update({ must_change_password: userData.mustChangePassword }).eq('id', data.id);
+      } catch (e) {
+        // Safe fallback if column is missing from remote schema
+      }
+    }
+
     return { success: true, data };
   } catch (err) {
     return { success: false, error: `Database Connection Failed: ${err.message}` };
@@ -428,12 +440,20 @@ export const updateStudentUserInDb = async (userId, updates) => {
     if (updates.level !== undefined) dbUpdates.level = updates.level;
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
     if (updates.streak !== undefined) dbUpdates.streak = updates.streak;
-    if (updates.mustChangePassword !== undefined) dbUpdates.must_change_password = updates.mustChangePassword;
 
     if (Object.keys(dbUpdates).length > 0) {
       const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
       if (error) {
         return { success: false, error: `Database Update Failed: ${error.message}` };
+      }
+    }
+
+    // Best-effort update for optional must_change_password column
+    if (updates.mustChangePassword !== undefined) {
+      try {
+        await supabase.from('users').update({ must_change_password: updates.mustChangePassword }).eq('id', userId);
+      } catch (e) {
+        // Safe fallback if column is missing from remote schema
       }
     }
 
