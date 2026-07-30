@@ -326,6 +326,8 @@ export const authSignIn = async (username, password) => {
 
       const defaultAssigned = ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1', 'les-occupations-1', 'les-occupations-quiz-1'];
 
+      const isDefaultPass = await verifyPassword('StudentPass123!', dbUser.password);
+
       const userObj = {
         id: dbUser.id,
         name: dbUser.name,
@@ -337,7 +339,7 @@ export const authSignIn = async (username, password) => {
         progress: dbUser.progress || 0,
         streak: dbUser.streak || 0,
         isOnline: true,
-        mustChangePassword: dbUser.must_change_password ?? false,
+        mustChangePassword: (dbUser.must_change_password === true) || isDefaultPass,
         lastActive: 'Just now',
         joinedDate: dbUser.created_at ? dbUser.created_at.split('T')[0] : '2026-01-01',
         assignedLessonIds: assignedIds.length > 0 ? assignedIds : defaultAssigned,

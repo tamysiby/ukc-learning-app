@@ -324,16 +324,33 @@ function AppContent() {
                     <span className="material-symbols-outlined text-base">auto_stories</span>
                     Lesson Management
                   </button>
+
+                  <button
+                    onClick={() => navigateTo('account')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${currentTab === 'account'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-on-surface-variant hover:bg-surface-container-low'
+                      }`}
+                  >
+                    <span className="material-symbols-outlined text-base">manage_accounts</span>
+                    Account
+                  </button>
                 </nav>
               )}
 
               {/* User Profile Pill & Logout Action */}
               <div className="flex items-center gap-2.5 pl-2 border-l border-outline-variant">
-                <UserAvatar name={currentUser?.name} role={currentUser?.role} size="sm" />
-                <div className="hidden lg:block leading-tight text-left">
-                  <p className="font-bold text-xs text-on-surface">{currentUser?.name}</p>
-                  <p className="text-[10px] text-outline">{currentUser?.role}</p>
-                </div>
+                <button
+                  onClick={() => navigateTo('account')}
+                  className="flex items-center gap-2 text-left hover:opacity-80 cursor-pointer"
+                  title="View Account Settings"
+                >
+                  <UserAvatar name={currentUser?.name} role={currentUser?.role} size="sm" />
+                  <div className="hidden lg:block leading-tight text-left">
+                    <p className="font-bold text-xs text-on-surface">{currentUser?.name}</p>
+                    <p className="text-[10px] text-outline">{currentUser?.role}</p>
+                  </div>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-bold text-outline hover:text-rose-600 hover:bg-rose-500/10 transition-colors flex items-center gap-1 cursor-pointer"
@@ -350,7 +367,9 @@ function AppContent() {
 
       {/* Main Authenticated Views */}
       <main className="flex-1">
-        {userRole === 'Student' ? (
+        {currentTab === 'account' ? (
+          <StudentAccount />
+        ) : userRole === 'Student' ? (
           <>
             {(currentTab === 'pathway' || currentTab === 'admin-list' || currentTab === 'admin-details') && (
               <StudentLessonPathway
@@ -393,9 +412,6 @@ function AppContent() {
                 onFinishQuiz={handleFinishVocabLesson}
                 onExitQuiz={() => navigateTo('pathway')}
               />
-            )}
-            {currentTab === 'account' && (
-              <StudentAccount />
             )}
           </>
         ) : (
