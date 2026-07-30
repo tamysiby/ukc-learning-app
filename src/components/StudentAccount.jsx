@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import UserAvatar from './UserAvatar';
 
@@ -10,6 +10,16 @@ export default function StudentAccount() {
     username: currentUser?.username || '',
     audioAutoPlay: true,
   });
+
+  useEffect(() => {
+    if (currentUser) {
+      setProfile(prev => ({
+        ...prev,
+        name: currentUser.name || '',
+        username: currentUser.username || ''
+      }));
+    }
+  }, [currentUser?.id, currentUser?.name, currentUser?.username]);
 
   const [isSaved, setIsSaved] = useState(false);
   const [profileError, setProfileError] = useState('');
