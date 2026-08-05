@@ -136,30 +136,32 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Login Shortcut Section */}
-          <div className="pt-4 border-t border-outline-variant/60 space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-outline text-center">
-              Quick Testing Shortcuts
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin', 'AdminPass123!')}
-                className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-base">admin_panel_settings</span>
-                Admin Login
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('minji.kim', 'StudentPass123!')}
-                className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-base">school</span>
-                Student Login
-              </button>
+          {/* Quick Demo Login Shortcut Section (DEV environment only) */}
+          {import.meta.env?.DEV && (
+            <div className="pt-4 border-t border-outline-variant/60 space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-outline text-center">
+                Quick Testing Shortcuts
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo('admin', 'AdminPass123!')}
+                  className="px-3 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">admin_panel_settings</span>
+                  Admin Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemo('minji.kim', 'StudentPass123!')}
+                  className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">school</span>
+                  Student Login
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer info */}
