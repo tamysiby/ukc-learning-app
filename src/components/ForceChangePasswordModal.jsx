@@ -11,11 +11,18 @@ export default function ForceChangePasswordModal() {
 
   useEffect(() => {
     if (import.meta.env?.DEV) {
+      const activeRoute = window.location.hash || '#pathway';
       console.log('[DEV ForceChangePasswordModal] User password change status:', {
         userId: currentUser?.id,
         username: currentUser?.username,
-        mustChangePassword: currentUser?.mustChangePassword
+        mustChangePassword: currentUser?.mustChangePassword,
+        activeRoute: activeRoute,
+        currentUrl: window.location.href
       });
+
+      if (currentUser?.mustChangePassword) {
+        console.trace(`[DEV ForceChangePasswordModal] Modal opened while targeting route: ${activeRoute}`);
+      }
     }
   }, [currentUser?.id, currentUser?.mustChangePassword]);
 
@@ -38,7 +45,7 @@ export default function ForceChangePasswordModal() {
     }
 
     if (import.meta.env?.DEV) {
-      console.log('[DEV ForceChangePasswordModal] Submitting password update for user:', currentUser?.id);
+      console.log('[DEV ForceChangePasswordModal] Submitting password update for user:', currentUser?.id, 'from route:', window.location.hash || '#pathway');
     }
 
     setIsSubmitting(true);

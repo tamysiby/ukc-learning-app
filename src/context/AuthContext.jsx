@@ -110,25 +110,32 @@ export function AuthProvider({ children }) {
       if (activeSession?.id) {
         const dbRecord = res.users.find(u => u.id === activeSession.id);
         if (dbRecord) {
-          const mergedCompleted = Array.from(new Set([
-            ...(activeSession.completedLessonIds || []),
-            ...(dbRecord.completedLessonIds || [])
-          ]));
-          const updatedSelf = {
-            ...dbRecord,
-            ...activeSession,
-            completedLessonIds: mergedCompleted
-          };
-          if (isDev) {
-            console.log('[DEV AuthContext] refreshUsersList session sync:', {
-              userId: activeSession.id,
-              dbMustChange: dbRecord.mustChangePassword,
-              activeSessionMustChange: activeSession.mustChangePassword,
-              finalMustChange: updatedSelf.mustChangePassword
-            });
-          }
-          setCurrentUser(updatedSelf);
-          saveStoredSession(updatedSelf);
+          setCurrentUser(prevSelf => {
+            const currentMustChange = prevSelf ? prevSelf.mustChangePassword : activeSession.mustChangePassword;
+            const mergedCompleted = Array.from(new Set([
+              ...(activeSession.completedLessonIds || []),
+              ...(prevSelf?.completedLessonIds || []),
+              ...(dbRecord.completedLessonIds || [])
+            ]));
+            const updatedSelf = {
+              ...dbRecord,
+              ...activeSession,
+              ...prevSelf,
+              mustChangePassword: currentMustChange === false ? false : (dbRecord.mustChangePassword ?? false),
+              completedLessonIds: mergedCompleted
+            };
+            if (isDev) {
+              console.log('[DEV AuthContext] refreshUsersList session sync:', {
+                userId: activeSession.id,
+                activeRoute: window.location.hash || '#pathway',
+                dbMustChange: dbRecord.mustChangePassword,
+                activeSessionMustChange: activeSession.mustChangePassword,
+                finalMustChange: updatedSelf.mustChangePassword
+              });
+            }
+            saveStoredSession(updatedSelf);
+            return updatedSelf;
+          });
         }
       }
     }
@@ -287,7 +294,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: dbRes.error };
     }
 
-    const updatedList = users.map(u => {
+    setUsers(prev => prev.map(u => {
       if (u.id === userId) {
         return {
           ...u,
@@ -296,15 +303,16 @@ export function AuthProvider({ children }) {
         };
       }
       return u;
+    }));
+
+    setCurrentUser(prevSelf => {
+      if (prevSelf && prevSelf.id === userId) {
+        const updatedSelf = { ...prevSelf, password: hashedPassword, mustChangePassword: true };
+        saveStoredSession(updatedSelf);
+        return updatedSelf;
+      }
+      return prevSelf;
     });
-
-    setUsers(updatedList);
-
-    if (currentUser.id === userId) {
-      const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: true };
-      setCurrentUser(updatedSelf);
-      saveStoredSession(updatedSelf);
-    }
 
     return { success: true };
   };
@@ -321,7 +329,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: dbRes.error };
     }
 
-    const updatedList = users.map(u => {
+    setUsers(prev => prev.map(u => {
       if (u.id === currentUser.id) {
         return {
           ...u,
@@ -330,16 +338,17 @@ export function AuthProvider({ children }) {
         };
       }
       return u;
+    }));
+
+    setCurrentUser(prevSelf => {
+      if (!prevSelf) return prevSelf;
+      const updatedSelf = { ...prevSelf, password: hashedPassword, mustChangePassword: false };
+      if (isDev) {
+        console.log('[DEV AuthContext] changeUserPassword: Password updated successfully. Updating mustChangePassword to false for user:', prevSelf.id);
+      }
+      saveStoredSession(updatedSelf);
+      return updatedSelf;
     });
-
-    setUsers(updatedList);
-
-    const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: false };
-    if (isDev) {
-      console.log('[DEV AuthContext] changeUserPassword: Password updated successfully. Updating mustChangePassword from', currentUser.mustChangePassword, 'to false for user:', currentUser.id);
-    }
-    setCurrentUser(updatedSelf);
-    saveStoredSession(updatedSelf);
 
     return { success: true };
   };
@@ -354,20 +363,21 @@ export function AuthProvider({ children }) {
       return { success: false, error: dbRes.error };
     }
 
-    const updatedList = users.map(u => {
+    setUsers(prev => prev.map(u => {
       if (u.id === userId) {
         return { ...u, ...updates };
       }
       return u;
+    }));
+
+    setCurrentUser(prevSelf => {
+      if (prevSelf?.id === userId) {
+        const updatedSelf = { ...prevSelf, ...updates };
+        saveStoredSession(updatedSelf);
+        return updatedSelf;
+      }
+      return prevSelf;
     });
-
-    setUsers(updatedList);
-
-    if (currentUser.id === userId) {
-      const updatedSelf = { ...currentUser, ...updates };
-      setCurrentUser(updatedSelf);
-      saveStoredSession(updatedSelf);
-    }
 
     return { success: true };
   };
@@ -386,8 +396,7 @@ export function AuthProvider({ children }) {
       return { success: false, error: dbRes.error };
     }
 
-    const updatedList = users.filter(u => u.id !== userId);
-    setUsers(updatedList);
+    setUsers(prev => prev.filter(u => u.id !== userId));
     return { success: true };
   };
 
@@ -405,20 +414,21 @@ export function AuthProvider({ children }) {
       return { success: false, error: dbRes.error };
     }
 
-    const updatedList = users.map(u => {
+    setUsers(prev => prev.map(u => {
       if (u.id === userId) {
         return { ...u, assignedLessonIds: lessonIds };
       }
       return u;
+    }));
+
+    setCurrentUser(prevSelf => {
+      if (prevSelf?.id === userId) {
+        const updatedSelf = { ...prevSelf, assignedLessonIds: lessonIds };
+        saveStoredSession(updatedSelf);
+        return updatedSelf;
+      }
+      return prevSelf;
     });
-
-    setUsers(updatedList);
-
-    if (currentUser?.id === userId) {
-      const updatedSelf = { ...currentUser, assignedLessonIds: lessonIds };
-      setCurrentUser(updatedSelf);
-      saveStoredSession(updatedSelf);
-    }
     return { success: true };
   };
 
@@ -430,27 +440,33 @@ export function AuthProvider({ children }) {
     if (lessonId === 'les-vowels-quiz-1') extraLessonId = 'les-vowels-1';
     if (lessonId === 'les-consonants-quiz-1') extraLessonId = 'les-consonants-1';
 
-    const targetUser = (currentUser?.id === targetUserId) ? currentUser : users.find(u => u.id === targetUserId);
-    let completed = targetUser?.completedLessonIds ? [...targetUser.completedLessonIds] : [];
+    setCurrentUser(prevSelf => {
+      const activeUser = (prevSelf?.id === targetUserId) ? prevSelf : users.find(u => u.id === targetUserId);
+      let completed = activeUser?.completedLessonIds ? [...activeUser.completedLessonIds] : [];
 
-    if (!completed.includes(lessonId)) {
-      completed.push(lessonId);
-    }
-    if (extraLessonId && !completed.includes(extraLessonId)) {
-      completed.push(extraLessonId);
-    }
+      if (!completed.includes(lessonId)) {
+        completed.push(lessonId);
+      }
+      if (extraLessonId && !completed.includes(extraLessonId)) {
+        completed.push(extraLessonId);
+      }
 
-    if (users.length > 0) {
-      setUsers(prev => prev.map(u => u.id === targetUserId ? { ...u, completedLessonIds: completed } : u));
-    }
+      setUsers(prevUsers => {
+        if (prevUsers.length > 0) {
+          return prevUsers.map(u => u.id === targetUserId ? { ...u, completedLessonIds: completed } : u);
+        }
+        return prevUsers;
+      });
 
-    if (currentUser?.id === targetUserId) {
-      const updatedSelf = { ...currentUser, completedLessonIds: completed };
-      setCurrentUser(updatedSelf);
-      saveStoredSession(updatedSelf);
-    }
+      updateStudentUserInDb(targetUserId, { completedLessonIds: completed });
 
-    updateStudentUserInDb(targetUserId, { completedLessonIds: completed });
+      if (prevSelf && prevSelf.id === targetUserId) {
+        const updatedSelf = { ...prevSelf, completedLessonIds: completed };
+        saveStoredSession(updatedSelf);
+        return updatedSelf;
+      }
+      return prevSelf;
+    });
   };
 
   const toggleStudentLessonCompletion = (userId, lessonId) => {
@@ -471,15 +487,16 @@ export function AuthProvider({ children }) {
       }
     }
 
-    if (users.length > 0) {
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, completedLessonIds: updatedCompleted } : u));
-    }
+    setUsers(prev => prev.length > 0 ? prev.map(u => u.id === userId ? { ...u, completedLessonIds: updatedCompleted } : u) : prev);
 
-    if (currentUser?.id === userId) {
-      const updatedSelf = { ...currentUser, completedLessonIds: updatedCompleted };
-      setCurrentUser(updatedSelf);
-      saveStoredSession(updatedSelf);
-    }
+    setCurrentUser(prevSelf => {
+      if (prevSelf && prevSelf.id === userId) {
+        const updatedSelf = { ...prevSelf, completedLessonIds: updatedCompleted };
+        saveStoredSession(updatedSelf);
+        return updatedSelf;
+      }
+      return prevSelf;
+    });
 
     updateStudentUserInDb(userId, { completedLessonIds: updatedCompleted });
   };

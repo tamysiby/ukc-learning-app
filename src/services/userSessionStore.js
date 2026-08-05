@@ -316,13 +316,14 @@ export const updateStudentUserInDb = async (userId, updates) => {
 
     if (updates.completedLessonIds !== undefined && Array.isArray(updates.completedLessonIds)) {
       try {
+        const uniqueCompleted = Array.from(new Set(updates.completedLessonIds));
         await supabase.from('student_lesson_progress').delete().eq('student_id', userId);
-        if (updates.completedLessonIds.length > 0) {
-          const progressRows = updates.completedLessonIds.map(lessonId => ({
+        if (uniqueCompleted.length > 0) {
+          const progressRows = uniqueCompleted.map(lessonId => ({
             student_id: userId,
             lesson_id: lessonId
           }));
-          await supabase.from('student_lesson_progress').insert(progressRows);
+          await supabase.from('student_lesson_progress').upsert(progressRows, { onConflict: 'student_id,lesson_id' });
         }
       } catch (err) {
         console.warn('Could not persist student_lesson_progress in Supabase:', err);
@@ -331,13 +332,14 @@ export const updateStudentUserInDb = async (userId, updates) => {
 
     if (updates.assignedLessonIds !== undefined && Array.isArray(updates.assignedLessonIds)) {
       try {
+        const uniqueAssigned = Array.from(new Set(updates.assignedLessonIds));
         await supabase.from('student_lesson_access').delete().eq('student_id', userId);
-        if (updates.assignedLessonIds.length > 0) {
-          const accessRows = updates.assignedLessonIds.map(lessonId => ({
+        if (uniqueAssigned.length > 0) {
+          const accessRows = uniqueAssigned.map(lessonId => ({
             student_id: userId,
             lesson_id: lessonId
           }));
-          await supabase.from('student_lesson_access').insert(accessRows);
+          await supabase.from('student_lesson_access').upsert(accessRows, { onConflict: 'student_id,lesson_id' });
         }
       } catch (err) {
         console.warn('Could not persist student_lesson_access in Supabase:', err);
