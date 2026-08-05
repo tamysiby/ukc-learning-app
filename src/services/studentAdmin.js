@@ -45,3 +45,48 @@ export function toggleStudentLessonAssignment(user, lessonId) {
   }
   return [...currentAssigned, lessonId];
 }
+
+export function getStudentActivityLogs(user, lessons = []) {
+  if (!user) return [];
+
+  if (Array.isArray(user.activityLogs) && user.activityLogs.length > 0) {
+    return user.activityLogs;
+  }
+
+  const logs = [];
+  const completedIds = user.completedLessonIds || [];
+
+  completedIds.forEach((lessonId, idx) => {
+    const lesson = lessons.find(l => l.id === lessonId);
+    const title = lesson ? lesson.title : lessonId;
+    const unit = lesson?.unit || 'Lesson Module';
+    const isQuiz = lesson ? (lesson.type === 'quiz' || lesson.title?.toLowerCase().includes('quiz')) : lessonId.includes('quiz');
+    const wordCount = lesson?.words?.length || 0;
+
+    logs.push({
+      id: `log-comp-${lessonId}-${idx}`,
+      title: isQuiz ? `Passed Quiz: ${title}` : `Completed Lesson: ${title}`,
+      detail: isQuiz
+        ? `${unit} • Quiz Passed`
+        : wordCount > 0
+          ? `${wordCount} Words Mastered`
+          : `${unit} • Module Completed`,
+      time: user.lastActive && user.lastActive !== 'Never' ? user.lastActive : 'Recent',
+      icon: isQuiz ? 'quiz' : 'check_circle',
+      badgeClass: isQuiz ? 'text-tertiary bg-tertiary/10' : 'text-emerald-700 bg-emerald-500/10'
+    });
+  });
+
+  if (user.lastActive && user.lastActive !== 'Never') {
+    logs.push({
+      id: 'log-last-active',
+      title: 'Portal Activity',
+      detail: user.streak ? `Active on platform • ${user.streak} Day Streak` : 'Active on learning platform',
+      time: user.lastActive,
+      icon: 'schedule',
+      badgeClass: 'text-primary bg-primary/10'
+    });
+  }
+
+  return logs;
+}
