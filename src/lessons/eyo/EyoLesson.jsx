@@ -112,7 +112,7 @@ export default function EyoLesson({ onFinishLesson }) {
           >
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
-          <h1 className="text-sm sm:text-base font-bold text-on-surface font-headline">
+          <h1 className="hidden sm:block text-sm sm:text-base font-bold text-on-surface font-headline truncate">
             입니다 / 이에요·예요 / 이야·야
           </h1>
         </div>

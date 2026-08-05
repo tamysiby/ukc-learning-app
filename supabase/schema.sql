@@ -123,6 +123,16 @@ INSERT INTO public.lessons (id, order_index, unit, title, description, type, pai
   {"id": "eyo-1", "korean": "가방이에요", "romanization": "ga-bang-i-e-yo", "english": "it''s a bag", "category": "받침 O"},
   {"id": "eyo-2", "korean": "의자예요", "romanization": "ui-ja-ye-yo", "english": "it''s a chair", "category": "받침 X"}
 ]'::jsonb),
+('les-particles-1', 4.65, 'Unit 1: Hangul & Korean Basics', 'N이/가 N예요/이에? · N은/는 N예요/이에요.', 'Learn Subject particles (이/가) and Topic particles (은/는) in Q&A sentence structures.', 'custom', NULL, NULL, 'Active', '[
+  {"id": "pt-1", "korean": "이름이 뭐예요?", "romanization": "i-reu-mi mweo-ye-yo?", "english": "what is your name?", "category": "Questions"},
+  {"id": "pt-2", "korean": "저는 스테파니예요.", "romanization": "jeo-neun seu-te-pa-ni-ye-yo", "english": "i am Stephanie", "category": "Answers"},
+  {"id": "pt-3", "korean": "직업이 뭐예요?", "romanization": "ji-geo-bi mweo-ye-yo?", "english": "what is your occupation?", "category": "Questions"},
+  {"id": "pt-4", "korean": "리에 씨는 요리사예요.", "romanization": "ri-e ssi-neun yo-ri-sa-ye-yo", "english": "Rie is a chef", "category": "Answers"},
+  {"id": "pt-5", "korean": "취미가 농구예요?", "romanization": "chwi-mi-ga nong-gu-ye-yo?", "english": "is your hobby basketball?", "category": "Questions"},
+  {"id": "pt-6", "korean": "아니요, 취미는 야구예요.", "romanization": "a-ni-yo, chwi-mi-neun ya-gu-ye-yo", "english": "no, my hobby is baseball", "category": "Answers"},
+  {"id": "pt-7", "korean": "선생님이 한국 사람이에요?", "romanization": "seon-saeng-ni-mi han-gug sa-ra-mi-e-yo?", "english": "is the teacher Korean?", "category": "Questions"},
+  {"id": "pt-8", "korean": "네, 선생님은 한국 사람이에요.", "romanization": "ne, seon-saeng-ni-meun han-gug sa-ra-mi-e-yo", "english": "yes, the teacher is Korean", "category": "Answers"}
+]'::jsonb),
 ('les-classroom-vocab-1', 4.7, 'Unit 1: Hangul & Korean Basics', 'Classroom Vocab (교실용어)', 'Essential classroom expressions, phrases, and commands in Korean.', 'custom', NULL, NULL, 'Active', '[
   {"id": "cr-1", "korean": "보세요", "romanization": "bo-se-yo", "english": "please look", "category": "Commands"},
   {"id": "cr-2", "korean": "들으세요", "romanization": "deu-reu-se-yo", "english": "please listen", "category": "Commands"},
