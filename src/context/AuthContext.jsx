@@ -26,21 +26,31 @@ export function AuthProvider({ children }) {
   const [users, setUsers] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingLessons, setLoadingLessons] = useState(true);
   const [authError, setAuthError] = useState('');
   const [lessonsError, setLessonsError] = useState('');
 
   const lastActivityTimeRef = useRef(Date.now());
   const inactivityTimerRef = useRef(null);
   const throttleTimerRef = useRef(0);
+  const lessonsErrorTimerRef = useRef(null);
+  const authErrorTimerRef = useRef(null);
 
   const refreshLessonsList = async () => {
+    setLoadingLessons(true);
     const res = await fetchLessonsFromSupabase();
     if (res.error) {
-      setLessonsError(res.error);
-      setLessons([]);
+      if (lessonsErrorTimerRef.current) clearTimeout(lessonsErrorTimerRef.current);
+      lessonsErrorTimerRef.current = setTimeout(() => {
+        setLessonsError(res.error);
+        setLessons([]);
+        setLoadingLessons(false);
+      }, 2500);
     } else if (res.lessons) {
+      if (lessonsErrorTimerRef.current) clearTimeout(lessonsErrorTimerRef.current);
       setLessonsError('');
       setLessons(res.lessons);
+      setLoadingLessons(false);
     }
   };
 
@@ -57,15 +67,22 @@ export function AuthProvider({ children }) {
     if (!savedUser || savedUser.role === 'Admin') {
       fetchUsersFromSupabase().then(res => {
         if (res.error) {
-          setAuthError(res.error);
-          setUsers([]);
+          if (authErrorTimerRef.current) clearTimeout(authErrorTimerRef.current);
+          authErrorTimerRef.current = setTimeout(() => {
+            setAuthError(res.error);
+            setUsers([]);
+          }, 2500);
         } else if (res.users) {
+          if (authErrorTimerRef.current) clearTimeout(authErrorTimerRef.current);
           setAuthError('');
           setUsers(res.users);
         }
       }).catch(err => {
-        setAuthError(err.message || 'Database Connection Failed');
-        setUsers([]);
+        if (authErrorTimerRef.current) clearTimeout(authErrorTimerRef.current);
+        authErrorTimerRef.current = setTimeout(() => {
+          setAuthError(err.message || 'Database Connection Failed');
+          setUsers([]);
+        }, 2500);
       });
     }
   }, []);
@@ -80,8 +97,12 @@ export function AuthProvider({ children }) {
 
     const res = await fetchUsersFromSupabase();
     if (res.error) {
-      setAuthError(res.error);
+      if (authErrorTimerRef.current) clearTimeout(authErrorTimerRef.current);
+      authErrorTimerRef.current = setTimeout(() => {
+        setAuthError(res.error);
+      }, 2500);
     } else if (res.users) {
+      if (authErrorTimerRef.current) clearTimeout(authErrorTimerRef.current);
       setAuthError('');
       setUsers(res.users);
 
@@ -466,6 +487,7 @@ export function AuthProvider({ children }) {
         users,
         lessons,
         lessonsError,
+        loadingLessons,
         refreshUsersList,
         refreshLessonsList,
         createStudentUser,

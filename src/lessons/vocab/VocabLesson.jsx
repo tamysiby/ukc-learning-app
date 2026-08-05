@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import VocabIllustration from '../../components/VocabIllustration';
-import { mockFlashcards } from '../../services/supabaseClient';
 
 export default function VocabLesson({ words = [], title = 'Vocabulary Practice Flashcards', onFinishLesson }) {
-  const flashcards = words.length > 0 ? words : mockFlashcards;
+  const flashcards = words;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);

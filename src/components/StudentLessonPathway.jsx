@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getStudentPathway } from '../services/lessonRegistry';
 
 export default function StudentLessonPathway({ onStartVocabLesson }) {
-  const { currentUser, authError, lessons, lessonsError, refreshUsersList } = useAuth();
+  const { currentUser, authError, lessons, lessonsError, loadingLessons, refreshUsersList, refreshLessonsList } = useAuth();
   const nodeRefs = useRef({});
 
   const assignedLessonIds = currentUser?.assignedLessonIds || [];
@@ -91,16 +91,35 @@ export default function StudentLessonPathway({ onStartVocabLesson }) {
     }
   }, []);
 
-  if (lessonsError || authError || !lessons || lessons.length === 0) {
+  if (loadingLessons || (!lessonsError && (!lessons || lessons.length === 0))) {
     return (
-      <div className="max-w-md mx-auto my-12 p-6 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-4 shadow-sm">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-xs sm:text-sm font-bold text-outline font-label tracking-wide">Loading pathway lessons...</p>
+      </div>
+    );
+  }
+
+  if (lessonsError || (authError && lessons.length === 0)) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-6 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-4 shadow-sm animate-in fade-in">
         <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
           <span className="material-symbols-outlined text-2xl">cloud_off</span>
         </div>
-        <h3 className="text-lg font-bold text-rose-900">Database Connection Error</h3>
-        <p className="text-sm text-rose-700 font-medium">
+        <h3 className="text-lg font-bold text-rose-900 font-headline">Database Connection Error</h3>
+        <p className="text-sm text-rose-700 font-medium font-body">
           {lessonsError || authError || 'Database Connection Error: Database is offline or non-configured.'}
         </p>
+        <button
+          onClick={() => {
+            refreshLessonsList();
+            refreshUsersList();
+          }}
+          className="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+        >
+          <span className="material-symbols-outlined text-base">refresh</span>
+          <span>Retry Connection</span>
+        </button>
       </div>
     );
   }

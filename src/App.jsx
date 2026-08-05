@@ -11,7 +11,6 @@ import StudentAccount from './components/StudentAccount';
 import ForceChangePasswordModal from './components/ForceChangePasswordModal';
 import UserAvatar from './components/UserAvatar';
 import { generateRandomVocabQuiz } from './services/quizGenerator';
-import { getStoredUsers } from './services/supabaseClient';
 
 const parseHash = (hashStr, userRole) => {
   const cleanHash = (hashStr || '').replace(/^#\/?/, '');
@@ -74,7 +73,7 @@ const navigateTo = (hash) => {
 };
 
 function AppContent() {
-  const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted, lessons, lessonsError } = useAuth();
+  const { currentUser, isAuthenticated, userRole, logout, loading, markLessonCompleted, lessons, lessonsError, users = [] } = useAuth();
 
   // Tabs: 'pathway' | 'hangul' | 'batchim' | 'vocab' | 'vocab-quiz' | 'account' (for Student) | 'admin-list' | 'admin-details' | 'admin-lessons' (for Admin)
   const [currentTab, setCurrentTab] = useState(userRole === 'Admin' ? 'admin-list' : 'pathway');
@@ -142,7 +141,6 @@ function AppContent() {
         setActiveQuizQuestions([]);
         setCurrentTab('hangul');
       } else if (route.tab === 'admin-details' && route.userId) {
-        const users = getStoredUsers();
         const user = users.find(u => u.id === route.userId);
         if (user) {
           setSelectedUser(user);

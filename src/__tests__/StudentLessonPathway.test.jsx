@@ -2,8 +2,27 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import StudentLessonPathway from '../components/StudentLessonPathway';
 import { AuthProvider } from '../context/AuthContext';
+import { supabase, saveStoredSession } from '../services/supabaseClient';
 
-import { initialMockUsers, supabase, saveStoredSession } from '../services/supabaseClient';
+const testFixtureUsers = [
+  {
+    id: 'usr-student-1',
+    name: 'Student One',
+    username: 'student1',
+    password: 'StudentPass123!',
+    role: 'Student',
+    status: 'Active',
+    level: 'Beginner (Level 1)',
+    progress: 0,
+    streak: 1,
+    lastActive: 'Just now',
+    joinedDate: '2026-01-01',
+    isOnline: true,
+    mustChangePassword: false,
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
+    completedLessonIds: []
+  }
+];
 
 function renderWithAuth(ui) {
   return render(
@@ -38,7 +57,7 @@ describe('Student Lesson Pathway Screen', () => {
 
     vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
       let dataToReturn = [];
-      if (tableName === 'users') dataToReturn = initialMockUsers;
+      if (tableName === 'users') dataToReturn = testFixtureUsers;
       if (tableName === 'lessons') dataToReturn = sampleTestLessons;
 
       return {

@@ -2,7 +2,27 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AdminLessonManagement from '../components/AdminLessonManagement';
 import { AuthProvider } from '../context/AuthContext';
-import { initialMockUsers, supabase, saveStoredSession } from '../services/supabaseClient';
+import { supabase, saveStoredSession } from '../services/supabaseClient';
+
+const testFixtureUsers = [
+  {
+    id: 'usr-admin-1',
+    name: 'Tae-hyun Choi (Admin)',
+    username: 'admin',
+    password: 'AdminPass123!',
+    role: 'Admin',
+    status: 'Active',
+    level: 'Staff Administrator',
+    progress: 100,
+    streak: 45,
+    lastActive: 'Just now',
+    joinedDate: '2025-08-01',
+    isOnline: false,
+    mustChangePassword: false,
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
+    completedLessonIds: ['les-vowels-1']
+  }
+];
 
 function renderWithAuth(ui) {
   return render(
@@ -34,7 +54,7 @@ describe('Admin Lesson Management Portal Component', () => {
 
     vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
       let dataToReturn = [];
-      if (tableName === 'users') dataToReturn = initialMockUsers;
+      if (tableName === 'users') dataToReturn = testFixtureUsers;
       if (tableName === 'lessons') dataToReturn = sampleTestLessons;
 
       return {

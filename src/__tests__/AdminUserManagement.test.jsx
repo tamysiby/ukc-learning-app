@@ -2,7 +2,61 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AdminUserManagement from '../components/AdminUserManagement';
 import { AuthProvider } from '../context/AuthContext';
-import { initialMockUsers, supabase, saveStoredSession } from '../services/supabaseClient';
+import { supabase, saveStoredSession } from '../services/supabaseClient';
+
+const testFixtureUsers = [
+  {
+    id: 'usr-admin-1',
+    name: 'Tae-hyun Choi (Admin)',
+    username: 'admin',
+    password: 'AdminPass123!',
+    role: 'Admin',
+    status: 'Active',
+    level: 'Staff Administrator',
+    progress: 100,
+    streak: 45,
+    lastActive: 'Just now',
+    joinedDate: '2025-08-01',
+    isOnline: false,
+    mustChangePassword: false,
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
+    completedLessonIds: ['les-vowels-1']
+  },
+  {
+    id: 'usr-1',
+    name: 'Min-ji Kim',
+    username: 'minji.kim',
+    password: 'StudentPass123!',
+    role: 'Student',
+    status: 'Active',
+    level: 'Intermediate (Level 3)',
+    progress: 78,
+    streak: 14,
+    lastActive: '10 mins ago',
+    joinedDate: '2026-01-15',
+    isOnline: false,
+    mustChangePassword: false,
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
+    completedLessonIds: ['les-vowels-1']
+  },
+  {
+    id: 'usr-2',
+    name: 'Ji-hoon Park',
+    username: 'jihoon.park',
+    password: 'StudentPass123!',
+    role: 'Student',
+    status: 'Active',
+    level: 'Beginner (Level 1)',
+    progress: 42,
+    streak: 5,
+    lastActive: '2 hours ago',
+    joinedDate: '2026-03-01',
+    isOnline: false,
+    mustChangePassword: false,
+    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
+    completedLessonIds: []
+  }
+];
 
 function renderWithAuth(ui) {
   return render(
@@ -40,7 +94,7 @@ describe('Admin User Management Screen', () => {
     ];
 
     vi.spyOn(supabase, 'from').mockImplementation((tableName) => {
-      const defaultUserList = initialMockUsers.map(u => ({
+      const defaultUserList = testFixtureUsers.map(u => ({
         ...u,
         is_online: false,
         created_at: u.joinedDate ? `${u.joinedDate}T00:00:00Z` : '2026-01-01T00:00:00Z'

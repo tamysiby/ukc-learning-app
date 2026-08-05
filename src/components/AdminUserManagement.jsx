@@ -513,8 +513,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                         onClick={() => {
                           toggleStudentLessonCompletion(userForLessonsModal.id, lesson.id);
                           // Refresh current modal user object
-                          const updatedUsers = getStoredUsers();
-                          const updatedModalUser = updatedUsers.find(u => u.id === userForLessonsModal.id);
+                          const updatedModalUser = users.find(u => u.id === userForLessonsModal.id);
                           if (updatedModalUser) setUserForLessonsModal(updatedModalUser);
                         }}
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors cursor-pointer ${isCompleted
@@ -535,8 +534,7 @@ export default function AdminUserManagement({ onSelectUser }) {
                           checked={assigned}
                           onChange={() => {
                             handleToggleStudentLesson(userForLessonsModal, lesson.id);
-                            const updatedUsers = getStoredUsers();
-                            const updatedModalUser = updatedUsers.find(u => u.id === userForLessonsModal.id);
+                            const updatedModalUser = users.find(u => u.id === userForLessonsModal.id);
                             if (updatedModalUser) setUserForLessonsModal(updatedModalUser);
                           }}
                           className="w-4 h-4 text-primary rounded focus:ring-primary accent-primary cursor-pointer"

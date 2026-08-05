@@ -1,7 +1,7 @@
 /**
  * UserSessionStore
  * Deep module encapsulating user persistence, active session verification,
- * single-session token validation, database access, and local dev storage fallbacks.
+ * single-session token validation, and database access.
  */
 
 import { supabase } from './supabaseClient';
@@ -20,146 +20,11 @@ export const isSupabaseConfigured = !!(
   import.meta.env?.MODE === 'test'
 );
 
-// Default Seed Users (Admin & Students)
-export const initialMockUsers = [
-  {
-    id: 'usr-admin-1',
-    name: 'Tae-hyun Choi (Admin)',
-    username: 'admin',
-    password: 'AdminPass123!',
-    role: 'Admin',
-    status: 'Active',
-    level: 'Staff Administrator',
-    progress: 100,
-    streak: 45,
-    lastActive: 'Just now',
-    joinedDate: '2025-08-01',
-    isOnline: false,
-    mustChangePassword: false,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1', 'les-pronunciation-1', 'les-occupations-1', 'les-occupations-quiz-1'],
-    completedLessonIds: ['les-vowels-1']
-  },
-  {
-    id: 'usr-1',
-    name: 'Min-ji Kim',
-    username: 'minji.kim',
-    password: 'StudentPass123!',
-    role: 'Student',
-    status: 'Active',
-    level: 'Intermediate (Level 3)',
-    progress: 78,
-    streak: 14,
-    lastActive: '10 mins ago',
-    joinedDate: '2026-01-15',
-    isOnline: false,
-    mustChangePassword: false,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1', 'les-consonants-1', 'les-consonants-quiz-1', 'les-batchim-1', 'les-eyo-1', 'les-classroom-vocab-1', 'les-vocab-practice-1', 'les-vocab-practice-quiz-1', 'les-vocab-practice-2', 'les-vocab-practice-quiz-2', 'les-hobbies-1', 'les-hobbies-quiz-1', 'les-sino-numbers-1', 'les-korean-numbers-1', 'les-number-usage-1'],
-    completedLessonIds: ['les-vowels-1']
-  },
-  {
-    id: 'usr-2',
-    name: 'Ji-hoon Park',
-    username: 'jihoon.park',
-    password: 'StudentPass123!',
-    role: 'Student',
-    status: 'Active',
-    level: 'Beginner (Level 1)',
-    progress: 42,
-    streak: 5,
-    lastActive: '2 hours ago',
-    joinedDate: '2026-03-01',
-    isOnline: false,
-    mustChangePassword: false,
-    assignedLessonIds: ['les-vowels-1', 'les-vowels-quiz-1'],
-    completedLessonIds: []
-  },
-  {
-    id: 'usr-3',
-    name: 'Soo-jin Lee',
-    username: 'soojin.lee',
-    password: 'StudentPass123!',
-    role: 'Student',
-    status: 'Inactive',
-    level: 'Advanced (Level 5)',
-    progress: 95,
-    streak: 0,
-    lastActive: '4 days ago',
-    joinedDate: '2025-11-10',
-    isOnline: false,
-    mustChangePassword: false,
-    assignedLessonIds: ['les-hangul-1'],
-    completedLessonIds: []
-  },
-  {
-    id: 'usr-5',
-    name: 'Eun-ji Choi',
-    username: 'eunji.choi',
-    password: 'StudentPass123!',
-    role: 'Student',
-    status: 'Active',
-    level: 'Elementary (Level 2)',
-    progress: 60,
-    streak: 9,
-    lastActive: '1 hour ago',
-    joinedDate: '2026-02-14',
-    isOnline: false,
-    mustChangePassword: false,
-    assignedLessonIds: ['les-hangul-1', 'les-vocab-1'],
-    completedLessonIds: []
-  }
-];
-
-export const mockFlashcards = [
-  {
-    id: 'fc-1',
-    korean: '안녕하세요',
-    romanization: 'An-nyeong-ha-se-yo',
-    english: 'Hello / Good day (Formal)',
-    category: 'Greetings',
-    audioUrl: ''
-  },
-  {
-    id: 'fc-2',
-    korean: '감사합니다',
-    romanization: 'Gam-sa-ham-ni-da',
-    english: 'Thank you (Formal)',
-    category: 'Etiquette',
-    audioUrl: ''
-  },
-  {
-    id: 'fc-3',
-    korean: '학교',
-    romanization: 'Hak-gyo',
-    english: 'School',
-    category: 'Places & Education',
-    audioUrl: ''
-  },
-  {
-    id: 'fc-4',
-    korean: '학생',
-    romanization: 'Hak-saeng',
-    english: 'Student',
-    category: 'People',
-    audioUrl: ''
-  },
-  {
-    id: 'fc-5',
-    korean: '선생님',
-    romanization: 'Seon-saeng-nim',
-    english: 'Teacher / Instructor',
-    category: 'People',
-    audioUrl: ''
-  }
-];
-
-// User Storage Management
 export const getStoredUsers = () => {
-  return initialMockUsers;
+  return [];
 };
 
-export const saveStoredUsers = (users) => {
-  // No-op: Local caching disabled. All persistence handled by Supabase DB.
-};
+export const saveStoredUsers = () => {};
 
 // Session Storage Management (Stored exclusively in sessionStorage)
 export const getStoredSession = () => {
@@ -184,20 +49,15 @@ export const saveStoredSession = (user) => {
   }
 };
 
-// Update user online status
-export const setUserOnlineState = (userId, isOnline) => {
-  const users = getStoredUsers();
-  const updatedList = users.map(u => {
-    if (u.id === userId) {
-      return {
-        ...u,
-        isOnline: isOnline,
-        lastActive: isOnline ? 'Just now' : u.lastActive
-      };
-    }
-    return u;
-  });
-  return updatedList;
+// Update user online status in database
+export const setUserOnlineState = async (userId, isOnline) => {
+  if (!isSupabaseConfigured) return;
+  try {
+    await supabase.from('users').update({
+      is_online: isOnline,
+      last_active: isOnline ? new Date().toISOString() : undefined
+    }).eq('id', userId);
+  } catch (e) {}
 };
 
 // Fetch users directly from Supabase DB
@@ -361,39 +221,28 @@ export const authSignOut = async (userId = null) => {
   const currentSession = getStoredSession();
   const targetId = userId || currentSession?.id;
 
-  if (targetId) {
-    if (isSupabaseConfigured) {
-      try {
-        await supabase
-          .from('users')
-          .update({ is_online: false })
-          .eq('id', targetId);
-      } catch (e) {
-        // Suppress network errors on signout
-      }
-    }
-    setUserOnlineState(targetId, false);
+  if (targetId && isSupabaseConfigured) {
+    try {
+      await supabase
+        .from('users')
+        .update({ is_online: false })
+        .eq('id', targetId);
+    } catch (e) {}
   }
 
   try {
     await supabase.auth.signOut();
-  } catch (e) {
-    // Ignore offline errors
-  }
+  } catch (e) {}
   saveStoredSession(null);
 };
 
 // Database Mutations (Create, Update, Delete)
 export const createStudentUserInDb = async (userData) => {
   if (!isSupabaseConfigured) {
-    if (!isDev) {
-      return { success: false, error: 'Database Unconfigured: Cannot create student account without a live Supabase database connection in production.' };
-    }
-    return { success: true };
+    return { success: false, error: 'Database Connection Error: Database is offline or non-configured.' };
   }
 
   try {
-    // Insert core fields guaranteed to exist across all table schemas
     const corePayload = {
       username: userData.username,
       name: userData.name,
@@ -409,13 +258,10 @@ export const createStudentUserInDb = async (userData) => {
       return { success: false, error: `Database Create Failed: ${error.message}` };
     }
 
-    // Best-effort update for optional must_change_password column
     if (data?.id && userData.mustChangePassword !== undefined) {
       try {
         await supabase.from('users').update({ must_change_password: userData.mustChangePassword }).eq('id', data.id);
-      } catch (e) {
-        // Safe fallback if column is missing from remote schema
-      }
+      } catch (e) {}
     }
 
     return { success: true, data };
@@ -426,10 +272,7 @@ export const createStudentUserInDb = async (userData) => {
 
 export const updateStudentUserInDb = async (userId, updates) => {
   if (!isSupabaseConfigured) {
-    if (!isDev) {
-      return { success: false, error: 'Database Unconfigured: Cannot update account without a live Supabase database connection in production.' };
-    }
-    return { success: true };
+    return { success: false, error: 'Database Connection Error: Database is offline or non-configured.' };
   }
 
   try {
@@ -450,13 +293,10 @@ export const updateStudentUserInDb = async (userId, updates) => {
       }
     }
 
-    // Best-effort update for optional must_change_password column
     if (updates.mustChangePassword !== undefined) {
       try {
         await supabase.from('users').update({ must_change_password: updates.mustChangePassword }).eq('id', userId);
-      } catch (e) {
-        // Safe fallback if column is missing from remote schema
-      }
+      } catch (e) {}
     }
 
     if (updates.completedLessonIds !== undefined && Array.isArray(updates.completedLessonIds)) {
@@ -497,10 +337,7 @@ export const updateStudentUserInDb = async (userId, updates) => {
 
 export const deleteStudentUserInDb = async (userId) => {
   if (!isSupabaseConfigured) {
-    if (!isDev) {
-      return { success: false, error: 'Database Unconfigured: Cannot delete account without a live Supabase database connection in production.' };
-    }
-    return { success: true };
+    return { success: false, error: 'Database Connection Error: Database is offline or non-configured.' };
   }
 
   try {
