@@ -35,7 +35,10 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
 -- Enable RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read access to users" ON public.users;
 CREATE POLICY "Allow public read access to users" ON public.users FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow authenticated full access to users" ON public.users;
 CREATE POLICY "Allow authenticated full access to users" ON public.users FOR ALL USING (true);
 
 -- ------------------------------------------
@@ -56,7 +59,10 @@ CREATE TABLE IF NOT EXISTS public.lessons (
 );
 
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access to lessons" ON public.lessons;
 CREATE POLICY "Allow public read access to lessons" ON public.lessons FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow authenticated full access to lessons" ON public.lessons;
 CREATE POLICY "Allow authenticated full access to lessons" ON public.lessons FOR ALL USING (true);
 
 -- ------------------------------------------
@@ -71,6 +77,7 @@ CREATE TABLE IF NOT EXISTS public.student_lesson_access (
 );
 
 ALTER TABLE public.student_lesson_access ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow authenticated access to access table" ON public.student_lesson_access;
 CREATE POLICY "Allow authenticated access to access table" ON public.student_lesson_access FOR ALL USING (true);
 
 -- ------------------------------------------
@@ -86,6 +93,7 @@ CREATE TABLE IF NOT EXISTS public.student_lesson_progress (
 );
 
 ALTER TABLE public.student_lesson_progress ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow authenticated access to progress table" ON public.student_lesson_progress;
 CREATE POLICY "Allow authenticated access to progress table" ON public.student_lesson_progress FOR ALL USING (true);
 
 -- ------------------------------------------

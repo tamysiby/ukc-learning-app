@@ -206,6 +206,15 @@ export const authSignIn = async (username, password) => {
         completedLessonIds: completedIds
       };
 
+      if (isDev) {
+        console.log('[DEV userSessionStore] authSignIn evaluated mustChangePassword:', {
+          username: dbUser.username,
+          dbMustChange: dbUser.must_change_password,
+          isDefaultPass,
+          finalMustChange: userObj.mustChangePassword
+        });
+      }
+
       saveStoredSession(userObj);
       return { user: userObj, error: null };
     }
@@ -294,6 +303,12 @@ export const updateStudentUserInDb = async (userId, updates) => {
     }
 
     if (updates.mustChangePassword !== undefined) {
+      if (isDev) {
+        console.log('[DEV userSessionStore] updateStudentUserInDb setting must_change_password in DB:', {
+          userId,
+          mustChangePassword: updates.mustChangePassword
+        });
+      }
       try {
         await supabase.from('users').update({ must_change_password: updates.mustChangePassword }).eq('id', userId);
       } catch (e) {}

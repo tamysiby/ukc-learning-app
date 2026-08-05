@@ -119,6 +119,14 @@ export function AuthProvider({ children }) {
             ...activeSession,
             completedLessonIds: mergedCompleted
           };
+          if (isDev) {
+            console.log('[DEV AuthContext] refreshUsersList session sync:', {
+              userId: activeSession.id,
+              dbMustChange: dbRecord.mustChangePassword,
+              activeSessionMustChange: activeSession.mustChangePassword,
+              finalMustChange: updatedSelf.mustChangePassword
+            });
+          }
           setCurrentUser(updatedSelf);
           saveStoredSession(updatedSelf);
         }
@@ -327,6 +335,9 @@ export function AuthProvider({ children }) {
     setUsers(updatedList);
 
     const updatedSelf = { ...currentUser, password: hashedPassword, mustChangePassword: false };
+    if (isDev) {
+      console.log('[DEV AuthContext] changeUserPassword: Password updated successfully. Updating mustChangePassword from', currentUser.mustChangePassword, 'to false for user:', currentUser.id);
+    }
     setCurrentUser(updatedSelf);
     saveStoredSession(updatedSelf);
 

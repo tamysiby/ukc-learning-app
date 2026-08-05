@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function ForceChangePasswordModal() {
@@ -8,6 +8,16 @@ export default function ForceChangePasswordModal() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (import.meta.env?.DEV) {
+      console.log('[DEV ForceChangePasswordModal] User password change status:', {
+        userId: currentUser?.id,
+        username: currentUser?.username,
+        mustChangePassword: currentUser?.mustChangePassword
+      });
+    }
+  }, [currentUser?.id, currentUser?.mustChangePassword]);
 
   if (!currentUser || !currentUser.mustChangePassword) {
     return null;
@@ -27,9 +37,17 @@ export default function ForceChangePasswordModal() {
       return;
     }
 
+    if (import.meta.env?.DEV) {
+      console.log('[DEV ForceChangePasswordModal] Submitting password update for user:', currentUser?.id);
+    }
+
     setIsSubmitting(true);
     const res = await changeUserPassword(newPassword);
     setIsSubmitting(false);
+
+    if (import.meta.env?.DEV) {
+      console.log('[DEV ForceChangePasswordModal] Password update result:', res);
+    }
 
     if (!res.success) {
       setError(res.error || 'Failed to update password.');
