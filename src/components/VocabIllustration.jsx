@@ -5,7 +5,7 @@ export function hasVocabIllustration(word) {
   if (!key) return false;
 
   const availableIds = [
-    'vp1-1', 'vp1-2', 'vp1-3', 'vp1-4', 'vp1-5', 'vp1-6', 'vp1-7', 'vp1-8', 'vp1-9', 'vp1-10',
+    'vp1-1', 'vp1-2', 'vp1-3', 'vp1-4', 'vp1-5', 'vp1-7', 'vp1-8', 'vp1-9', 'vp1-10',
     'vp1-11', 'vp1-12', 'vp1-13', 'vp1-14', 'vp1-15', 'vp1-16', 'vp1-17', 'vp1-18', 'vp1-19', 'vp1-20',
     'vp1-21', 'vp1-22', 'vp1-23', 'vp1-24', 'vp1-25', 'vp1-26', 'vp1-27', 'vp1-28', 'vp1-29', 'vp1-30', 'vp1-31',
     'vp2-1', 'vp2-2', 'vp2-3', 'vp2-4', 'vp2-5', 'vp2-6', 'vp2-7', 'vp2-8', 'vp2-9', 'vp2-10',

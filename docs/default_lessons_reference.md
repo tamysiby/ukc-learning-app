@@ -186,7 +186,6 @@ All lesson data is now fetched dynamically from the Supabase database table `les
       { "id": "vp1-3", "korean": "새", "romanization": "sae", "english": "bird", "category": "Vocab" },
       { "id": "vp1-4", "korean": "뼈", "romanization": "ppyeo", "english": "bone", "category": "Vocab" },
       { "id": "vp1-5", "korean": "시계", "romanization": "si-gye", "english": "clock", "category": "Vocab" },
-      { "id": "vp1-6", "korean": "소주", "romanization": "so-ju", "english": "soju", "category": "Vocab" },
       { "id": "vp1-7", "korean": "쏘다", "romanization": "sso-da", "english": "shoot", "category": "Vocab" },
       { "id": "vp1-9", "korean": "싸다", "romanization": "ssa-da", "english": "cheap", "category": "Vocab" },
       { "id": "vp1-10", "korean": "바지", "romanization": "ba-ji", "english": "pants", "category": "Vocab" },

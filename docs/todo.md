@@ -13,7 +13,7 @@ lesson:
 - 한글 vowels vocab quiz
 - 한글 consonants vocab
 - 한글 consonants vocab quiz
-- 한글 reading 1 vocab (시소, 사자, 새, 뼈, 시계, 소주, 쏘다, 자두, 싸다, 바지, 피자, 고추, 치즈, 휴지, 호수, 나무, 나비, 바나나, 우유, 사과, 왜, 더워요, 가위, 오리, 토마토, 의사, 모자, 스웨터, 모래, 의자, 주사위)
+- 한글 reading 1 vocab (시소, 사자, 새, 뼈, 시계, 쏘다, 자두, 싸다, 바지, 피자, 고추, 치즈, 휴지, 호수, 나무, 나비, 바나나, 우유, 사과, 왜, 더워요, 가위, 오리, 토마토, 의사, 모자, 스웨터, 모래, 의자, 주사위)
 - 한글 reading 1 vocab quiz (no 받침)
 - 한글 받침 custom lesson 
     -- refer to docs/reference/20260726_131127.jpg for lesson content
